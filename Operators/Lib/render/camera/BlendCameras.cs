@@ -69,11 +69,6 @@ internal sealed class BlendCameras : Instance<BlendCameras>, IStatusProvider, IC
                 }
             }
                 
-            if (context.BypassCameras)
-            {
-                Command.GetValue(context);
-                return;
-            }
 
             var blend = floatIndex - index;
             _blendedCamDef = CameraDefinition.Blend(camA.CameraDefinition, camB.CameraDefinition, blend);
@@ -82,6 +77,12 @@ internal sealed class BlendCameras : Instance<BlendCameras>, IStatusProvider, IC
 
             WorldToCamera = worldToCamera;
             CameraToClipSpace = camToClipSpace;
+            
+            if (context.BypassCameras)
+            {
+                Command.GetValue(context);
+                return;
+            }
             
             // Set properties and evaluate sub-tree
             var prevWorldToCamera = context.WorldToCamera;
