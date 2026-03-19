@@ -1,9 +1,10 @@
+using T3.Core.Rendering;
 using T3.Core.Utils;
 
 namespace Lib.render.camera;
 
 [Guid("e3ff58e2-847a-4c97-947c-cfbcf8f9c79d")]
-internal sealed class BlendCameras : Instance<BlendCameras>, IStatusProvider, ICamera
+internal sealed class BlendCameras : Instance<BlendCameras>, IStatusProvider, ICamera, ICameraPropertiesProvider
 {
     [Output(Guid = "d0a6f926-c4ed-4cc9-917d-942f8c34fd65")]
     public readonly Slot<Command> Output = new();
@@ -74,6 +75,7 @@ internal sealed class BlendCameras : Instance<BlendCameras>, IStatusProvider, IC
             _blendedCamDef = CameraDefinition.Blend(camA.CameraDefinition, camB.CameraDefinition, blend);
 
             _blendedCamDef.BuildProjectionMatrices(out var camToClipSpace, out var worldToCamera);
+            //CameraDefinition.BuildBlendedMatrices(camA.CameraDefinition, camB.CameraDefinition, blend, out var camToClipSpace, out var worldToCamera);
 
             WorldToCamera = worldToCamera;
             CameraToClipSpace = camToClipSpace;
@@ -123,6 +125,7 @@ internal sealed class BlendCameras : Instance<BlendCameras>, IStatusProvider, IC
     public CameraDefinition CameraDefinition => _blendedCamDef;
     public Matrix4x4 WorldToCamera { get; set; }
     public Matrix4x4 CameraToClipSpace { get; set; }
+    public Matrix4x4 LastObjectToWorld { get; set; } = Matrix4x4.Identity;
     #endregion
     
     private string _lastErrorMessage;
