@@ -40,6 +40,12 @@ internal sealed class CustomForce :Instance<CustomForce>{
 
         [Input(Guid = "da22402b-decf-4f02-afc4-a0ce984062c1")]
         public readonly InputSlot<float> NormalSamplingDistance = new InputSlot<float>();
+
+        [Input(Guid = "c7e31ead-9bab-441e-af0b-bdaea7a60a79")]
+        public readonly InputSlot<System.Numerics.Vector4> Color = new InputSlot<System.Numerics.Vector4>();
+
+        [Input(Guid = "76ecc997-76a8-477c-9d35-643d12994adb")]
+        public readonly InputSlot<T3.Core.DataTypes.Texture2D> Image = new InputSlot<T3.Core.DataTypes.Texture2D>();
         
         
     private enum Modes {
