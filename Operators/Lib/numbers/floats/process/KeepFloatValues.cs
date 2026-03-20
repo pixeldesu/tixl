@@ -18,6 +18,7 @@ internal sealed class KeepFloatValues : Instance<KeepFloatValues>
         var addValueToList = AddValueToList.GetValue(context);
         var length = BufferLength.GetValue(context).Clamp(1, 100000);
         var newValue = Value.GetValue(context);
+        var defaultValue = DefaultValue.GetValue(context);
 
         var reset = Reset.GetValue(context);
             
@@ -30,7 +31,7 @@ internal sealed class KeepFloatValues : Instance<KeepFloatValues>
             {
                 while (_list.Count < length)
                 {
-                    _list.Add(0);
+                    _list.Add(defaultValue);
                 }
             }
 
@@ -64,6 +65,9 @@ internal sealed class KeepFloatValues : Instance<KeepFloatValues>
 
     [Input(Guid = "D11E3F87-ECFA-44B9-8672-96562685CDCE")]
     public readonly InputSlot<bool> Reset = new();
+
+    [Input(Guid = "639DC9C2-E3B9-4E17-959E-CB181166B0A2")]
+    public readonly InputSlot<float> DefaultValue = new();
 
         
 }
