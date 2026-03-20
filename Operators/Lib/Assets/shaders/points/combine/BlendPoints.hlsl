@@ -28,12 +28,21 @@ RWStructuredBuffer<Point> ResultPoints : u0; // output
     uint aIndex = i.x;
     uint bIndex = i.x;
 
-    float t = i.x / (float)resultCount;
+    float t = i.x / ((float)resultCount-1);
 
     if (PairingMode > 0.5 && countA != countB)
     {
-        aIndex = (int)(countA * t);
-        bIndex = (int)(countB * t);
+        uint maxCount = max(countA, countB);
+        
+        // This calculates the first index i.x that would map to the current pair.
+        // It's essentially the inverse of (count * i.x) / resultCount
+        uint firstIxA = (uint)((aIndex * (float)resultCount) / countA);
+        uint firstIxB = (uint)((bIndex * (float)resultCount) / countB);
+        
+        uint firstIx = max(firstIxA, firstIxB);
+
+        if (i.x > firstIx)
+            return;
     }
 
     Point A = PointsA[aIndex];
@@ -74,11 +83,16 @@ RWStructuredBuffer<Point> ResultPoints : u0; // output
     float fallOffFromCenter = smoothstep(0, 1, 1 - abs(f - 0.5) * 2);
     f += (hash11(t) - 0.5) * Scatter * fallOffFromCenter;
 
-    ResultPoints[i.x].Rotation = qSlerp(A.Rotation, B.Rotation, f);
-    ResultPoints[i.x].Position = lerp(A.Position, B.Position, f);
+    bool noBlend = isnan(A.Scale.x * B.Scale.x);
+
+
+    f = noBlend ? (f< 0.5 ? 0 : 1) : f;
+
+    ResultPoints[i.x].Scale = noBlend ? (f<0.1 ? A.Scale: B.Scale) : (lerp(A.Scale, B.Scale, f));
+    ResultPoints[i.x].Rotation =   qSlerp(A.Rotation, B.Rotation, f);
     ResultPoints[i.x].FX1 = lerp(A.FX1, B.FX1, f);
     ResultPoints[i.x].FX2 = lerp(A.FX2, B.FX2, f);
-
     ResultPoints[i.x].Color = lerp(A.Color, B.Color, f);
-    ResultPoints[i.x].Scale = lerp(A.Scale, B.Scale, f);
+    ResultPoints[i.x].Position = lerp(A.Position, B.Position, f);
+    ResultPoints[i.x].FX1 = f;
 }
