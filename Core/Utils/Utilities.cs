@@ -67,7 +67,31 @@ public static class Utilities
         var i = intInputSlot.GetValue(context).Clamp(0, Enum.GetValues(typeof(T)).Length - 1);
         return CastTo<T>.From(i);
     }
-        
+     
+    
+    /// <summary>
+    /// Get a new value from an input slot and compare it with and old reference value.
+    /// This can be useful to quickly check if important input has changed and something
+    /// needs to be recomputed.
+    /// </summary>
+    /// <returns>true if value has changed</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool GetChangedValue<T>(
+        this Slot<T> input,
+        in EvaluationContext context,
+        ref T oldValue,
+        out T newValue)
+    {
+        newValue = input.GetValue(context);
+
+        if (EqualityComparer<T>.Default.Equals(newValue, oldValue))
+            return false;
+
+        oldValue = newValue;
+        return true;
+    }
+    
+    
     public static int Hash<T>(T a, T b)
     {
         unchecked

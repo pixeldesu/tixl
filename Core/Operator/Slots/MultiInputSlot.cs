@@ -45,8 +45,8 @@ public sealed class MultiInputSlot<T> : InputSlot<T>, IMultiInputSlot
 
     protected override int InvalidationOverride()
     {
-        // NOTE: In situations with extremely large graphs (1000 of instances)
-        // invalidation can become bottle neck. In these cases it might be justified
+        // NOTE: In situations with extremely large graphs (1000s of instances)
+        // invalidation can become a bottle neck. In these cases it might be justified
         // to limit the invalidation to "active" parts of the subgraph. The [Switch]
         // operator defines this list.
 

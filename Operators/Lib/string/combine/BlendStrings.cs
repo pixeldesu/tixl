@@ -16,13 +16,14 @@ internal sealed class BlendStrings : Instance<BlendStrings>
 
     private void Update(EvaluationContext context)
     {
-        //var strA = InputTextA.GetValue(context);
-        //var strB = InputTextB.GetValue(context);
+        var needsUpdate = false;
         
         var stringInputs = InputStrings.GetCollectedTypedInputs();
         var stringCount = stringInputs.Count;
 
-        var floatIndex = Blend.GetValue(context).Clamp(0, stringCount - 1.0001f);
+        needsUpdate |= Blend.GetChangedValue(context, ref _blend, out var floatIndex);
+        
+        floatIndex = floatIndex.Clamp(0, stringCount - 1.0001f);
         var index = (int)floatIndex;
 
         string strA;
@@ -36,12 +37,16 @@ internal sealed class BlendStrings : Instance<BlendStrings>
 
         if (stringCount == 1)
         {
-            strB = strA = stringInputs[0].GetValue(context);
+            needsUpdate |= stringInputs[0].GetChangedValue(context, ref _strA, out strA);
+            strB = strA;
+            //strB = strA = stringInputs[0].GetValue(context);
         }
         else
         {
-            strA = stringInputs[index].GetValue(context);
-            strB = stringInputs[index+1].GetValue(context);
+            needsUpdate |= stringInputs[index].GetChangedValue(context, ref _strA, out strA);
+            needsUpdate |= stringInputs[index+1].GetChangedValue(context, ref _strB, out strB);
+            // strA = stringInputs[index].GetValue(context);
+            // strB = stringInputs[index+1].GetValue(context);
         }
         
         var blendIndex = floatIndex - index;
@@ -54,19 +59,32 @@ internal sealed class BlendStrings : Instance<BlendStrings>
             Result.Value = string.Empty;
             return;
         }
-        
-        var blendSpread = BlendSpread.GetValue(context);
+
+        BlendSpread.GetChangedValue(context, ref _blendSpread, out var blendSpread);
+        //var blendSpread = BlendSpread.GetValue(context);
 
         var totalMaxLength = MaxLength.GetValue(context).Clamp(1, 10000); // 10000 is going to be slow!
         var maxLength = Math.Max(strA.Length, strB.Length).Clamp(1,totalMaxLength);
-        var scrambleFactor = Scramble.GetValue(context);
-        var scrambleSeed = ScrambleSeed.GetValue(context);
 
-        var chars = Characters.GetValue(context);
+        needsUpdate|=Scramble.GetChangedValue(context, ref _scrambleFactor, out var scrambleFactor);
+        needsUpdate|=ScrambleSeed.GetChangedValue(context, ref _scrambleSeed, out var scrambleSeed);
+        
+        //var scrambleFactor = Scramble.GetValue(context);
+        //var scrambleSeed = ScrambleSeed.GetValue(context);
+
+        needsUpdate|=Characters.GetChangedValue(context, ref _chars, out var chars);
+        
+        //var chars = Characters.GetValue(context);
         if (string.IsNullOrEmpty(chars))
             chars = FallbackChars;
+
+        if (!needsUpdate)
+            return;
             
+        
         _stringBuilder.Clear();
+
+        //var needsUpdate = strA != _strA || strB != _strB || chars != _chars;
 
         for (int charIndex = 0; charIndex < maxLength; charIndex++)
         {
@@ -99,6 +117,20 @@ internal sealed class BlendStrings : Instance<BlendStrings>
         Result.Value = _stringBuilder.ToString();
     }
 
+    // private static bool GetValue<T>(in InputSlot<T> input, in EvaluationContext context,  ref T oldValue, out T newValue)
+    // {
+    //     newValue = input.GetValue(context);
+    //     return newValue != oldValue;
+    // }
+
+    private string _strA, _strB, _chars; 
+    
+    private float _blend;
+    private float _blendSpread;
+    
+    private readonly StringBuilder _stringBuilder = new();
+
+
     private static char GetCharOrSpace(string str, int index)
     {
         if (index < 0 || index >= str.Length)
@@ -118,7 +150,6 @@ internal sealed class BlendStrings : Instance<BlendStrings>
         return ((x-progress)/spread - progress + 1).Clamp(0,1);    
     }
         
-    private StringBuilder _stringBuilder = new();
         
         
     private const string FallbackChars = " .-/\\?#<^*()&AÁÄBCDEFGHIJKLMNOÄÓÖPQRSTUÜÜÚVWXYZaäåbcdefghijklmnoóöpqrsßtuúüvwxyz0123456789";
@@ -152,6 +183,7 @@ internal sealed class BlendStrings : Instance<BlendStrings>
 
     [Input(Guid = "CCC21ECC-2877-4FE7-8D78-F7E2A708D762")]
     public readonly InputSlot<string> InputTextB= new();
-    
-    
+
+    private float _scrambleFactor;
+    private int _scrambleSeed;
 }
