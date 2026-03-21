@@ -16,9 +16,45 @@ internal sealed class BlendStrings : Instance<BlendStrings>
 
     private void Update(EvaluationContext context)
     {
-        var strA = InputTextA.GetValue(context);
-        var strB = InputTextB.GetValue(context);
-        var blendFactor = Blend.GetValue(context).Clamp(0,1);
+        //var strA = InputTextA.GetValue(context);
+        //var strB = InputTextB.GetValue(context);
+        
+        var stringInputs = InputStrings.GetCollectedTypedInputs();
+        var stringCount = stringInputs.Count;
+
+        var floatIndex = Blend.GetValue(context).Clamp(0, stringCount - 1.0001f);
+        var index = (int)floatIndex;
+
+        string strA;
+        string strB;
+                
+        InputStrings.DirtyFlag.Clear();
+        if (stringCount == 0)
+        {
+            return;
+        }
+
+        if (stringCount == 1)
+        {
+            strB = strA = stringInputs[0].GetValue(context);
+        }
+        else
+        {
+            strA = stringInputs[index].GetValue(context);
+            strB = stringInputs[index+1].GetValue(context);
+        }
+        
+        var blendIndex = floatIndex - index;
+        
+        strA ??= string.Empty;
+        strB ??= string.Empty;
+
+        if (strA == string.Empty && strB == string.Empty)
+        {
+            Result.Value = string.Empty;
+            return;
+        }
+        
         var blendSpread = BlendSpread.GetValue(context);
 
         var totalMaxLength = MaxLength.GetValue(context).Clamp(1, 10000); // 10000 is going to be slow!
@@ -26,14 +62,16 @@ internal sealed class BlendStrings : Instance<BlendStrings>
         var scrambleFactor = Scramble.GetValue(context);
         var scrambleSeed = ScrambleSeed.GetValue(context);
 
-        const string chars = " .-/\\?#<^*()&AÁÄBCDEFGHIJKLMNOÄÓÖPQRSTUÜÜÚVWXYZaäåbcdefghijklmnoóöpqrsßtuúüvwxyz0123456789";
+        var chars = Characters.GetValue(context);
+        if (string.IsNullOrEmpty(chars))
+            chars = FallbackChars;
             
         _stringBuilder.Clear();
 
-        for (int index = 0; index < maxLength; index++)
+        for (int charIndex = 0; charIndex < maxLength; charIndex++)
         {
-            var charA = GetCharOrSpace(strA, index);
-            var charB = GetCharOrSpace(strB, index);
+            var charA = GetCharOrSpace(strA, charIndex);
+            var charB = GetCharOrSpace(strB, charIndex);
                 
             if (charA == '\n' || charB == '\n')
             {
@@ -45,14 +83,15 @@ internal sealed class BlendStrings : Instance<BlendStrings>
             var charAInt = chars.IndexOf(charA).Clamp(0,charCount-1);
             var charBInt = chars.IndexOf(charB).Clamp(0,charCount-1);
                 
-            var hashA = MathUtils.Hash01((uint)((index * 123 + scrambleSeed/100))); 
+            var hashA = MathUtils.Hash01((uint)((charIndex * 123 + scrambleSeed/100))); 
             var scrambleOffset = hashA < scrambleFactor 
-                                     ? (MathUtils.Hash01((uint)(index * 123 + scrambleSeed )) - 0.5f) * charCount 
+                                     ? (MathUtils.Hash01((uint)(charIndex * 123 + scrambleSeed )) - 0.5f) * charCount 
                                      : 0;
 
-            var x = maxLength <= 1 ? 0: index/ (float)(maxLength-1);
-            var blendProgressForChar = ProgressTransition(x, blendFactor, blendSpread);
-            var blendedValue = (int)(charAInt + (charBInt - charAInt) * blendProgressForChar + scrambleOffset).Clamp(0, charCount-1);
+            var x = maxLength <= 1 ? 0: charIndex/ (float)(maxLength-1);
+            var blendProgressForChar = ProgressTransition(x, blendIndex, blendSpread);
+            //var blendedValue = (int)(charAInt + (charBInt - charAInt) * blendProgressForChar + scrambleOffset).Clamp(0, charCount-1);
+            var blendedValue = (int)(charBInt + (charAInt - charBInt) * blendProgressForChar + scrambleOffset).Clamp(0, charCount-1);
             var s = chars[blendedValue];
             _stringBuilder.Append(s);
         }
@@ -72,7 +111,8 @@ internal sealed class BlendStrings : Instance<BlendStrings>
     /// Return a normalized progress value for a given t and spreading.
     /// </summary>
     /// <remarks>
-    /// This is easier visualized than explained. Please have a look at: https://www.desmos.com/calculator/vd2njtavqq</remarks>
+    /// This is easier visualized than explained. Please have a look at: https://www.desmos.com/calculator/vd2njtavqq
+    /// </remarks>
     public static float ProgressTransition(float x, float progress, float spread=1)
     {
         return ((x-progress)/spread - progress + 1).Clamp(0,1);    
@@ -81,12 +121,12 @@ internal sealed class BlendStrings : Instance<BlendStrings>
     private StringBuilder _stringBuilder = new();
         
         
+    private const string FallbackChars = " .-/\\?#<^*()&AÁÄBCDEFGHIJKLMNOÄÓÖPQRSTUÜÜÚVWXYZaäåbcdefghijklmnoóöpqrsßtuúüvwxyz0123456789";
 
-    [Input(Guid = "3197934e-d0ed-4a81-9dc1-2cc63d97ac6f")]
-    public readonly InputSlot<string> InputTextA = new();
+    [Input(Guid = "EB2D968D-0CE0-48F1-A014-29475A3F0B04")]
+    public readonly MultiInputSlot<string> InputStrings = new();
+    
 
-    [Input(Guid = "CCC21ECC-2877-4FE7-8D78-F7E2A708D762")]
-    public readonly InputSlot<string> InputTextB= new();
         
     [Input(Guid = "2EFD4A0C-958C-49F6-86CB-F8D9FD6FB308")]
     public readonly InputSlot<float> Blend= new();
@@ -103,4 +143,15 @@ internal sealed class BlendStrings : Instance<BlendStrings>
     [Input(Guid = "D70DA276-C047-42DB-A921-5C1263613CBB")]
     public readonly InputSlot<int> MaxLength= new();
 
+    
+    [Input(Guid = "48DE52F6-9B8D-4C12-9336-40091824BE43")]
+    public readonly InputSlot<string> Characters= new();
+
+    [Input(Guid = "3197934e-d0ed-4a81-9dc1-2cc63d97ac6f")]
+    public readonly InputSlot<string> InputTextA = new();
+
+    [Input(Guid = "CCC21ECC-2877-4FE7-8D78-F7E2A708D762")]
+    public readonly InputSlot<string> InputTextB= new();
+    
+    
 }
