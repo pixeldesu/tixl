@@ -46,6 +46,9 @@ internal sealed class CustomForce :Instance<CustomForce>{
 
         [Input(Guid = "76ecc997-76a8-477c-9d35-643d12994adb")]
         public readonly InputSlot<T3.Core.DataTypes.Texture2D> Image = new InputSlot<T3.Core.DataTypes.Texture2D>();
+
+        [Input(Guid = "b5f3d4dc-db30-4067-821f-e2a3d4564c62")]
+        public readonly InputSlot<string> TemplateFile = new InputSlot<string>();
         
         
     private enum Modes {

@@ -26,6 +26,8 @@ cbuffer FloatParams : register(b1)
     float2 GainAndBias;
 
     float4 Color;
+
+    float TimeInSec;
 }
 
 cbuffer IntParams : register(b2)
@@ -81,6 +83,10 @@ inline float GetDistance(float3 p3)
 
 //===================================================================
 
+//- DEFINES ------------------------------------
+/*{defines}*/
+//----------------------------------------------
+
 float3 GetNormal(float3 p, float offset=0.001)
 {
     return normalize(
@@ -107,7 +113,10 @@ float4 q_from_tangentAndNormal(float3 dx, float3 dz)
 float Biased(float f){return ApplyGainAndBias(f, GainAndBias);}
 float4 SampleGradient(float f){return Gradient.SampleLevel(ClampedSampler, float2(f, 0.5), 0);}
 
-
+inline float2 PositionToScreenSpaceUv(float3 p){
+    float4 vp=mul(float4(p.xyz,1),WorldToClipSpace);
+    return 0.5+0.5*float2(1,-1)*vp.xy/vp.w;
+}
 
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {
@@ -121,6 +130,9 @@ float4 SampleGradient(float f){return Gradient.SampleLevel(ClampedSampler, float
     float3 vel=p.Velocity;
     float3 pos=p.Position;  // Warning: avoid setting this, because it without applying SpeedFactor
     float4 col=p.Color;
+    float age= TimeInSec - p.BirthTime;
+    float2 uv = PositionToScreenSpaceUv(pos);
+
 {
 //- METHOD -------------------------------------
 /*{method}*/
