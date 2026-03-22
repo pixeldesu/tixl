@@ -15,6 +15,12 @@ StructuredBuffer<Point> PointsA : t0;        // input
 StructuredBuffer<Point> PointsB : t1;        // input
 RWStructuredBuffer<Point> ResultPoints : u0; // output
 
+float SmootherStep(float x)
+{
+    x = saturate(x);
+    return x * x * x * (x * (x * 6.0 - 15.0) + 10.0);
+}
+
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {
     uint resultCount, countA, countB, stride;
@@ -77,10 +83,12 @@ RWStructuredBuffer<Point> ResultPoints : u0; // output
             b = 2 - b;
             t = 1 - t;
         }
-        f = 1 - smoothstep(0, 1, saturate((t - b) / Width - b + 1));
+        //f = 1 - smoothstep(0, 1, saturate((t - b) / Width - b + 1));
+        f = 1 - SmootherStep(saturate((t - b) / Width - b + 1));
     }
 
-    float fallOffFromCenter = smoothstep(0, 1, 1 - abs(f - 0.5) * 2);
+    float fallOffFromCenter = smoothstep(0, 1, 1 - abs(f - 0.5) * 2); 
+    //float fallOffFromCenter = SmootherStep(1 - abs(f - 0.5) * 2);
     f += (hash11(t) - 0.5) * Scatter * fallOffFromCenter;
 
     bool noBlend = isnan(A.Scale.x * B.Scale.x);
