@@ -139,18 +139,9 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
         for (var index = 0; index < parentInputCount; index++)
         {
             var inputSlot = parentInputs[index];
-            var inputDirtyFlag = inputSlot.DirtyFlag;
-            if (inputSlot.TryGetFirstConnection(out var inputSlotConnection))
-            {
-                inputDirtyFlag.SourceVersion = inputSlotConnection.InvalidateGraph();
-            }
-            else if (inputDirtyFlag.TriggerIsAnimated)
-            {
-                inputDirtyFlag.Invalidate();
-            }
-
-            inputSlot.SetVisited();
-            isOutputDirty |= inputDirtyFlag.IsDirty;
+            // Let each input handle its own invalidation strategy (e.g. MultiInputSlot traverses all collected connections).
+            inputSlot.InvalidateGraph();
+            isOutputDirty |= inputSlot.IsDirty;
         }
 
         return isOutputDirty ? _dirtyFlag.Invalidate() : _dirtyFlag.SourceVersion;
