@@ -49,7 +49,7 @@ public class InputSlot<T> : Slot<T>, IInputSlot
 
     public T GetCurrentValue()
     {
-        return HasInputConnections
+        return HasInputConnections || (Parent.Parent?.Symbol.Animator.IsInputSlotAnimated(this) ?? false) 
                    ? Value
                    : TypedInputValue.Value;
     }
