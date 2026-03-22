@@ -14,6 +14,12 @@ internal sealed class DrawMovingPoints : Instance<DrawMovingPoints>
         [Input(Guid = "46559f84-2bcf-43e5-aae3-2f6ecf6a17f1")]
         public readonly InputSlot<float> PointSize = new InputSlot<float>();
 
+        [Input(Guid = "6f6087e6-b912-4431-a64f-36bf9061b9e8")]
+        public readonly InputSlot<float> VelocityStretch = new InputSlot<float>();
+
+        [Input(Guid = "32aba77d-f7b6-4106-bb98-a7b654e21fc0")]
+        public readonly InputSlot<float> VelocityJumpThreshold = new InputSlot<float>();
+
         [Input(Guid = "7dae1a72-c664-400d-90df-bbcdc45d4fde", MappedType = typeof(ScaleFXModes))]
         public readonly InputSlot<int> ScaleFactor = new InputSlot<int>();
 
@@ -44,14 +50,8 @@ internal sealed class DrawMovingPoints : Instance<DrawMovingPoints>
         [Input(Guid = "bb3706e6-9918-4500-a4ab-7e47a6c2b08b")]
         public readonly InputSlot<T3.Core.DataTypes.ShaderGraphNode> ColorField = new InputSlot<T3.Core.DataTypes.ShaderGraphNode>();
 
-        [Input(Guid = "32aba77d-f7b6-4106-bb98-a7b654e21fc0")]
-        public readonly InputSlot<float> VelocityJumpThreshold = new InputSlot<float>();
-
-        [Input(Guid = "6f6087e6-b912-4431-a64f-36bf9061b9e8")]
-        public readonly InputSlot<float> VelocityStretch = new InputSlot<float>();
-
-        [Input(Guid = "768bc509-107f-48ab-a588-a36791edadb6")]
-        public readonly InputSlot<float> VelocityThickness = new InputSlot<float>();
+        [Input(Guid = "effc6f83-72dc-4459-bc13-cc91a924484a")]
+        public readonly InputSlot<int> TextureAtlasRows = new InputSlot<int>();
         
         private enum ScaleFXModes
         {

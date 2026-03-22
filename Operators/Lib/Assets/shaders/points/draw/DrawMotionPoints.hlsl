@@ -10,13 +10,21 @@ static const float2 kCorners[6] = {
     float2(1.0, -1.0),
     float2(1.0, 1.0)};
 
+// static const float2 kUV[6] = {
+//     float2(0.0, 1.0),
+//     float2(1.0, 1.0),
+//     float2(0.0, 0.0),
+//     float2(0.0, 0.0),
+//     float2(1.0, 1.0),
+//     float2(1.0, 0.0)};
+
 static const float2 kUV[6] = {
+    float2(0.0, 0.0),
     float2(0.0, 1.0),
-    float2(1.0, 1.0),
-    float2(0.0, 0.0),
-    float2(0.0, 0.0),
-    float2(1.0, 1.0),
-    float2(1.0, 0.0)};
+    float2(1.0, 0.0),
+    float2(1.0, 0.0),
+    float2(0.0, 1.0),
+    float2(1.0, 1.0)};
 
 cbuffer Transforms : register(b0)
 {
@@ -63,6 +71,8 @@ cbuffer IntParams : register(b3)
     int SegmentCount;
     int ScaleFX;
     int UsePointScale;
+    int TextureAtlasRowCount;
+
 };
 
 cbuffer FogParams : register(b4)
@@ -84,6 +94,7 @@ struct psInput
     float4 color : COLOR;
     float2 texCoord : TEXCOORD;
     float fog : FOG;
+    float stretch : INTERNAL;
 };
 
 sampler WrappedSampler : register(s0);
@@ -140,7 +151,7 @@ psInput vsMain(uint id : SV_VertexID)
     Point PP = PointsPrev[i];
 
     float2 corner = kCorners[q];
-    o.texCoord = kUV[q];
+    
 
     float sizeFx = (ScaleFX == 0.0) ? 1.0 : ((ScaleFX == 1.0) ? P.Scale.x : P.Scale.y);
     float2 baseSize = PointSize * sizeFx * (UsePointScale != 0 ? P.Scale.xy : 1.0.xx) * 0.2;
@@ -169,7 +180,7 @@ psInput vsMain(uint id : SV_VertexID)
     float2 ndc = clip.xy / max(1e-6, clip.w);
     float2 ndcP = clipP.xy / max(1e-6, clipP.w);
 
-    float2 vU = (ndc - ndcP); // * useVel;
+    float2 vU = (ndc - ndcP) * useVel;
     vU.x *= Aspect;
 
     float speedU = length(vU);
@@ -188,6 +199,13 @@ psInput vsMain(uint id : SV_VertexID)
     float stretchTarget = lerp(1.0, VelocityStretch, f);
     float stretch = clamp(lerp(1.0, stretchTarget, wAlign), 0, 10);
 
+    o.texCoord = kUV[q];
+
+    o.texCoord.y /=TextureAtlasRowCount;
+    o.texCoord.y += TextureAtlasRowCount <= 1 ? 0: (floor(stretch*1.5)/TextureAtlasRowCount);
+    o.stretch = -stretch * 0.02; // Stretch factor for pill shape
+
+
     float thickness = 0.5 * baseSize.x;
     float lengthHx = 0.5 * baseSize.y * stretch;
     float2 offset = corner.x * thickness * per + corner.y * lengthHx * dir;
@@ -201,9 +219,25 @@ psInput vsMain(uint id : SV_VertexID)
     return o;
 }
 
+inline float SharpS(float x, float strength)
+{
+    float p = exp2(strength * 10.0);
+    return x < 0.5
+           ? 0.5 * pow(2.0 * x, p)
+           : 1.0 - 0.5 * pow(2.0 * (1.0 - x), p);
+}
+
 float4 psMain(psInput i) : SV_TARGET
 {
-    float4 tex = texture2.Sample(ClampedSampler, i.texCoord);
+    float2 uv = i.texCoord;
+
+    // Stretch into pull shape
+    uv.x =  saturate( SharpS(uv.x, i.stretch));
+
+
+    // Stretching the borders will switch to next mipmap level causing flickering,
+    // so we sample a fixed level.
+    float4 tex = texture2.SampleLevel(ClampedSampler, uv, 0);
     float4 col = i.color * tex;
 
     if (CutOffTransparent > 0.0 && col.a < CutOffTransparent)
