@@ -34,8 +34,8 @@
       "InputId": "6dada5f7-252c-4af4-8c2f-f5352bbc3597"/*MeshBuffers*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 418.37402,
-        "Y": 967.823
+        "X": 253.65576,
+        "Y": 1000.2579
       }
     },
     {
@@ -77,8 +77,8 @@
     {
       "InputId": "de70d11c-93cb-494a-9516-c8a5989c2617"/*ShowGizmo*/,
       "Position": {
-        "X": 568.374,
-        "Y": 922.82306
+        "X": 578.374,
+        "Y": 957.82306
       },
       "Description": "When enabled shows an outline of the mesh if the output window has the Show Gizmos enabled."
     }
@@ -108,8 +108,8 @@
     {
       "ChildId": "2a730c0e-27dc-43e0-ba8b-9909bfb33fdc"/*DrawMesh*/,
       "Position": {
-        "X": 568.374,
-        "Y": 967.823
+        "X": 578.374,
+        "Y": 922.82306
       }
     },
     {
@@ -137,7 +137,7 @@
       "ChildId": "630acf93-3c38-4e97-9ddb-d44ab3579450"/*Indices*/,
       "Position": {
         "X": 711.3287,
-        "Y": 1070.1052
+        "Y": 1101.2682
       }
     },
     {

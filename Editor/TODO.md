@@ -34,6 +34,8 @@
 - [ ] Complete import T3-project window?
 - [ ] Test create new project
 
+- [ ] Persist project workspaces: Window Layout, Timeline (Zoom, visible Parameters), Output Settings (resolution, Gizmo, Pinned Instance), Selected Ops?  
+
 
 # Clean up Asset-Paths
 - [x] Implement auto fix methods
