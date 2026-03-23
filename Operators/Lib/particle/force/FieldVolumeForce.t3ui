@@ -72,7 +72,7 @@
         "X": 714.5168,
         "Y": 671.036
       },
-      "GroupTitle": "Collision",
+      "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -81,7 +81,8 @@
       "Position": {
         "X": 574.5168,
         "Y": 934.58826
-      }
+      },
+      "GroupTitle": "Collision"
     },
     {
       "InputId": "bf4f4938-e8ca-4b64-aa8b-6247527ad2fd"/*InvertVolume*/,

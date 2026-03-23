@@ -36,6 +36,13 @@
 
 - [ ] Persist project workspaces: Window Layout, Timeline (Zoom, visible Parameters), Output Settings (resolution, Gizmo, Pinned Instance), Selected Ops?  
 
+- [ ] Fix shader warning / error display -> Use it to fix AMD Raymarch error
+- [ ] Add Resample Points loop parameter
+- [ ] Check PerlinNoise3 GainAndBias (rename!) with higher Amplitude parameter
+- [ ] @unc Raymarch field 
+- [ ] Add [RaymarchField] IterationGlow
+- [ ] Fix Nik's Custom shader bug (see https://discord.com/channels/823853172619083816/823853172966817864/1485735996891857100) 
+
 
 # Clean up Asset-Paths
 - [x] Implement auto fix methods

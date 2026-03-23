@@ -50,6 +50,7 @@
     },
     {
       "InputId": "9709b1c0-7b4f-46cc-93bf-7405564b514a"/*Mesh*/,
+      "Relevancy": "Required",
       "Position": {
         "X": 170.50171,
         "Y": 906.0529

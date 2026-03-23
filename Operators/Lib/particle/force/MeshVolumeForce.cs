@@ -5,6 +5,9 @@ internal sealed class MeshVolumeForce :Instance<MeshVolumeForce>{
     [Output(Guid = "dedbd7bd-d593-406d-a6cc-cd9d409bbe8c")]
     public readonly Slot<T3.Core.DataTypes.ParticleSystem> Particles = new();
 
+        [Input(Guid = "9709b1c0-7b4f-46cc-93bf-7405564b514a")]
+        public readonly InputSlot<T3.Core.DataTypes.MeshBuffers> Mesh = new InputSlot<T3.Core.DataTypes.MeshBuffers>();
+
         [Input(Guid = "b4a1c048-f6e1-424e-b63d-c3a1896bffb4")]
         public readonly InputSlot<float> Amount = new InputSlot<float>();
 
@@ -34,9 +37,6 @@ internal sealed class MeshVolumeForce :Instance<MeshVolumeForce>{
 
         [Input(Guid = "9e3e295d-ed8a-41b5-91ba-3cd06261b9a2")]
         public readonly InputSlot<bool> ApplyColorOnCollision = new InputSlot<bool>();
-
-        [Input(Guid = "9709b1c0-7b4f-46cc-93bf-7405564b514a")]
-        public readonly InputSlot<T3.Core.DataTypes.MeshBuffers> Mesh = new InputSlot<T3.Core.DataTypes.MeshBuffers>();
         
         
     private enum Modes {
