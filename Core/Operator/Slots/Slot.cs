@@ -194,18 +194,14 @@ public class Slot<T> : ISlot
                 _actionBeforeAddingConnecting = UpdateAction;
                 if (_parentIsICompoundWithUpdate && !_isInputSlot && _parent.Children.Count > 0)
                 {
-                    //Log.Debug($"Skipping connection for compound op with update method for {Parent.Symbol} {this}", compoundWithUpdate);
-                    //compoundWithUpdate.RegisterOutputUpdateAction(this, ConnectedUpdate);
                     ArrayUtils.InsertAtIndexOrEnd(ref InputConnections, (Slot<T>)sourceSlot, index);
-
                     _dirtyFlag.SourceVersion = sourceSlot.DirtyFlag.SourceVersion;
-                    _dirtyFlag.ValueVersion = _dirtyFlag.SourceVersion - 1;
+                    _dirtyFlag.ValueVersion = - 1;
                     return;
                 }
             }
             UpdateAction = ConnectedUpdate;
             _dirtyFlag.SourceVersion = sourceSlot.DirtyFlag.SourceVersion;
-            //_dirtyFlag.ValueVersion = _dirtyFlag.SourceVersion - 1;
             _dirtyFlag.ValueVersion = -1;
         }
             
