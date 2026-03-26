@@ -95,7 +95,7 @@ void main(uint3 DTId : SV_DispatchThreadID)
         return;
     }
 
-    float f = (float)idx / TotalCount;
+    float f = TotalCount<=1 ? 0 : (idx / (float)(TotalCount-1));
     Point p = (Point)0;
     if(numStructs>0){
         p = SourcePoints[(idx)%numStructs];
