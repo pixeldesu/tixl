@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.DataTypes;
@@ -534,6 +535,7 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
     #region thumbnail rendering
     private void UpdateNextVariationThumbnail(Instance instanceForBlending, Slot<Texture2D> textureOutputSlot)
     {
+        Debug.Assert(PoolForBlendOperations != null);
         if (_allThumbnailsRendered)
             return;
 
