@@ -22,6 +22,9 @@ namespace Lib.mesh.modify{
         [Input(Guid = "54059d29-e8d9-457c-9dff-25b23753872d")]
         public readonly InputSlot<bool> RecomputeNormals = new InputSlot<bool>();
 
+        [Input(Guid = "e7f9c927-5d70-40d2-b5e3-43bd06731bf7")]
+        public readonly InputSlot<System.Numerics.Vector3> Offset = new InputSlot<System.Numerics.Vector3>();
+
         [Input(Guid = "cb9f9b0e-0486-400e-9fa1-5d2a997bb7d6")]
         public readonly InputSlot<float> A = new InputSlot<float>();
 
@@ -34,8 +37,8 @@ namespace Lib.mesh.modify{
         [Input(Guid = "6643b344-a69d-4142-85a6-f7c642a1e93a")]
         public readonly InputSlot<float> D = new InputSlot<float>();
 
-        [Input(Guid = "e7f9c927-5d70-40d2-b5e3-43bd06731bf7")]
-        public readonly InputSlot<System.Numerics.Vector3> Offset = new InputSlot<System.Numerics.Vector3>();
+        [Input(Guid = "d23cbda2-0ac6-40ec-8600-590b1c50e0bd")]
+        public readonly InputSlot<System.Numerics.Vector2> GainAndBias = new InputSlot<System.Numerics.Vector2>();
 
         [Input(Guid = "13abde1f-3173-4614-a5d8-e2848e94236e")]
         public readonly InputSlot<T3.Core.DataTypes.Texture2D> Image = new InputSlot<T3.Core.DataTypes.Texture2D>();
@@ -52,8 +55,8 @@ namespace Lib.mesh.modify{
         [Input(Guid = "a14d4ec8-33b8-487d-8855-a33088c8885b")]
         public readonly InputSlot<string> ShaderTemplate = new InputSlot<string>();
 
-        [Input(Guid = "68ae89bb-31b4-4516-aeb5-6b9ac132cf38")]
-        public readonly InputSlot<bool> IgnoreTemplate = new InputSlot<bool>();
+        [Input(Guid = "7dfcbc7a-d6ee-49bb-9ed0-caeade459702")]
+        public readonly InputSlot<T3.Core.DataTypes.ShaderGraphNode> Field = new InputSlot<T3.Core.DataTypes.ShaderGraphNode>();
 
 
     }
