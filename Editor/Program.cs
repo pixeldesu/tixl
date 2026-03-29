@@ -33,6 +33,9 @@ using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
 namespace T3.Editor;
 
+/// <summary>
+/// Bootstraps the TiXL editor process, rendering context, and UI services.
+/// </summary>
 internal static class Program
 {
     public static IUiContentDrawer? UiContentContentDrawer;

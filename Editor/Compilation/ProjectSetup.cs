@@ -15,8 +15,7 @@ using T3.Editor.UiModel;
 namespace T3.Editor.Compilation;
 
 /// <summary>
-/// handles the creation, loading, unloading, and general management of projects and packages
-/// todo: simplify/refactor as it's pretty confusing
+/// Creates, loads, updates, and unloads editor symbol projects and packages.
 /// </summary>
 internal static partial class ProjectSetup
 {
