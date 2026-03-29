@@ -59,7 +59,7 @@ public abstract partial class ShaderCompiler
                         timer.Stop();
                         success = true;
                         CacheSuccessfulCompilation(args.OldBytecode, hash, compiledBlob);
-                        reason = $"compiled in: {timer.Elapsed.TotalMilliseconds:0.0} ms";
+                        reason = $"{timer.Elapsed.TotalMilliseconds:0.0}ms";
                     }
                         
                 }
@@ -71,7 +71,7 @@ public abstract partial class ShaderCompiler
             if (Instance.CompileShaderFromSource<TShader>(args, out compiledBlob, out reason))
             {   
                 timer.Stop();
-                reason = $"compiled in: {timer.Elapsed.TotalMilliseconds:0.0} ms";
+                reason = $"{timer.Elapsed.TotalMilliseconds:0.0}ms";
                 success = true;
             }
         }
@@ -81,12 +81,11 @@ public abstract partial class ShaderCompiler
         {
             Instance.CreateShaderInstance(name, compiledBlob, out TShader s);
             shader = s; // make nullable happy
-            if(ProjectSettings.Config.LogFileEvents)
-                Log.Debug($"{name} - {args.EntryPoint} {reason}");
+            Log.Debug($"Compiled {name} @{args.EntryPoint} ({reason})"); 
             return true;
         }
 
-        reason = $"Failed to compile shader '{name}'.\n{reason}";
+        reason = $"Failed to compile '{name}': {reason}";
         shader = null;
         return false;
 

@@ -87,16 +87,45 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
     }
     public static string ExtractMeaningfulShaderErrorMessage(string message)
     {
-        var shaderErrorMatch = ShaderErrorPatternRegex().Match(message);
-        if (!shaderErrorMatch.Success)
-            return message;
+        var lines = message.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
 
-        var shaderName = shaderErrorMatch.Groups[1].Value;
-        var lineNumber = shaderErrorMatch.Groups[2].Value;
-        var errorMessage = shaderErrorMatch.Groups[3].Value;
+        (string ShaderName, string LineNumber, string ErrorMessage)? firstWarning = null;
 
-        errorMessage = errorMessage.Split('\n').First();
-        return $"Line {lineNumber}: {errorMessage}\n\n{shaderName}";
+        foreach (var line in lines)
+        {
+            var shaderErrorMatch = ShaderErrorPatternRegex().Match(line);
+            if (shaderErrorMatch.Success)
+            {
+                var shaderName = shaderErrorMatch.Groups[1].Value;
+                var lineNumber = shaderErrorMatch.Groups[2].Value;
+                var errorMessage = shaderErrorMatch.Groups[3].Value.Trim();
+
+                if (errorMessage.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return $"Line {lineNumber}: {errorMessage}\n\n{shaderName}";
+
+                if (firstWarning == null && errorMessage.IndexOf("warning", StringComparison.OrdinalIgnoreCase) >= 0)
+                    firstWarning = (shaderName, lineNumber, errorMessage);
+
+                continue;
+            }
+
+            // Some compiler lines don't contain file/line info. Still prefer an error if one is present.
+            if (line.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0)
+                return line.Trim();
+
+            if (firstWarning == null && line.IndexOf("warning", StringComparison.OrdinalIgnoreCase) >= 0)
+                firstWarning = (string.Empty, string.Empty, line.Trim());
+        }
+
+        if (firstWarning != null)
+        {
+            if (!string.IsNullOrEmpty(firstWarning.Value.ShaderName))
+                return $"Line {firstWarning.Value.LineNumber}: {firstWarning.Value.ErrorMessage}\n\n{firstWarning.Value.ShaderName}";
+
+            return firstWarning.Value.ErrorMessage;
+        }
+
+        return message;
     }
     
     /// <summary>
