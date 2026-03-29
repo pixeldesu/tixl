@@ -37,6 +37,19 @@
       "Scale": 0.01
     },
     {
+      "InputId": "7e02e1e8-0ddc-4c80-8109-f5ee39bd3987"/*GainAndBias*/,
+      "Position": {
+        "X": 748.22876,
+        "Y": 536.828
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "BiasAndGain"
+    },
+    {
       "InputId": "946d47f3-9fcf-4f2c-b7c9-26d94ddb4613"/*D*/,
       "Position": {
         "X": 888.22876,
@@ -152,6 +165,13 @@
       }
     },
     {
+      "ChildId": "1f69b7de-1a80-4f7d-b171-84975fb6032f"/*__padding*/,
+      "Position": {
+        "X": 888.22876,
+        "Y": 501.828
+      }
+    },
+    {
       "ChildId": "24c45d78-dbac-4d7d-84db-5dc051e187b2"/*GradientsToTexture*/,
       "Position": {
         "X": 1394.9698,
@@ -180,6 +200,13 @@
       }
     },
     {
+      "ChildId": "75a8c0d1-5da8-44b1-a526-f4c3be0705b6"/*Vector2Components*/,
+      "Position": {
+        "X": 888.22876,
+        "Y": 536.828
+      }
+    },
+    {
       "ChildId": "76bc9a62-a436-4507-8488-e52dcbc0f1d9"/*SrvFromTexture2d*/,
       "Position": {
         "X": 1534.9698,
@@ -196,8 +223,8 @@
     {
       "ChildId": "85ddb7ea-1078-49a5-97bf-dcaf4f0eee30"/*GetBufferComponents*/,
       "Position": {
-        "X": 654.70233,
-        "Y": 531.05566
+        "X": 742.9254,
+        "Y": 643.9433
       }
     },
     {

@@ -37,6 +37,9 @@ namespace Lib.mesh.modify{
         [Input(Guid = "946d47f3-9fcf-4f2c-b7c9-26d94ddb4613")]
         public readonly InputSlot<float> D = new InputSlot<float>();
 
+        [Input(Guid = "7e02e1e8-0ddc-4c80-8109-f5ee39bd3987")]
+        public readonly InputSlot<System.Numerics.Vector2> GainAndBias = new InputSlot<System.Numerics.Vector2>();
+
         [Input(Guid = "a76dbb53-092c-4398-9e51-889d4785d60d")]
         public readonly InputSlot<T3.Core.DataTypes.Texture2D> Image = new InputSlot<T3.Core.DataTypes.Texture2D>();
 

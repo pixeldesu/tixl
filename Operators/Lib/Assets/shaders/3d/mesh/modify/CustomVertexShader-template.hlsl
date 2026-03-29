@@ -3,6 +3,7 @@
 #include "shared/point.hlsl"
 #include "shared/quat-functions.hlsl"
 #include "shared/pbr.hlsl"
+#include "shared/bias-functions.hlsl"
 
 /*{ADDITIONAL_INCLUDES}*/
 
@@ -12,7 +13,11 @@ cbuffer Params : register(b0)
     float B;
     float C;
     float D;
+
     float3 Offset;
+    float __padding;
+
+    float2 GainAndBias;
 }
 
 cbuffer Params : register(b1)
@@ -59,6 +64,9 @@ inline float GetDistance(float3 p3)
 //- DEFINES ------------------------------------
 /*{defines}*/
 //----------------------------------------------
+
+float Biased(float f){return ApplyGainAndBias(f, GainAndBias);}
+float4 SampleGradient(float f){return Gradient.SampleLevel(ClampedSampler, float2(f, 0.5), 0);}
 
 [numthreads(64,1,1)]
 void main(uint3 i : SV_DispatchThreadID)

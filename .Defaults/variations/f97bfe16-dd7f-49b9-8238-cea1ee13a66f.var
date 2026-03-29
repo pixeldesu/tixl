@@ -136,24 +136,46 @@
       }
     },
     {
-      "Id": "a6e18437-45a0-4900-80a3-b56463b3e995",
+      "Id": "c508ab52-419a-4480-8d55-538fdfb01692",
       "IsPreset": true,
-      "ActivationIndex": 3,
-      "Title": "untitled",
+      "ActivationIndex": 4,
+      "Title": "Image -> Polygonize Color",
       "PosOnCanvas": {
         "X": 326.0,
         "Y": 0.0
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
-          "cb9f9b0e-0486-400e-9fa1-5d2a997bb7d6": 2.85,
-          "ee09aa68-6191-494f-9900-f0dff16df27d": 1.0,
-          "e7f9c927-5d70-40d2-b5e3-43bd06731bf7": {
-            "X": 0.0,
-            "Y": -0.5,
-            "Z": 0.0
+          "cb9f9b0e-0486-400e-9fa1-5d2a997bb7d6": -0.28,
+          "ee09aa68-6191-494f-9900-f0dff16df27d": 0.53,
+          "c79b7cd6-ca23-4e3b-8eb7-3468e157f592": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "18e0c67c-c3d7-441a-b773-1701f16e66cf",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.99999,
+                    "G": 0.99999684,
+                    "B": 1.0,
+                    "A": 0.0
+                  }
+                },
+                {
+                  "Id": "d8603331-8664-4fdc-81aa-e61942020a92",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.99999,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
           },
-          "0957ec56-8c74-4e72-aee3-c14abddcc655": "float2 uv1=v1.TexCoord.xy;\nfloat2 uv2=v2.TexCoord.xy;\nfloat2 uv3=v3.TexCoord.xy;\nif(B>0.5){\nfloat s=1;\nuv1=(v1.Position+Offset).xy*s+0.5;\nuv2=(v2.Position+Offset).xy*s+0.5;\nuv3=(v3.Position+Offset).xy*s+0.5;\n\n\n}\n\nfloat2 uvc=(uv1+uv2+uv3)/3;\nuv1=(uv1-(uv2+uv3)/2)*A+(uv2+uv3)/2;\nuv2=(uv2-(uv1+uv3)/2)*A+(uv1+uv3)/2;\nuv3=(uv3-(uv2+uv1)/2)*A+(uv2+uv1)/2;\n\nuv1.y=1.0-uv1.y;\nuv2.y=1.0-uv2.y;\nuv3.y=1.0-uv3.y;\n\nfloat4 smpc=Image.SampleLevel(Sampler,uvc,0);\nfloat4 smp1=Image.SampleLevel(Sampler,uv1,0);\nfloat4 smp2=Image.SampleLevel(Sampler,uv2,0);\nfloat4 smp3=Image.SampleLevel(Sampler,uv3,0);\n\nv1.ColorRGB=smp1.rgb;\nv2.ColorRGB=smp2.rgb;\nv3.ColorRGB=smp3.rgb;\n"
+          "0957ec56-8c74-4e72-aee3-c14abddcc655": "// A: strength\n// B: Mode (0-> position, 1->UV)\n\nfloat2 uv1=v1.TexCoord.xy;\nfloat2 uv2=v2.TexCoord.xy;\nfloat2 uv3=v3.TexCoord.xy;\n\nif(B>0.5){\n  float s=1;\n  uv1=(v1.Position+Offset).xy*s+0.5;\n  uv2=(v2.Position+Offset).xy*s+0.5;\n  uv3=(v3.Position+Offset).xy*s+0.5;\n}\n\nfloat2 uvc=(uv1+uv2+uv3)/3;\nuv1=(uv1-(uv2+uv3)/2)*A+(uv2+uv3)/2;\nuv2=(uv2-(uv1+uv3)/2)*A+(uv1+uv3)/2;\nuv3=(uv3-(uv2+uv1)/2)*A+(uv2+uv1)/2;\n\nuv1.y=1.0-uv1.y;\nuv2.y=1.0-uv2.y;\nuv3.y=1.0-uv3.y;\n\nfloat4 smpc=Image.SampleLevel(Sampler,uvc,0);\nfloat4 smp1=Image.SampleLevel(Sampler,uv1,0);\nfloat4 smp2=Image.SampleLevel(Sampler,uv2,0);\nfloat4 smp3=Image.SampleLevel(Sampler,uv3,0);\n\nv1.ColorRGB=smp1.rgb;\nv2.ColorRGB=smp2.rgb;\nv3.ColorRGB=smp3.rgb;\n"
         }
       }
     }
