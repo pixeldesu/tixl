@@ -5,16 +5,13 @@ using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
-using T3.Core.Resource;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Variations.Model;
-using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.DelaunayVoronoi;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
-using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Selection;
@@ -54,14 +51,13 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         
         if (RenderProcess.OutputWindow != null)
         {
-            var instanceForOutput = RenderProcess.OutputWindow?.ShownInstance;
             var instanceForBlending = InstanceForBlendOperations;
 
             if (RenderProcess.State == RenderProcess.States.ReadyForExport)
             {
-                if (instanceForOutput is { Outputs.Count: > 0 }  )
+                if (RenderProcess.OutputWindow.ShownInstance is { Outputs.Count: > 0 } instanceForOutput)
                 {
-                    var primaryOutput = instanceForOutput?.Outputs[0];
+                    var primaryOutput = instanceForOutput.Outputs[0];
                     if (primaryOutput is Slot<Texture2D> textureSlot2)
                     {
                         UpdateThumbnailRendering(instanceForBlending, textureSlot2);
@@ -142,7 +138,8 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         if (!outputSymbolUi.OutputUis.TryGetValue(textureOutputSlot.Id, out var textureOutputUi))
             return;
 
-        UpdateNextVariationThumbnail(instanceForBlending, textureOutputUi, textureOutputSlot);
+        _ = textureOutputUi;
+        UpdateNextVariationThumbnail(instanceForBlending, textureOutputSlot);
     }
 
     private void DrawBlendingOverlay(ImDrawListPtr drawList, Instance instanceForBlending)
@@ -438,12 +435,18 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
 
     protected void TriggerThumbnailUpdate()
     {
+        PoolForBlendOperations?.StopHover();
+        _pendingThumbnailVariation = null;
+        _thumbnailCaptureDelayFrames = 0;
         _renderThumbnailIndex = 0;
         _allThumbnailsRendered = false;
     }
 
     protected void TriggerThumbnailSave()
     {
+        PoolForBlendOperations?.StopHover();
+        _pendingThumbnailVariation = null;
+        _thumbnailCaptureDelayFrames = 0;
         _renderThumbnailIndex = 0;
         _allThumbnailsRendered = false;
         _rerenderToFileRequested = true;
@@ -529,30 +532,47 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
     }
 
     #region thumbnail rendering
-    private void UpdateNextVariationThumbnail(Instance instanceForBlending, IOutputUi textureOutputUi, Slot<Texture2D> textureOutputSlot)
+    private void UpdateNextVariationThumbnail(Instance instanceForBlending, Slot<Texture2D> textureOutputSlot)
     {
-        if (_allThumbnailsRendered || PoolForBlendOperations == null)
+        if (_allThumbnailsRendered)
             return;
 
         //_thumbnailCanvasRendering.InitializeCanvasTexture(VariationThumbnail.ThumbnailSize);
 
-        if (PoolForBlendOperations.AllVariations.Count == 0 || textureOutputSlot?.Value == null)
+        if (PoolForBlendOperations.AllVariations.Count == 0)
         {
+            PoolForBlendOperations.StopHover();
+            _pendingThumbnailVariation = null;
             _allThumbnailsRendered = true;
             _rerenderRequested = false;
+            return;
+        }
+
+        if (_pendingThumbnailVariation != null)
+        {
+            if (_thumbnailCaptureDelayFrames > 0)
+            {
+                _thumbnailCaptureDelayFrames--;
+                return;
+            }
+
+            CapturePendingThumbnail(instanceForBlending, textureOutputSlot, _pendingThumbnailVariation);
+            _pendingThumbnailVariation = null;
+            _renderThumbnailIndex++;
             return;
         }
 
         if (!TryGetNextVariationForThumbnailRendering(out var variation))
         {
+            PoolForBlendOperations.StopHover();
+            _pendingThumbnailVariation = null;
             _allThumbnailsRendered = true;
             _rerenderRequested = false;
             _rerenderToFileRequested = false;
             return;
         }
-        
-        RenderThumbnail(instanceForBlending, textureOutputSlot, variation);
-        _renderThumbnailIndex++;
+
+        ApplyVariationForThumbnail(instanceForBlending, textureOutputSlot, variation);
     }
 
     private bool TryGetNextVariationForThumbnailRendering([NotNullWhen(true)] out Variation? variation)
@@ -590,9 +610,6 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         // if (instanceForBlending.Outputs.Count == 0)
         //     return;
         
-        // Set variation values
-        PoolForBlendOperations.BeginHover(instanceForBlending, variation);
-        
         textureOutputSlot.DirtyFlag.ForceInvalidate();
         textureOutputSlot.Update(_imageContext);
         
@@ -605,6 +622,25 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         ThumbnailManager.SaveThumbnail(variation.Id, instanceForBlending.Symbol.SymbolPackage, textureOutputSlot.Value, saveAs, saveToFile);
 
         PoolForBlendOperations.StopHover();
+    }
+
+    private void ApplyVariationForThumbnail(Instance instanceForBlending, Slot<Texture2D> textureOutputSlot, Variation variation)
+    {
+        if (PoolForBlendOperations == null)
+            return;
+
+        // Keep the variation active for at least one frame so render and readback don't race.
+        PoolForBlendOperations.BeginHover(instanceForBlending, variation);
+        textureOutputSlot.DirtyFlag.ForceInvalidate();
+        textureOutputSlot.Update(_imageContext);
+
+        _pendingThumbnailVariation = variation;
+        _thumbnailCaptureDelayFrames = ThumbnailCaptureDelayInFrames;
+    }
+
+    private void CapturePendingThumbnail(Instance instanceForBlending, Slot<Texture2D> textureOutputSlot, Variation variation)
+    {
+        RenderThumbnail(instanceForBlending, textureOutputSlot, variation);
     }
     #endregion
 
@@ -719,7 +755,7 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
     }
     
     protected override ScalableCanvas? Parent => null;
-    private static EvaluationContext _imageContext = new() { RequestedResolution = new Int2(170,130)};
+    private static readonly EvaluationContext _imageContext = new() { RequestedResolution = new Int2(170,130)};
     
 
     public bool IsBlendingActive { get; private set; }
@@ -729,7 +765,15 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
 
     private int _renderThumbnailIndex;
     private bool _allThumbnailsRendered;
+    private Variation? _pendingThumbnailVariation;
+    private int _thumbnailCaptureDelayFrames;
+    private const int ThumbnailCaptureDelayInFrames = 1;
     internal readonly CanvasElementSelection CanvasElementSelection = new();
     private Instance? _currentRenderInstance;
     private readonly SelectionFence _selectionFence = new();
 }
+
+
+
+
+
