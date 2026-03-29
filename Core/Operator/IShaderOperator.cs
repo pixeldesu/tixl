@@ -75,7 +75,7 @@ public interface IShaderCodeOperator<T> where T : AbstractShader
 
         if (string.IsNullOrWhiteSpace(debugName))
         {
-            debugName = $"{typeof(T).Name}_{instance}";
+            debugName = $"{typeof(T).Name}";
         }
 
         var compilationArgs = new ShaderCompiler.ShaderCompilationArgs(
@@ -92,14 +92,7 @@ public interface IShaderCodeOperator<T> where T : AbstractShader
 
         if (!compiled)
         {
-            var errors = StringUtils.ParseShaderCompilationError(errorMessage);
-            if (errors.Count > 0)
-            {
-                instance.LogErrorState(string.Join('\n',errors));
-            }
-            
-            // This error has been logged earlier...
-            //Log.Error($"Failed to update shader \"{debugName}\" in package \"{instance.Symbol.SymbolPackage.AssemblyInformation.Name}\":\n{errorMessage}");
+            instance.LogErrorState(errorMessage);
         }
         else
         {

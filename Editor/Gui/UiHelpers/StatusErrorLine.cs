@@ -43,11 +43,11 @@ internal sealed class StatusErrorLine : ILogWriter
             
             var width = ImGui.CalcTextSize(firstLine).X;
             
-            var logMessage = lastEntry.Message;
-            if (lastEntry.Level == ILogEntry.EntryLevel.Error)
-            {
-                logMessage = DX11ShaderCompiler.ExtractMeaningfulShaderErrorMessage(logMessage);
-            }
+            // var logMessage = lastEntry.Message;
+            // if (lastEntry.Level == ILogEntry.EntryLevel.Error)
+            // {
+            //     logMessage = DX11ShaderCompiler.ExtractMeaningfulShaderErrorMessage(logMessage);
+            // }
             
             var availableSpace = ImGui.GetWindowContentRegionMax().X;
             ImGui.SetCursorPosX(availableSpace - width);

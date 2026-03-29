@@ -85,7 +85,7 @@ public abstract partial class ShaderCompiler
             return true;
         }
 
-        reason = $"Failed to compile '{name}': {reason}";
+        reason = $"Failed to compile {name}: {reason}";
         shader = null;
         return false;
 

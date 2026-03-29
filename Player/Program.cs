@@ -44,8 +44,14 @@ using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Player;
 
+/// <summary>
+/// Bootstraps the standalone player, loads exported content, and starts the render loop.
+/// </summary>
 internal static partial class Program
 {
+    /// <summary>
+    /// Defines command line switches for exported playback.
+    /// </summary>
     private class Options
     {
         [Option(Default = false, Required = false, HelpText = "Disable vsync")]
