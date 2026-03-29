@@ -4,6 +4,23 @@
   "SymbolTags": "1",
   "InputUis": [
     {
+      "InputId": "41cc1bbc-2726-4980-93d8-010ea01e3f48"/*StartIndex*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 240.0
+      },
+      "GroupTitle": "Options",
+      "Description": "Defines the start of the data slice read back from GPU."
+    },
+    {
+      "InputId": "63014058-5418-4711-ae57-a9ba8841cb67"/*MaxCount*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 165.0
+      },
+      "Description": "Reading down large chunks for data can critically slow down the user interface.\nFor most diagnostic purposes you want to limit this count to a reasonable number."
+    },
+    {
       "InputId": "77ee7ca9-a2db-4de9-bb9c-21ec4f1bbeaf"/*UpdateContinuously*/,
       "Position": {
         "X": -200.0,
