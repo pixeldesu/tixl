@@ -4,7 +4,7 @@
 #include "shared/quat-functions.hlsl"
 #include "shared/pbr.hlsl"
 
-cbuffer Params : register(b0)
+cbuffer FloatParams : register(b0)
 {
     float3 Scale;
     float Fx1;
@@ -17,6 +17,17 @@ cbuffer Params : register(b0)
     float EnableScaleWithFaceArea;
     float OffsetScale;
 }
+
+cbuffer FloatParams : register(b1)
+{
+    int OrientationMode;
+    int OutputMode;
+    int FaceCount;
+    int ResultCount;
+}
+
+
+static const  int CornerCountsForMode[]  = {1,3,5};
 
 StructuredBuffer<int3> Faces : t0;
 StructuredBuffer<PbrVertex> SourceVertices : t1;
@@ -107,58 +118,97 @@ void CalculateTangentBitangent(
     bitangent = cross(normal, tangent);
 }
 
+#define OUTPUT_CENTERS 0
+#define OUTPUT_CORNERS 1
+#define OUTPUT_CORNERLOOPS 2
+
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {
     uint numFaces, stride;
     Faces.GetDimensions(numFaces, stride);
-    if (i.x >= numFaces)
-    {
+    int idx = i.x;
+    if (idx >= ResultCount)
         return;
-    }
 
-    int faceIndex = i.x;
+    int cornerCount = CornerCountsForMode[OutputMode];
 
-    int3 faceVertices = Faces[faceIndex];
+    int faceIndex = OutputMode == 0? idx : idx/ cornerCount; 
 
-    float3 a = SourceVertices[faceVertices.x].Position;
-    float3 b = SourceVertices[faceVertices.y].Position;
-    float3 c = SourceVertices[faceVertices.z].Position;
+    int3 faceVertIndices = Faces[faceIndex];
 
-    float2 uv0 = SourceVertices[faceVertices.x].TexCoord;
-    float2 uv1 = SourceVertices[faceVertices.y].TexCoord;
-    float2 uv2 = SourceVertices[faceVertices.z].TexCoord;
+    float2 uv0 = SourceVertices[faceVertIndices.x].TexCoord;
+    float2 uv1 = SourceVertices[faceVertIndices.y].TexCoord; 
+    float2 uv2 = SourceVertices[faceVertIndices.z].TexCoord;
 
-    float2 uvCenter = (uv0 + uv1 + uv2) / 3;
 
-    float3 pCenter = CalculateInscribedCircleCenter(a, b, c);
+    float3 p0 = SourceVertices[faceVertIndices.x].Position;
+    float3 p1 = SourceVertices[faceVertIndices.y].Position;
+    float3 p2 = SourceVertices[faceVertIndices.z].Position;
+    float3 pCenter = CalculateInscribedCircleCenter(p0, p1, p2);
 
-    uint index = i.x;
-    PbrVertex v = SourceVertices[index];
+    //PbrVertex v = SourceVertices[idx];
 
-    float3 normal = normalize(cross(a - b, a - c)); // Calculate the face normal
+    float3 normal = normalize(
+        SourceVertices[faceVertIndices.x].Normal
+      + SourceVertices[faceVertIndices.y].Normal
+      + SourceVertices[faceVertIndices.z].Normal);
 
     // Calculate tangent and bitangent vectors
     float3 tangent, bitangent;
-    CalculateTangentBitangent(a, b, c, uv0, uv1, uv2, tangent, bitangent);
+    CalculateTangentBitangent(p0, p1, p2, uv0, uv1, uv2, tangent, bitangent);
     pCenter += OffsetByTBN.x * tangent * OffsetScale + OffsetByTBN.y * bitangent * OffsetScale + OffsetByTBN.z * normal * OffsetScale;
 
     float3 upVector = float3(0, 1, 0);
-    float4 orientation = qLookAt(normal, upVector);
-
+    float4 faceOrientation = OrientationMode==0 
+                        ? qLookAt(normal, upVector)
+                        : qFromMatrix3(transpose( float3x3(tangent, bitangent,normal )));
     
-
-    ResultPoints[index].Position = pCenter;
-    ResultPoints[index].Rotation = normalize(orientation);
-
-    float3 avgColor = (SourceVertices[faceVertices.x].ColorRGB + SourceVertices[faceVertices.y].ColorRGB + SourceVertices[faceVertices.z].ColorRGB)/3;
-
-    ResultPoints[index].Color = Color * Texture.SampleLevel(LinearSampler, uvCenter, 0) * float4(avgColor,1);
-    ResultPoints[index].FX1 = Fx1;
-    ResultPoints[index].FX2 = Fx1;
-    // ResultPoints[index].Scale.xy = 1;
-    // ResultPoints[index].Scale.z = CalculateTriangleArea(a, b, c) * StretchZ;
-    ResultPoints[index].Scale = lerp(1,
-                                     CalculateInscribedCircleRadius(a, b, c),
-                                     EnableScaleWithFaceArea) *
+    Point p;
+    p.FX1 = Fx1;
+    p.FX2 = Fx2;
+    p.Scale = lerp(1,
+                                    CalculateInscribedCircleRadius(p0, p1, p2),
+                                    EnableScaleWithFaceArea) *
                                 Scale;
+
+    p.Rotation = normalize(faceOrientation);
+
+    if(OutputMode == OUTPUT_CENTERS) 
+    {
+        p.Position = pCenter;
+
+        float3 avgColor = (SourceVertices[faceVertIndices.x].ColorRGB + SourceVertices[faceVertIndices.y].ColorRGB + SourceVertices[faceVertIndices.z].ColorRGB)/3;
+
+        float2 uvCenter = (uv0 + uv1 + uv2) / 3;
+        p.Color = Color * Texture.SampleLevel(LinearSampler, uvCenter, 0) * float4(avgColor,1);
+    }
+    else if(OutputMode == OUTPUT_CORNERS) 
+    {
+        int cornerIndex = idx % cornerCount;
+        p.Position = SourceVertices[faceVertIndices[cornerIndex]].Position;
+        float2 uv = SourceVertices[faceVertIndices[cornerIndex]].TexCoord;
+        float4 vertexColor = float4( SourceVertices[faceVertIndices[cornerIndex]].ColorRGB,1);
+        p.Color = Color * Texture.SampleLevel(LinearSampler, uv, 0) * vertexColor;
+    }
+    else {
+        int cornerIndex = idx % cornerCount;
+        if(cornerIndex == 4) {
+            p.Scale = NAN;
+        } 
+        else 
+        {
+            cornerIndex %=3;    // close loop
+
+            float3 pos =SourceVertices[faceVertIndices[cornerIndex]].Position;
+            
+            p.Position = lerp(pCenter,  SourceVertices[faceVertIndices[cornerIndex]].Position, OffsetScale);
+            
+            float2 uv = SourceVertices[faceVertIndices[cornerIndex]].TexCoord;
+            float4 vertexColor = float4( SourceVertices[faceVertIndices[cornerIndex]].ColorRGB,1);
+            p.Color = Color * Texture.SampleLevel(LinearSampler, uv, 0) * vertexColor;
+        }
+    }
+
+
+    ResultPoints[idx] = p; 
 }

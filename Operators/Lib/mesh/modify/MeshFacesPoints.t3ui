@@ -1,6 +1,6 @@
 {
   "Id": "58a490b1-eb8a-4102-906a-f74a79c0ad1c"/*MeshFacesPoints*/,
-  "Description": "Set points at the \"Inscribed Circle Center\" of the mesh's faces, as the W attribute gets the radius. The size of each of the faces defines the size of the points. \n\nUseful combinations [LoadObj] and [DrawPoints] and more.\n\nSimilar Operators:\nTo create a point at each vertex of the connected mesh [MeshVerticesToPoints] can be used.\nTo get evenly distributed points on a mesh [PointsOnMesh] can be used.",
+  "Description": "\n\nCreate points at the center, corners or edges of the mesh's faces.\n\nThe size of each of the faces defines the size of the points and FX1 as the W attribute gets the radius. \n\nIn center mode uses the \"Inscribed Circle Center\".\n\nUseful combinations [LoadObj] and [DrawPoints] and more.\n\nSimilar Operators:\nTo create a point at each vertex of the connected mesh [MeshVerticesToPoints] can be used.\nTo get evenly distributed points on a mesh [PointsOnMesh] can be used.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -24,7 +24,8 @@
       "Position": {
         "X": 1172.58,
         "Y": 2652.6238
-      }
+      },
+      "Description": "This can be useful to \"inset\" edge loops.\n"
     },
     {
       "InputId": "803dc471-081f-48c8-b1b5-f5b5e4673518"/*Texture*/,
@@ -32,6 +33,14 @@
         "X": 1172.58,
         "Y": 2031.0386
       }
+    },
+    {
+      "InputId": "8365a78f-4b04-477a-b762-bcdf9e62163f"/*Mode*/,
+      "Position": {
+        "X": 752.5799,
+        "Y": 2039.2845
+      },
+      "Description": "Defines the output mode. This directly effects the resulting point count,  e.g. Loop mode results in FaceCount × 5 points because of an added separator. \n\nCorners is because identical to [MeshVerticesToPoints]."
     },
     {
       "InputId": "9361aeff-d96f-400c-8837-7d98fb6da99e"/*Fx1*/,
@@ -43,10 +52,18 @@
       "Description": "Scales the W / size of the points."
     },
     {
+      "InputId": "b01260c2-9766-44b2-9754-6f4a8b8dc4e3"/*Orientation*/,
+      "Position": {
+        "X": 1172.58,
+        "Y": 2729.025
+      },
+      "Description": "UseUpVector will look more consistent in most scenarios.\nTBN (Tangent, BiTagent and Normal) will be more precise a expecially for instanciating more content at the points."
+    },
+    {
       "InputId": "bad1db42-201c-4d3b-8e62-82e812a8388f"/*InputMesh*/,
       "Position": {
-        "X": 779.10333,
-        "Y": 1740.9166
+        "X": 372.6872,
+        "Y": 1709.1115
       },
       "Description": "Mesh input via [LoadObj] for example"
     },
@@ -114,10 +131,17 @@
       }
     },
     {
+      "ChildId": "3a704e9e-f698-4374-afd0-d163a027a883"/*PickInt*/,
+      "Position": {
+        "X": 892.5799,
+        "Y": 1934.2843
+      }
+    },
+    {
       "ChildId": "5a875125-82e9-41ed-9248-2692d05d1e5a"/*GetIndices*/,
       "Position": {
-        "X": 974.58276,
-        "Y": 1918.169
+        "X": 568.1666,
+        "Y": 1886.3638
       }
     },
     {
@@ -130,8 +154,22 @@
     {
       "ChildId": "64a97ffa-5d37-4f71-8600-ce1b96356fec"/*ExecuteBufferUpdate*/,
       "Position": {
-        "X": 1551.269,
-        "Y": 1904.9056
+        "X": 1778.106,
+        "Y": 1949.6272
+      }
+    },
+    {
+      "ChildId": "6b29e6fb-0a8f-4a5c-b271-ffaa9bed92fc"/*MultiplyInt*/,
+      "Position": {
+        "X": 752.5799,
+        "Y": 2004.2843
+      }
+    },
+    {
+      "ChildId": "713f8d68-c587-480a-9dc4-cd9deee0854c"/*MultiplyInt*/,
+      "Position": {
+        "X": 752.5799,
+        "Y": 1969.2843
       }
     },
     {
@@ -139,6 +177,13 @@
       "Position": {
         "X": 1312.58,
         "Y": 1800.1821
+      }
+    },
+    {
+      "ChildId": "766e8658-3bfc-4be2-b339-d72ca1a665ad"/*IntsToBuffer*/,
+      "Position": {
+        "X": 1312.58,
+        "Y": 2729.025
       }
     },
     {
@@ -165,8 +210,8 @@
     {
       "ChildId": "a60671a7-e9f8-43ed-a965-bbf8c05650d8"/*_MeshBufferComponents*/,
       "Position": {
-        "X": 779.10333,
-        "Y": 1775.9166
+        "X": 372.6872,
+        "Y": 1744.1115
       }
     },
     {
@@ -179,8 +224,8 @@
     {
       "ChildId": "bc6b09a9-48f4-47e3-9dc1-f173c6b8fbbb"/*GetVertices*/,
       "Position": {
-        "X": 974.58276,
-        "Y": 1790.5923
+        "X": 568.1666,
+        "Y": 1758.7871
       }
     },
     {
@@ -207,8 +252,8 @@
     {
       "ChildId": "e2b9980a-6b56-432d-b7f2-f4c1bc4f5816"/*ComputeShaderStage*/,
       "Position": {
-        "X": 1551.269,
-        "Y": 1624.9056
+        "X": 1778.106,
+        "Y": 1634.6272
       }
     },
     {
@@ -230,8 +275,8 @@
     {
       "OutputId": "f40d8abc-a97c-4dba-8811-b19042db1c66"/*OutBuffer*/,
       "Position": {
-        "X": 1551.269,
-        "Y": 1974.9056
+        "X": 1778.106,
+        "Y": 2019.6272
       }
     }
   ]

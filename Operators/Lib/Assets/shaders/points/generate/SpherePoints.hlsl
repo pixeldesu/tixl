@@ -11,8 +11,7 @@ cbuffer Params : register(b0)
     float Scatter;
 }
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;    // output
-
+RWStructuredBuffer<Point> ResultPoints : u0;    // output
 
 static float precision = 0.0001;
 static float phi = PI *  (3. - sqrt(5.));  // golden angle in radians
@@ -32,9 +31,6 @@ void main(uint3 dtID : SV_DispatchThreadID)
     if(i >= count)
         return;
 
-
-    //float i = index;
-
     float t = i / float(count - 1);
     float y = 1 - t * 2;            // y goes from 1 to -1
     float radius = sqrt(1 - y * y); // radius at y
@@ -46,23 +42,19 @@ void main(uint3 dtID : SV_DispatchThreadID)
     theta += StartAngle * toRad;
     theta += (hash11(i/123.71) -0.5) * Scatter;
     
-    //float theta = (phi * i) + StartAngle / 180 * PI;          // golden angle increment
-
     float x = cos(theta) * radius;
     float z = sin(theta) * radius;
 
-
     float3 position = float3(x,y,z);
     ResultPoints[i].Position = position * Radius + Center;
-    ResultPoints[i].W = 1;
-
+    ResultPoints[i].FX1 = 1;
+    ResultPoints[i].FX2 = 1;
 
     float4 rot = qFromAngleAxis( theta, float3(0,-1,0));
     float angle4 = atan2( y, radius)  - PI/2;
     float4 rot2 = qFromAngleAxis( angle4 , float3(0,0,1));    
     ResultPoints[i].Rotation = qMul( qMul(rot,rot2) , rot5);
     ResultPoints[i].Color = 1;
-    ResultPoints[i].Selected = 1;
-    ResultPoints[i].Stretch = 1;
+    ResultPoints[i].Scale = 1;
 }
 

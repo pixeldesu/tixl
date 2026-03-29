@@ -35,8 +35,7 @@ internal class PresetCanvas : VariationBaseCanvas
 
     protected override void DrawAdditionalContextMenuContent(Instance instance)
     {
-        ImGui.GetForegroundDrawList().AddRect(_keepWindowPos, _keepWindowPos+ _keepWindowSize, Color.Red);
-        
+        //ImGui.GetForegroundDrawList().AddRect(_keepWindowPos, _keepWindowPos+ _keepWindowSize, Color.Red);
     }
 
     private void CreatePreset()

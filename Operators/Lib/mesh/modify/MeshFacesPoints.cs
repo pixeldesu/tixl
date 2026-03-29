@@ -10,6 +10,9 @@ internal sealed class MeshFacesPoints : Instance<MeshFacesPoints>
         [Input(Guid = "bad1db42-201c-4d3b-8e62-82e812a8388f")]
         public readonly InputSlot<T3.Core.DataTypes.MeshBuffers> InputMesh = new InputSlot<T3.Core.DataTypes.MeshBuffers>();
 
+        [Input(Guid = "8365a78f-4b04-477a-b762-bcdf9e62163f", MappedType = typeof(OutputModes))]
+        public readonly InputSlot<int> Mode = new InputSlot<int>();
+
         [Input(Guid = "df3005ad-76ca-423a-95f5-4a29ae1284ca")]
         public readonly InputSlot<float> ScaleUniform = new InputSlot<float>();
 
@@ -18,6 +21,9 @@ internal sealed class MeshFacesPoints : Instance<MeshFacesPoints>
 
         [Input(Guid = "d5288530-4e29-4a6d-9175-7e43e2880f1d")]
         public readonly InputSlot<bool> ScaleWithFaceArea = new InputSlot<bool>();
+
+        [Input(Guid = "71d65094-f6a6-4ea7-8e3a-c0c95db5cff0")]
+        public readonly InputSlot<float> OffsetScale = new InputSlot<float>();
 
         [Input(Guid = "9361aeff-d96f-400c-8837-7d98fb6da99e")]
         public readonly InputSlot<float> Fx1 = new InputSlot<float>();
@@ -34,16 +40,20 @@ internal sealed class MeshFacesPoints : Instance<MeshFacesPoints>
         [Input(Guid = "67b24f6d-61d1-49df-9e86-4555474f91b4")]
         public readonly InputSlot<System.Numerics.Vector3> OffsetByTBN = new InputSlot<System.Numerics.Vector3>();
 
-        [Input(Guid = "71d65094-f6a6-4ea7-8e3a-c0c95db5cff0")]
-        public readonly InputSlot<float> OffsetScale = new InputSlot<float>();
-        
-        
-    private enum Directions
-    {
-        Surface,
-        Noise,
-        Center,
-    }
-        
+        [Input(Guid = "b01260c2-9766-44b2-9754-6f4a8b8dc4e3", MappedType = typeof(OrientationModes))]
+        public readonly InputSlot<int> Orientation = new InputSlot<int>();
+
+        private enum OutputModes
+        {
+            Centers,
+            Corners,
+            EdgeLines,
+        }
+
+        private enum OrientationModes
+        {
+            UseUpVector,
+            CalculateTBN,
+        }
 
 }
