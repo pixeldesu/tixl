@@ -96,7 +96,7 @@
     },
     {
       "Id": "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df"/*ShaderCode*/,
-      "DefaultValue": "// f - normalized position in buffer\n// p - current point defined as SourcePoints[idx]\n\nfloat t= Biased( frac((f * (B+1) + A)) );\nfloat3 pForward = qRotateVec3(float3(0,0,1), p.Rotation);\n\np.Position += pForward * (t -0.5);\np.Color = SampleGradient(t);\np.Scale += t;"
+      "DefaultValue": "// f - normalized position in buffer\n// p - current point defined as SourcePoints[idx]\n\nfloat t= Biased( frac((f * (B+1) + A)) );\nfloat3 pForward = qRotateVec3(float3(0,0,1), p.Rotation);\n\np.Position += pForward * (t -0.5);\np.Position.y += sin(t*2*PI);\np.Color = SampleGradient(t);\np.Scale += t;"
     },
     {
       "Id": "fe120fea-dc5e-45ed-97b5-09d9d4e6269c"/*TemplateFile*/,
