@@ -15,12 +15,15 @@ internal sealed class SwitchParticleForce : Instance<SwitchParticleForce>
 
     private void Update(EvaluationContext context)
     {
+        var index = Index.GetValue(context);
+        if (index == -1)
+            return;
+        
         var connections = Input.GetCollectedTypedInputs();
         if (connections == null || connections.Count == 0)
             return;
-
-        var index = Index.GetValue(context).Mod(connections.Count);
-        Selected.Value = connections[index].GetValue(context);
+        
+        Selected.Value = connections[index.Mod(connections.Count)].GetValue(context);
     }
 
     [Input(Guid = "0E7BA3EA-D20A-41D6-9FD9-00A81D39F112")]
