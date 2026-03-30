@@ -33,7 +33,7 @@ inline int imod2(int val, int repeat)
         return;
 
     int scatterOffset = Scatter > 0.001
-                             ? (float)SourceCount * Scatter * hash11u(idx + Seed % 54321 + StartIndex)
+                             ? (float)SourceCount * Scatter * hash11u(idx + Seed * SourceCount + StartIndex)
                              : 0 ;
 
     int index = imod2(StartIndex + (int)((i.x * StepSize) + scatterOffset), SourceCount);

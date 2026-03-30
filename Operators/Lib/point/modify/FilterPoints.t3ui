@@ -28,9 +28,7 @@
       },
       "Description": "Changes the random seed for the scatter effect",
       "Min": 0,
-      "Max": 1,
-      "ClampMin": true,
-      "ClampMax": true
+      "Max": 1
     },
     {
       "InputId": "60cea2c3-02ae-4132-ad11-3f16c2f71b6e"/*ScatterSelect*/,
