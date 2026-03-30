@@ -44,6 +44,12 @@ internal sealed class TextureMapForce : Instance<TextureMapForce>
 
     [Input(Guid = "b79534be-d4ab-4a9b-93ac-3652f3ccf19d")]
     public readonly InputSlot<GizmoVisibility> ShowGizmo = new InputSlot<GizmoVisibility>();
+
+        [Input(Guid = "4a438635-1d96-4526-a154-626a6286a65a")]
+        public readonly InputSlot<System.Numerics.Vector4> Colorization = new InputSlot<System.Numerics.Vector4>();
+
+        [Input(Guid = "e9194e55-d0e8-4a97-8808-768cac23ce37")]
+        public readonly InputSlot<float> Colorize = new InputSlot<float>();
         
         
     private enum Modes {

@@ -38,6 +38,16 @@
       "UseVec2Control": "BiasAndGain"
     },
     {
+      "InputId": "4a438635-1d96-4526-a154-626a6286a65a"/*Colorization*/,
+      "Position": {
+        "X": 79.55301,
+        "Y": 1343.7299
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
       "InputId": "87264af4-0939-4aad-9a15-b79d067b9fcb"/*DepthConcentration*/,
       "Position": {
         "X": 219.55301,
@@ -74,7 +84,7 @@
       "InputId": "b4ffa587-f6f0-47c2-af60-f8660ad1882e"/*TwistVariation*/,
       "Position": {
         "X": 219.55301,
-        "Y": 1343.7299
+        "Y": 1518.7299
       },
       "Min": -180.0,
       "Max": 180.0,
@@ -108,10 +118,17 @@
       "Description": "Target distance from the camera plane when applying DepthConcentration."
     },
     {
+      "InputId": "e9194e55-d0e8-4a97-8808-768cac23ce37"/*Colorize*/,
+      "Position": {
+        "X": 219.55301,
+        "Y": 1483.7299
+      }
+    },
+    {
       "InputId": "eddf467a-d96e-4639-aa09-b49dc1775c1b"/*Amount*/,
       "Position": {
-        "X": -119.803406,
-        "Y": 985.93256
+        "X": -79.60657,
+        "Y": 1657.7941
       },
       "GroupTitle": "Amount",
       "Description": "How much are the particles accelerated by the signed normal map.\nYou can use negative values to invert the direction.",
@@ -247,6 +264,13 @@
       "Position": {
         "X": 219.55301,
         "Y": 923.72986
+      }
+    },
+    {
+      "ChildId": "d7265407-2d65-49b6-9c16-f1e64694f258"/*Vector4Components*/,
+      "Position": {
+        "X": 219.55301,
+        "Y": 1343.7299
       }
     },
     {

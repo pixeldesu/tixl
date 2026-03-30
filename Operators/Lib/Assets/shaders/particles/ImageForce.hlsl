@@ -8,17 +8,20 @@ cbuffer Params : register(b0)
 {
     float2 AmountXY;
     float Amount;
-
     float Confinment;
+
     float DepthConcentration;
     float CenterDepth;
     float SpinAngle;
-
     float SpinVariation;
+
     float AmountVariation;
     float2 VariationGainAndBias;
-
     float Twist;
+
+    float4 Color;
+
+    float Colorize;
     float TwistVariation;
 }
 
@@ -87,6 +90,9 @@ RWStructuredBuffer<Particle> Particles : u0;
     float accelerationToDepthCenter = depth - CenterDepth;
     offset.z += accelerationToDepthCenter * DepthConcentration;
     offset = mul(float4(offset.xyz, 0), CameraToWorld );
+
+    float intensity = length(offset);
+    Particles[i.x].Color = lerp(Particles[i.x].Color, Color, saturate( intensity * Colorize));
 
     float3 v = Particles[i.x].Velocity + offset;
 
