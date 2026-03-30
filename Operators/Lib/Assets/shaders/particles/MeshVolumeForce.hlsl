@@ -19,13 +19,16 @@ cbuffer Params : register(b0)
     float SpeedFactor;
 }
 
-cbuffer Params : register(b1)
+cbuffer IntParams : register(b1)
 {
     int ParticleCount;
     int VertexCount;
     int FaceCount;
     int EnableBounce;
+
     int ApplyColorOnCollision;
+    int SkipCount;
+    int FrameCount;
 }
 
 RWStructuredBuffer<Particle> Particles : u0; 
@@ -225,6 +228,9 @@ void main(uint3 i : SV_DispatchThreadID)
     if (gi >= maxParticleCount)
         return;
 
+    if( (((gi/64) +FrameCount) % SkipCount) > 0 )
+        return;
+
     float3 pos = Particles[gi].Position;
     int closestFaceIndex;
     float3 closestSurfacePoint;
@@ -259,8 +265,10 @@ void main(uint3 i : SV_DispatchThreadID)
                             1)), //
                         Amount);
 
+
         if (ApplyColorOnCollision)
         {
+            // TODO:
             // Could sample text with mesh uv
             // float4 surfaceColor = GetField(float4(pos, 1));
             // Particles[gi].Color.rgb = surfaceColor.rgb;
@@ -281,57 +289,4 @@ void main(uint3 i : SV_DispatchThreadID)
 
     if (!isnan(velocity.x) && !isnan(velocity.y) && !isnan(velocity.z))
         Particles[gi].Velocity = velocity;
-
-
-    // float signedPointHash = hash11(i.x % 123.567 * 123.1) * 2-1;
-    // Particle p = Particles[i.x];
-
-    // float phase = ((Phase + (133.1123 * i.x) ) % 10000) * (1 + signedPointHash * 0.5);
-    // int phaseId = (int)phase;
-    // float1 normalizedNoise = lerp(hash31((i.x + phaseId) % 123121),
-    //                                 hash31((i.x + phaseId) % 123121 + 1),
-    //                                 smoothstep(0, 1,
-    //                                            phase - phaseId));
-    // float3 signedNoise = normalizedNoise * 2 - 1;
-
-    // float3 pos = p.Position;
-    // float3 forward =  qRotateVec3( float3(1,0,0), p.Rotation);
-
-    // float usedSpeed = Speed * 0.01f * (1+signedPointHash * RandomizeSpeed);
-
-    // float3 pos2 = pos + forward * usedSpeed;
-
-    // int closestFaceIndex;
-    // float3 closestSurfacePoint;
-    
-
-    // // Keep outside
-    // float3 distanceFromSurface= normalize(pos2 - closestSurfacePoint) * (SurfaceDistance + signedPointHash * RandomSurfaceDistance);
-    // distanceFromSurface *= dot(distanceFromSurface, Vertices[Indices[closestFaceIndex].x].Normal) > 0 
-    //     ? 1 : -1;
-
-    // float3 targetPosWithDistance = closestSurfacePoint + distanceFromSurface;
-
-    // float3 movement = targetPosWithDistance - p.Position;
-    // float requiredSpeed= clamp(length(movement), 0.001,99999);
-    // float clampedSpeed = min(requiredSpeed, usedSpeed );
-    // float speedFactor = clampedSpeed / requiredSpeed;
-    // movement *= speedFactor;
-
-    // if(!isnan(movement.x) ) 
-    // {
-    //     p.Velocity += movement;
-    //     float4 orientation = normalize(q_from_tangentAndNormal(movement, distanceFromSurface));
-    //     float4 mixedOrientation = qSlerp(orientation, p.Rotation, 0.96);
-
-    //     float usedSpin = (Spin + RandomSpin) * signedNoise;
-    //     if(abs(usedSpin) > 0.001) 
-    //     {
-    //         float randomAngle = signedPointHash  * usedSpin;
-    //         mixedOrientation = normalize(qMul( mixedOrientation, qFromAngleAxis(randomAngle, distanceFromSurface )));
-    //     }
-            
-    //     p.Rotation = mixedOrientation;
-    // }
-    // Particles[i.x] = p;
 }

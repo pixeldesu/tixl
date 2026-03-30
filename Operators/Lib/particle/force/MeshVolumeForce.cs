@@ -37,6 +37,9 @@ internal sealed class MeshVolumeForce :Instance<MeshVolumeForce>{
 
         [Input(Guid = "9e3e295d-ed8a-41b5-91ba-3cd06261b9a2")]
         public readonly InputSlot<bool> ApplyColorOnCollision = new InputSlot<bool>();
+
+        [Input(Guid = "f81826f1-391c-48b5-86d4-807d1654ca22")]
+        public readonly InputSlot<int> ExecuteEveryNthFrame = new InputSlot<int>();
         
         
     private enum Modes {
