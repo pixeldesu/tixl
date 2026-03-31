@@ -31,6 +31,7 @@ internal static class FactoryKeyMap
                 new(UserActions.PlaybackJumpToStartTime, new KeyCombination(Key.Home)),
                 new(UserActions.PlaybackJumpToNextKeyframe, new KeyCombination(Key.Period)),
                 new(UserActions.PlaybackJumpToPreviousKeyframe, new KeyCombination(Key.Comma)),
+                new(UserActions.PlaybackScrubTime, new KeyCombination(Key.T)),
 
                 // Timeline actions
                 new(UserActions.InsertKeyframe, new KeyCombination(Key.C)),

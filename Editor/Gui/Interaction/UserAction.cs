@@ -35,6 +35,7 @@ internal enum UserActions
     PlaybackJumpToPreviousKeyframe,
     PlaybackJumpToEndTime,
     PlaybackJumpToStartTime,
+    PlaybackScrubTime,
 
     // Timeline
     SetStartTime,

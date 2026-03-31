@@ -16,7 +16,6 @@ using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.Skills.Training;
-using T3.Editor.Skills.Data;
 using T3.Editor.Skills.Ui;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
@@ -94,6 +93,8 @@ public static partial class T3Ui
 
         FrameStats.CompleteFrame();
         TriggerGlobalActionsFromKeyBindings();
+
+        PlaybackTimeScrubHandling.ProcessFrame();
 
         //if (UserSettings.Config.ShowMainMenu || UserSettings.Config.EnableMainMenuHoverPeek && ImGui.GetMousePos().Y < 3)
         if (UserSettings.Config.ShowMainMenu || ImGui.GetMousePos().Y < 3)

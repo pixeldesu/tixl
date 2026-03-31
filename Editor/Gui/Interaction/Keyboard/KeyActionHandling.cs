@@ -123,6 +123,7 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.PlaybackStop, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.PlaybackToggle, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.PlaybackJumpToStartTime, Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.PlaybackScrubTime, Flags.KeyHoldOnly);
 
         // Timeline actions
         RegisterActionsFlags(UserActions.InsertKeyframe, Flags.NeedsWindowFocus | Flags.KeyPressOnly);

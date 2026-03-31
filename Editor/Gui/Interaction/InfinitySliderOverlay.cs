@@ -19,13 +19,14 @@ internal static class InfinitySliderOverlay
     private const float Width = 750;
 
     internal static void Draw(ref double roundedValue,
-                              bool restarted,
-                              Vector2 center,
-                              double min = double.NegativeInfinity,
-                              double max = double.PositiveInfinity,
-                              float scale = 0.1f,
-                              bool clampMin = false,
-                              bool clampMax = false)
+        bool restarted,
+        Vector2 center,
+        double min = double.NegativeInfinity,
+        double max = double.PositiveInfinity,
+        float scale = 0.1f,
+        bool clampMin = false,
+        bool clampMax = false,
+        bool disableRounding = false)
     {
         var drawList = ImGui.GetForegroundDrawList();
         _io = ImGui.GetIO();
@@ -85,8 +86,7 @@ internal static class InfinitySliderOverlay
         }
 
         _value = MathUtils.OptionalClamp(_value, min, clampMin, max, clampMax);
-
-        DrawUi(out roundedValue, min, max, valueRange, mousePosX, drawList);
+        DrawUi(out roundedValue, min, max, valueRange, mousePosX, drawList,disableRounding);
 
         roundedValue = MathUtils.OptionalClamp(roundedValue, min, clampMin, max, clampMax);
 
@@ -95,7 +95,7 @@ internal static class InfinitySliderOverlay
     }
 
     private static bool DrawUi(out double roundedValue, double min, double max, double valueRange, int mousePosX,
-                               ImDrawListPtr drawList)
+                               ImDrawListPtr drawList, bool disableRounding)
     {
         var log10 = Math.Log10(valueRange);
         var iLog10 = Math.Floor(log10);
@@ -107,7 +107,7 @@ internal static class InfinitySliderOverlay
                                     _     => tickValueInterval / 10
                                 };
 
-        roundedValue = _io.KeyCtrl ? _value : Math.Round(_value / roundInterval) * roundInterval;
+        roundedValue = (_io.KeyCtrl || disableRounding) ? _value : Math.Round(_value / roundInterval) * roundInterval;
 
         var rSize = new Vector2(Width, 40) * T3Ui.UiScaleFactor;
         var rCenter = new Vector2(mousePosX, _io.MousePos.Y - rSize.Y);
