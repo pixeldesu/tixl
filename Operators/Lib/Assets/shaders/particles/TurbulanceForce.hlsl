@@ -13,6 +13,7 @@ cbuffer Params : register(b0)
     float Variation;
 
     float SpeedFactor;
+    float VariationGroupCount;
 }
 
 cbuffer Params : register(b1)
@@ -57,7 +58,9 @@ inline float GetDistance(float3 p3)
         return;
     }
 
-    float3 variationOffset = hash41u(i.x).xyz * Variation;
+    uint vgc = (uint)(VariationGroupCount+0.5);
+    uint mod = vgc == 0 ? maxParticleCount : vgc;
+    float3 variationOffset = hash41u(i.x % mod).xyz * Variation;
     float3 pos = Particles[i.x].Position * 0.9; // avoid simplex noice glitch at -1,0,0
     float3 noiseLookup = (pos + variationOffset + Phase * float3(1, -1, 0)) * Frequency;
     float3 velocity = Particles[i.x].Velocity;

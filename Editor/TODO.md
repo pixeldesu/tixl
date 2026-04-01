@@ -1,16 +1,19 @@
+Reference for symbol
+[>] <-- an issue has been created for this
+
 ## Important issues
 
-- [?] Connections from input are sometimes not correctly evaluated 
+- [x] Connections from input are sometimes not correctly evaluated 
 - [ ] Rearranging parameters with additional annotations (e.g. ShaderParameters) breaks operator 
-- [ ] Pre/Post Curve modes are applied to all (not just selected curves)
-- [ ] Indicate Pre/Post curve moves in timeline
-- [ ] Fix Add input disabled before switching type
-- [ ] Reset modifier keys if app regets focus
-- [ ] Publish output from Graph
+- [ ] Modifying Pre/Post Curve modes are applied to all (not just selected curves)
+- [>] Indicate non-default Pre/Post curve mode in timeline (e.g. icons)
+- [>] Bug: In Add input dialog requires to switch type once
+- [>] Reset modifier keys if app regain window focus
+- [>] Publish output from Graph
 
-- [ ] Ask before removing inputs and outputs (can't be undone)
-- [ ] Fix MultiInput connection editing
-- [ ] Combine into new Symbol should prefill current project and namespace
+- [>] Ask before removing inputs and outputs (can't be undone)
+- [>] Fix MultiInput connection editing
+- [>] Combine into new Symbol should prefill current project and namespace
 - [ ] Command bar shortcuts should work if UI is hidden
 - [ ] Inserting keyframes does not always use neighbour interpolation type
 - [ ] Looks like only last animated value edit to a vec3 can't be undone?
@@ -18,10 +21,10 @@
 - [ ] Rethink bookmarks -> Add marker in Op with number / switch with numbers only. only bring to view if hidden
 - [ ] Export should use project folder and some prefix like _
 - [ ] Fix tiny node-text with 200% display-scaling
-- [ ] Focus selected op in SymbolLibrary
-- [ ] Collapse Symbol Library
-- [ ] Add Voronoi Pattern Shader
-- [ ] Add Project image to SdfMaterial
+- [x] Focus selected op in SymbolLibrary
+- [x] Collapse Symbol Library
+- [x] Add Voronoi Pattern Shader
+- [ ] Add Project image onto SdfMaterial
 - [ ] Duplicate as new type should also duplicate variations and snapshot enabled ops!
 - [ ] Variations should be stored at project folder
 - [ ] !!! Indicate read-only operators
@@ -36,7 +39,7 @@
 
 - [ ] Persist project workspaces: Window Layout, Timeline (Zoom, visible Parameters), Output Settings (resolution, Gizmo, Pinned Instance), Selected Ops?  
 
-- [ ] Fix shader warning / error display -> Use it to fix AMD Raymarch error
+- [x] Fix shader warning / error display -> Use it to fix AMD Raymarch error
 - [ ] Add Resample Points loop parameter
 - [ ] Check PerlinNoise3 GainAndBias (rename!) with higher Amplitude parameter
 - [ ] @unc Raymarch field 
@@ -162,9 +165,6 @@ optional:
 
 
 
-
-
-
 # UI
 - [ ] add color preview to vec4 (and maybe a history gradient?)
 - [ ] Create [HowToUseVariables]
@@ -172,26 +172,26 @@ optional:
 - [ ] PointList parameter needs max height
 
 - [ ] Idea: bookmark / navigation panel
-- [ ] Snapshots: Somehow fix usecase "update set this parameter for these snapshots"
+- [ ] Snapshots: Somehow fix use-case "update set this parameter for these snapshots"
 - [ ] Snapshots: Layout snapshots like on Controller
 - [ ] Fix: Raymarch point
 
 ## Feedback from Alex 2
-- [ ] Try to get rid of console
-- [ ] Import / Load projects to library 
+- [x] Try to get rid of console
+- [x] Import / Load projects to library 
 - [x] Press P again to unpin
 - [ ] Provide warning if project folder is owned by OneCloud
-- [ ] AssetHandling: Import multiple assets or even folders through drag&drop
-- [ ] Idea: Op templates?
+- [x] AssetHandling: Import multiple assets or even folders through drag&drop
+- [ ] Idea: Reactivate Op templates?
 - [ ] Idea: Cursor Up/Down in parameter input widget to modify numerical values
 
 ## Project handling / Project HUB
 
-- [ ] Project settings should save output resolution
-- [ ] Project hub context menu Open in Explore is not working #719
-- [ ] Load last project from user settings
-- [ ] unload projects from project list
-- [ ] Project backups should be project specific
+- [!] Project settings should save output resolution
+- [x] Project hub context menu Open in Explore is not working #719
+- [>] Automatically load last project from user settings
+- [x] unload projects from project list
+- [>] Project backups should be project specific
 
 ## Graph
 

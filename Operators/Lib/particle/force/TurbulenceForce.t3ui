@@ -23,13 +23,11 @@
       "Format": "{0:0.000} ±"
     },
     {
-      "InputId": "671a04f9-0f40-45ea-a2df-4f06c08d9647"/*AmountFromVelocity*/,
+      "InputId": "5acc0f9f-667a-4e78-85d0-46f3f94e72f2"/*VariationGroupCount*/,
       "Position": {
-        "X": 159.11227,
-        "Y": 217.83896
-      },
-      "Description": "Defines whether the particles with more momentum should be more affected by the noise.",
-      "AddPadding": "True"
+        "X": 209.71893,
+        "Y": 245.57773
+      }
     },
     {
       "InputId": "e27a97ce-3d0f-41a9-93c3-a1691f4029aa"/*Amount*/,
@@ -105,6 +103,13 @@
       "Position": {
         "X": 77.238434,
         "Y": -425.20306
+      }
+    },
+    {
+      "ChildId": "b62e9b95-5f58-4956-8903-2ed988b6d873"/*IntToFloat*/,
+      "Position": {
+        "X": 349.71893,
+        "Y": 245.57773
       }
     },
     {
