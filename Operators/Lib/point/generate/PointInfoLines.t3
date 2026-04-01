@@ -58,7 +58,7 @@
         {
           "Id": "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "p=SourcePoints[idx/3];\np.Rotation=float4(0,0,0,1);\nuint ii=idx%3;\n// Position\nif(A<0.5) { \n  p.FX2=p.Position[ii]; \n}\nelse if(A < 1.5) {  \n  p.FX2=p.Color[ii]; \n}\nelse\n{\n  if(ii==0) p.FX2=p.FX1;\n  if(ii==1) p.FX2=p.FX2;\n  if(ii==2) p.FX2= NAN;\n}\n\n\nfloat3 up=mul(float3(0,1,0),(float3x3)CameraToWorld);\nfloat3 dir=normalize(p.Position-CameraToWorld[3].xyz);\n\n//p.Rotation=qLookAt(dir,up);\n\nif(C>0.5) p.Rotation = qFromMatrix3((float3x3)WorldToCamera);\n\nfloat3 down = qRotateVec3(float3(0,1,0), p.Rotation);\n\np.Position+=-float(ii) * down * 0.08 * B * p.Scale.y;\np.Position += qRotateVec3( Offset * B, p.Rotation);\n"
+          "Value": "p=SourcePoints[idx/3];\n//p.Rotation=float4(0,0,0,1);\nuint ii=idx%3;\n\n// Position\nif(A<0.5) { \n  p.FX2=p.Position[ii]; \n}\nelse if(A < 1.5) {  \n  p.FX2=p.Color[ii]; \n}\nelse\n{\n  if(ii==0) p.FX2=p.FX1;\n  if(ii==1) p.FX2=p.FX2;\n  if(ii==2) p.FX2= NAN;\n}\n\n\nfloat3 up=mul(float3(0,1,0),(float3x3)CameraToWorld);\nfloat3 dir=normalize(p.Position-CameraToWorld[3].xyz);\n\n//p.Rotation=qLookAt(dir,up);\n\nif(C>0.5) p.Rotation = qFromMatrix3((float3x3)WorldToCamera);\n\nfloat3 down = qRotateVec3(float3(0,1,0), p.Rotation);\n\np.Position+=-float(ii) * down * 0.08 * B * p.Scale.y;\np.Position += qRotateVec3( Offset * B, p.Rotation);\n"
         }
       ],
       "Outputs": []
