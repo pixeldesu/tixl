@@ -6,7 +6,9 @@ using SharpDX.DXGI;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Logging;
+using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Player;
 
@@ -41,47 +43,67 @@ internal static partial class Program
         DirtyFlag.IncrementGlobalTicks();
         DirtyFlag.GlobalInvalidationTick++;
 
-        _deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, _resolution.Width, _resolution.Height, 0.0f, 1.0f));
-        _deviceContext.OutputMerger.SetTargets(_renderView);
-
-        _evalContext.Reset();
-        _evalContext.RequestedResolution = _resolution;
-
-        if (_textureOutput != null)
-        {
-            _textureOutput.InvalidateGraph();
-            var outputTexture = _textureOutput.GetValue(_evalContext);
-            var textureChanged = outputTexture != _outputTexture;
-
-            if (_outputTexture != null || textureChanged)
-            {
-                _outputTexture = outputTexture;
-                _deviceContext.Rasterizer.State = _rasterizerState;
-                if (_fullScreenVertexShaderResource?.Value != null)
-                    _deviceContext.VertexShader.Set(_fullScreenVertexShaderResource.Value);
-                if (_fullScreenPixelShaderResource?.Value != null)
-                    _deviceContext.PixelShader.Set(_fullScreenPixelShaderResource.Value);
-
-                if (_outputTextureSrv == null || textureChanged)
-                {
-                    Log.Debug("Creating new srv...");
-                    _outputTextureSrv = new ShaderResourceView(_device, _outputTexture);
-                }
-
-                var pixelShader = _deviceContext.PixelShader;
-                pixelShader.SetShaderResource(0, _outputTextureSrv);
-
-                _deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                _deviceContext.ClearRenderTargetView(_renderView, new Color(0.45f, 0.55f, 0.6f, 1.0f));
-                _deviceContext.Draw(3, 0);
-                pixelShader.SetShaderResource(0, null);
-            }
-        }
+        EvaluateAndDrawOutput(_evalContext, _resolution, _textureOutput, _deviceContext, _renderView);
 
         _swapChain.Present(_vsyncInterval, PresentFlags.None);
     }
     
     private class TimelineEndedException : Exception
     {
+    }
+
+    private static bool EvaluateAndDrawOutput(EvaluationContext evalContext,
+                                              T3.Core.DataTypes.Vector.Int2 resolution,
+                                              Slot<Texture2D> textureOutput,
+                                              DeviceContext deviceContext,
+                                              RenderTargetView renderView)
+    {
+        deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, resolution.Width, resolution.Height, 0.0f, 1.0f));
+        deviceContext.OutputMerger.SetTargets(renderView);
+
+        evalContext.Reset();
+        evalContext.RequestedResolution = resolution;
+
+        if (textureOutput == null)
+        {
+            return false;
+        }
+
+        textureOutput.InvalidateGraph();
+        var outputTexture = textureOutput.GetValue(evalContext);
+        if (outputTexture == null)
+        {
+            return false;
+        }
+
+        EnsureOutputTextureSrv(outputTexture);
+
+        deviceContext.Rasterizer.State = _rasterizerState;
+        if (_fullScreenVertexShaderResource?.Value != null)
+            deviceContext.VertexShader.Set(_fullScreenVertexShaderResource.Value);
+        if (_fullScreenPixelShaderResource?.Value != null)
+            deviceContext.PixelShader.Set(_fullScreenPixelShaderResource.Value);
+
+        var pixelShader = deviceContext.PixelShader;
+        pixelShader.SetShaderResource(0, _outputTextureSrv);
+
+        deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+        deviceContext.ClearRenderTargetView(renderView, new Color(0.45f, 0.55f, 0.6f, 1.0f));
+        deviceContext.Draw(3, 0);
+        pixelShader.SetShaderResource(0, null);
+        return true;
+    }
+
+    private static void EnsureOutputTextureSrv(Texture2D outputTexture)
+    {
+        if (_outputTextureSrv != null && outputTexture == _outputTexture)
+        {
+            return;
+        }
+
+        _outputTexture = outputTexture;
+        _outputTextureSrv?.Dispose();
+        Log.Debug("Creating new srv...");
+        _outputTextureSrv = new ShaderResourceView(_device, _outputTexture);
     }
 }

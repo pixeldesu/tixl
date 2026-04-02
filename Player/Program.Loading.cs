@@ -5,8 +5,10 @@ using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using T3.Core.Animation;
+using T3.Core.Audio;
 using T3.Core.Compilation;
 using T3.Core.DataTypes.Vector;
+using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
@@ -65,42 +67,94 @@ internal static partial class Program
     {
         var previousSpeed = playback.PlaybackSpeed;
         var originalTime = playback.TimeInSecs;
+        var wasWindowVisible = _renderForm?.Visible ?? true;
+        var previousSoundtrackMute = ProjectSettings.Config.SoundtrackMute;
+        var previousGlobalMute = ProjectSettings.Config.GlobalMute;
+        var hideDisplayDuringPreload = true;
+        var muteAudioDuringPreload = true;
+        const double subFrameWarmOffsetInSecs = 1.0 / 60.0;
 
-        playback.PlaybackSpeed = 0.1f;
-        var rasterizer = deviceContext.Rasterizer;
-        var merger = deviceContext.OutputMerger;
-        var hasTextureOutput = textureOutput != null;
-
-        for (double timeInSecs = 0; timeInSecs < durationSecs; timeInSecs += 2.0)
+        if (muteAudioDuringPreload)
         {
-            playback.TimeInSecs = timeInSecs;
-            Log.Info($"Pre-evaluate at: {timeInSecs:0.00}s / {playback.TimeInBars:0.00} bars");
+            ProjectSettings.Config.SoundtrackMute = true;
+            AudioEngine.SetSoundtrackMute(true);
+            AudioEngine.SetGlobalMute(true);
+        }
+
+        if (hideDisplayDuringPreload && _renderForm != null)
+        {
+            _renderForm.Visible = false;
+        }
+
+        playback.PlaybackSpeed = 0;
+        var reportedTextureInitFailure = false;
+
+        try
+        {
+            for (double timeInSecs = 0; timeInSecs < durationSecs; timeInSecs += 2.0)
+            {
+                var barsAtSample = playback.BarsFromSeconds(timeInSecs);
+                Log.Info($"Pre-evaluate at: {timeInSecs:0.00}s / {barsAtSample:0.00} bars");
+
+                var frameWasDrawn = PreloadSampleAtTime(timeInSecs);
+                if (!frameWasDrawn && !reportedTextureInitFailure)
+                {
+                    Log.Error("Failed to initialize texture during preload");
+                    reportedTextureInitFailure = true;
+                }
+
+                var warmupTimeInSecs = timeInSecs + subFrameWarmOffsetInSecs;
+                if (warmupTimeInSecs < durationSecs)
+                {
+                    PreloadSampleAtTime(warmupTimeInSecs);
+                }
+
+                Thread.Sleep(20);
+                if (hideDisplayDuringPreload)
+                {
+                    // Ensure GPU work gets submitted even when preload frames are not presented.
+                    deviceContext.Flush();
+                }
+                else
+                {
+                    swapChain.Present(1, PresentFlags.None);
+                }
+            }
+        }
+        finally
+        {
+            playback.PlaybackSpeed = previousSpeed;
+            playback.TimeInSecs = originalTime;
+
+            if (muteAudioDuringPreload)
+            {
+                AudioEngine.SetGlobalMute(previousGlobalMute);
+                ProjectSettings.Config.SoundtrackMute = previousSoundtrackMute;
+                AudioEngine.SetSoundtrackMute(previousSoundtrackMute);
+            }
+
+            if (hideDisplayDuringPreload && _renderForm != null)
+            {
+                _renderForm.Visible = wasWindowVisible;
+            }
+        }
+
+        bool PreloadSampleAtTime(double sampleTimeInSecs)
+        {
+            playback.TimeInSecs = sampleTimeInSecs;
+            playback.Update();
+
+            if (_soundtrackHandle != null)
+            {
+                AudioEngine.UseSoundtrackClip(_soundtrackHandle, playback.TimeInSecs);
+            }
+
+            AudioEngine.CompleteFrame(playback, Playback.LastFrameDuration);
 
             DirtyFlag.IncrementGlobalTicks();
             DirtyFlag.GlobalInvalidationTick++;
 
-            rasterizer.SetViewport(new Viewport(0, 0, resolution.Width, resolution.Height, 0.0f, 1.0f));
-            merger.SetTargets(renderView);
-
-            context.Reset();
-            context.RequestedResolution = resolution;
-
-            if (hasTextureOutput)
-            {
-                textureOutput.InvalidateGraph();
-                textureOutput.GetValue(context); // why is this done twice?
-
-                if (textureOutput.GetValue(context) == null)
-                {
-                    Log.Error("Failed to initialize texture");
-                }
-            }
-
-            Thread.Sleep(20);
-            swapChain.Present(1, PresentFlags.None);
+            return EvaluateAndDrawOutput(context, resolution, textureOutput, deviceContext, renderView);
         }
-
-        playback.PlaybackSpeed = previousSpeed;
-        playback.TimeInSecs = originalTime;
     }
 }
