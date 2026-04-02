@@ -651,7 +651,7 @@ public partial class Symbol
             lock (_creationLock)
             {
                 foreach (var instance in _instancesOfSelf.Values)
-                {
+                        {
                     instance.TryAddConnection(connection, multiInputIndex, allowCreate);
                 }
             }
@@ -666,6 +666,9 @@ public partial class Symbol
                     if (instance.TryGetTargetSlot(connection, out var targetSlot, false))
                     {
                         targetSlot.RemoveConnection(multiInputIndex);
+                        // Ensure reconnect/replace operations always propagate dirtiness,
+                        // even when the slot still has other connections (e.g. multi-input replace).
+                        targetSlot.InvalidateGraph();
                     }
                 }
             }
