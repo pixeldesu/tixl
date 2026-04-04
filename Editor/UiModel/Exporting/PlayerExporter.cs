@@ -93,7 +93,6 @@ internal static partial class PlayerExporter
                 Log.Warning("Can't resolved shared asset " + shared);
             }
         }
-        
 
         // Collect used assets
         RecursivelyCollectExportData(output, exportData);
@@ -114,8 +113,13 @@ internal static partial class PlayerExporter
         if (!TryCopyDirectory(SharedResources.EditorResourcesDirectory, editorResourcesTargetDir, out reason))
             return false;
 
+        // Exclude optional dependency files that are not required by any exported symbol.
+        var excludedDependencyFiles = GetUnusedMappedDependencyFiles(exportData);
         var playerDirectory = Path.Combine(FileLocations.StartFolder, "Player");
-        if (!TryCopyDirectory(playerDirectory, exportDir, out reason))
+        if (!TryCopyDirectory(playerDirectory,
+                              exportDir,
+                              out reason,
+                              excludeFiles: excludedDependencyFiles))
             return false;
 
         if (!TryExportSettings(exportDir, symbol, out reason))
@@ -482,4 +486,99 @@ internal static partial class PlayerExporter
         reason = string.Empty;
         return true;
     }
+
+    private static string[] GetUnusedMappedDependencyFiles(ExportData exportData)
+    {
+        var requiredFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var allMappedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var definition in _dependencyDefinitions)
+        {
+            foreach (var filename in definition.Filenames)
+            {
+                allMappedFiles.Add(filename);
+            }
+
+            var isRequired = false;
+            foreach (var symbolId in definition.SymbolIds)
+            {
+                if (!exportData.ContainsSymbolId(symbolId))
+                    continue;
+
+                isRequired = true;
+                break;
+            }
+
+            if (!isRequired)
+                continue;
+
+            foreach (var filename in definition.Filenames)
+            {
+                requiredFiles.Add(filename);
+            }
+        }
+
+        allMappedFiles.ExceptWith(requiredFiles);
+        return allMappedFiles.ToArray();
+    }
+
+    private sealed record OpDependencyDefinition(List<Guid> SymbolIds, List<string> Filenames);
+
+    private static readonly List<OpDependencyDefinition> _dependencyDefinitions =
+    [
+        new([new Guid("31ab98ec-5e79-4667-9a85-2fb168f41fa1")], [
+            "AbletonLink.deps.json",
+            "AbletonLinkDLL.dll",
+            "AbletonLink.dll",
+        ]),
+        // Things related to webcams and MediaPipe
+        new([
+            new Guid("cd5a182e-254b-4e65-820b-ff754122614c"), // VideoDeviceInput
+            new Guid("A1B2C3D4-E5F6-4798-89AB-CDEF12345679"), // MediaPipeFaceDetection
+            new Guid("9b2c3d4e-5f6a-4798-89ab-cdef12345678"), // FaceLandmark
+            new Guid("4567890a-bcde-f123-4567-890abcdef123"), // HandLandmark
+            new Guid("23456789-0abc-def1-2345-67890abcdef1"), // Image Segmentation
+            new Guid("12345678-90ab-cdef-1234-567890abcdef"), // Object Detection 
+            new Guid("34567890-abcd-ef12-3456-7890abcdef12"), // PoseLandmarkDetection  
+            new Guid("8b23c93b-3b45-4c9b-9c23-4d5e6f7a8b9c"), // OnvifCamera
+            new Guid("7b4d3c2a-5b16-4b2a-8f3a-7e8c9d0b1a2b"), // CameraCalibrartor  
+            new Guid("D9A7233D-5D03-4268-A58B-465972852A5B"), // VideoStreamInput
+        ], [
+            "mediapipe_c.dll",
+            "Emgu.CV.dll",
+            "Processing.NDI.Lib.x64.dll",
+            "OpenGL.Net.dll",
+            "OpenCvSharp.Extensions.dll",
+            "OpenCvSharp.dll",
+            "OpenCvSharpExtern.dll",
+            "opencv_videoio_ffmpeg4110_64.dll",
+            "DirectShowLib.dll",
+            "cvextern.dll",
+        ]),
+
+        // NDI
+        new([
+            new Guid("7567c3b0-9d91-40d2-899d-3a95b481d023"), // NdiInput
+            new Guid("9412d0f4-dab8-4145-9719-10395e154fa7"), // NdiOutput
+        ], [
+            "NDILibDotNet6.dll",
+        ]),
+        
+        // Unsplash
+        new([
+            new Guid("89162b9f-75f5-4d32-9d28-8259cf47cf58"), 
+        ], [
+            "Unsplasharp.dll",
+        ]),
+
+        
+        new([
+            new Guid("fc03dcd0-6f2f-4507-be06-1ed105607489"), //ArtnetInput
+            new Guid("98efc7c8-cafd-45ee-8746-14f37e9f59f8"), //ArtnetOutput
+            new Guid("faa3e182-96e6-45e7-b037-fb2acd88825b"), //ArtnetPixelOutput
+        ], [
+            "ArtNet.dll",
+        ]),
+    ];
 }
+

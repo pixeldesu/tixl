@@ -109,6 +109,17 @@ internal static partial class PlayerExporter
 
             return true;
         }
+
+        public bool ContainsSymbolId(Guid symbolId)
+        {
+            foreach (var symbol in _symbols)
+            {
+                if (symbol.Id == symbolId)
+                    return true;
+            }
+
+            return false;
+        }
     }
     
     
