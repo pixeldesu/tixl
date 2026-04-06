@@ -8,7 +8,7 @@
       "Title": "Dots",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 0.0
+        "Y": -59.10112
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -23,7 +23,7 @@
       "Title": "Tiles",
       "PosOnCanvas": {
         "X": 735.0096,
-        "Y": -20.667908
+        "Y": -50.218468
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -56,7 +56,7 @@
       "Title": "I love maths",
       "PosOnCanvas": {
         "X": 735.0096,
-        "Y": -113.66791
+        "Y": -172.76903
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -79,7 +79,7 @@
       "Title": "Put you X here",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 93.0
+        "Y": 63.44944
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -103,7 +103,7 @@
       "Title": "Can't see you",
       "PosOnCanvas": {
         "X": 326.0,
-        "Y": 93.0
+        "Y": 63.44944
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -128,7 +128,7 @@
       "Title": "Offset",
       "PosOnCanvas": {
         "X": 489.0,
-        "Y": 93.0
+        "Y": 63.44944
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -210,7 +210,7 @@
       "Title": "2 by 4",
       "PosOnCanvas": {
         "X": 735.0096,
-        "Y": 165.33209
+        "Y": 194.88266
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -238,7 +238,7 @@
       "Title": "untitled",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 279.0
+        "Y": 308.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -263,7 +263,7 @@
       "Title": "untitled",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 279.0
+        "Y": 308.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
