@@ -72,7 +72,7 @@ internal static partial class CustomComponents
         ImGui.TextWrapped(text);
         ImGui.PopStyleColor();
         ImGui.PopFont();
-        ImGui.Dummy(new Vector2(0, 4 * T3Ui.DisplayScaleFactor));
+        ImGui.Dummy(new Vector2(0, 4 * T3Ui.UiScaleFactor));
     }
 
     public static void SmallGroupHeader(string text)

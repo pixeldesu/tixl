@@ -178,7 +178,7 @@ internal sealed partial class MagGraphView
             {
                 var font = annotation.Title.StartsWith("# ") ? Fonts.FontLarge : Fonts.FontNormal;
                 drawList.PushClipRect(pMin, pMax, true);
-                var labelPos = pMin + new Vector2(8, 8 + labelHeight) * T3Ui.DisplayScaleFactor;
+                var labelPos = pMin + new Vector2(8, 8 + labelHeight) * T3Ui.UiScaleFactor;
 
                 var fade = MathUtils.SmootherStep(0.25f, 0.6f, canvasScale) * 0.8f;
                 var fontSize = canvasScale > 1

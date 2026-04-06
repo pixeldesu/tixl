@@ -107,7 +107,6 @@ public static partial class T3Ui
     // ReSharper disable once InconsistentlySynchronizedField
 
     internal static float UiScaleFactor { get; set; } = 1;
-    internal static float DisplayScaleFactor { get; set; } = 1;
     internal static bool IsAnyPopupOpen => !string.IsNullOrEmpty(FrameStats.Last.OpenedPopUpName);
 
     internal static readonly MidiDataRecording MidiDataRecording = new(DataRecording.ActiveRecordingSet);

@@ -254,13 +254,14 @@ internal sealed partial class MagGraphView
                 }
 
                 ImGui.PushFont(Fonts.FontNormal);
-                var labelSize = ImGui.CalcTextSize(name.AddSpacesForImGuiOutput());
+                var requiredLabelSize = ImGui.CalcTextSize(name.AddSpacesForImGuiOutput()).X;
                 ImGui.PopFont();
 
-                var paddingForPreview = hasPreview ? MagGraphItem.LineHeight + 15 : 0;
-                var downScale =  MathF.Min(1f,  T3Ui.UiScaleFactor * (MagGraphItem.Width - paddingForPreview) * 0.9f / labelSize.X);
+                var paddingForPreview = (hasPreview ? MagGraphItem.LineHeight + 15 : 0) ;
+                var availableLabelWidth = (MagGraphItem.Width - paddingForPreview) * 0.9f;
+                var downScaleFactor =  MathF.Min(1/T3Ui.UiScaleFactor,  availableLabelWidth / requiredLabelSize );
 
-                var fontSize = Fonts.FontNormal.FontSize * (downScale / T3Ui.UiScaleFactor) * CanvasScale.Clamp(0.1f, 2f);
+                var fontSize = Fonts.FontNormal.FontSize * (downScaleFactor * CanvasScale).Clamp(0.1f , 1);
                 
                 var visibleLineHeight = Math.Min((pMaxVisible.Y - pMinVisible.Y), MagGraphItem.LineHeight * CanvasScale);
                 var yCenter = pMin.Y + visibleLineHeight / 2 - fontSize / 2;

@@ -111,7 +111,7 @@ internal sealed class AnnotationElement
             var font = annotation.Title.StartsWith("# ") ? Fonts.FontLarge: Fonts.FontNormal;
             var fade = MathUtils.SmootherStep(0.25f, 0.6f, canvasScale);
             drawList.PushClipRect(screenArea.Min, screenArea.Max, true);
-            var labelPos = screenArea.Min + new Vector2(8, 6) * T3Ui.DisplayScaleFactor;
+            var labelPos = screenArea.Min + new Vector2(8, 6) * T3Ui.UiScaleFactor;
 
             var fontSize = canvasScale > 1 
                                ? font.FontSize
