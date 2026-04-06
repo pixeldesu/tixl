@@ -36,6 +36,10 @@
         "X": 0.0,
         "Y": 0.0
       }
+    },
+    {
+      "Id": "d156bd8f-f2a7-47f2-bf14-99be4aad32d7"/*EnableKeyframeSync*/,
+      "DefaultValue": false
     }
   ],
   "Children": [],

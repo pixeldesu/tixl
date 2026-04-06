@@ -2,8 +2,10 @@
   "Id": "3dd5629e-8b23-4381-acf2-db642fc4b030"/*IntListToBuffer*/,
   "Inputs": [
     {
-      "Id": "1a2a3b9f-5269-479d-ab64-ac4ba69ed9a3"/*Params*/,
-      "DefaultValue": 0
+      "Id": "fdc560d8-0c47-4e31-ab93-a086468e8f96"/*IntList*/,
+      "DefaultValue": {
+        "Values": []
+      }
     }
   ],
   "Children": [],

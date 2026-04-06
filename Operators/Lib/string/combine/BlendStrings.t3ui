@@ -23,6 +23,14 @@
       "Usage": "Multiline"
     },
     {
+      "InputId": "48de52f6-9b8d-4c12-9336-40091824be43"/*Characters*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 345.0
+      },
+      "Usage": "Default"
+    },
+    {
       "InputId": "c3e0cde4-fecf-4802-a287-a173a6a12518"/*BlendSpread*/,
       "Position": {
         "X": 0.0,
@@ -61,6 +69,14 @@
         "Y": 180.0
       },
       "AddPadding": "True"
+    },
+    {
+      "InputId": "eb2d968d-0ce0-48f1-a014-29475a3f0b04"/*InputStrings*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Usage": "Default"
     }
   ],
   "SymbolChildUis": [],

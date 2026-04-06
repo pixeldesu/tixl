@@ -56,10 +56,6 @@
     {
       "Id": "f8a7e0c8-c6c7-4b53-9a3a-3e5f2a4f4e1c"/*LocalIpAddress*/,
       "DefaultValue": ""
-    },
-    {
-      "Id": "D0E1F2A3-B4C5-4678-9012-3456789ABCDE"/*PrintToLog*/,
-      "DefaultValue": false
     }
   ],
   "Children": [],

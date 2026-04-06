@@ -10,6 +10,10 @@
       "DefaultValue": ""
     },
     {
+      "Id": "48de52f6-9b8d-4c12-9336-40091824be43"/*Characters*/,
+      "DefaultValue": ""
+    },
+    {
       "Id": "c3e0cde4-fecf-4802-a287-a173a6a12518"/*BlendSpread*/,
       "DefaultValue": 0.5
     },
@@ -28,6 +32,10 @@
     {
       "Id": "dc4e5b79-53e5-463a-92ad-d9bb1f2b0495"/*Scramble*/,
       "DefaultValue": 0.0
+    },
+    {
+      "Id": "eb2d968d-0ce0-48f1-a014-29475a3f0b04"/*InputStrings*/,
+      "DefaultValue": ""
     }
   ],
   "Children": [],

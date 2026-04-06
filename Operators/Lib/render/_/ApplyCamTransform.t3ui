@@ -11,19 +11,10 @@
       }
     },
     {
-      "InputId": "877c2285-f326-4b5b-a9fd-4a526daa41a4"/*CamToClipSpaceRows*/,
-      "Relevancy": "Required",
+      "InputId": "46c15ed4-d05a-4caf-aef7-80667d98fc3d"/*CamReference*/,
       "Position": {
         "X": 15.714638,
-        "Y": 102.57604
-      }
-    },
-    {
-      "InputId": "e1ec7b13-a200-4733-bb18-b6b3befd7e6c"/*WorldToCamRows*/,
-      "Relevancy": "Required",
-      "Position": {
-        "X": 15.714638,
-        "Y": 57.576042
+        "Y": 87.57604
       }
     }
   ],

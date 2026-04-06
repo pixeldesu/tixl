@@ -55,6 +55,13 @@
         "X": -200.0,
         "Y": 0.0
       }
+    },
+    {
+      "InputId": "d156bd8f-f2a7-47f2-bf14-99be4aad32d7"/*EnableKeyframeSync*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 345.0
+      }
     }
   ],
   "SymbolChildUis": [],

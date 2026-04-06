@@ -6,6 +6,10 @@
       "DefaultValue": 100
     },
     {
+      "Id": "639dc9c2-e3b9-4e17-959e-cb181166b0a2"/*DefaultValue*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "a5ed1db1-2dc9-43b2-97c3-cd416d07089b"/*Value*/,
       "DefaultValue": 0.0
     },

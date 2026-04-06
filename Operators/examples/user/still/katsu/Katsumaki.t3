@@ -4099,11 +4099,6 @@
       "SymbolId": "3f8376f2-b89a-4ab4-b6dc-a3e8bf88c0a5",
       "InputValues": [
         {
-          "Id": "671a04f9-0f40-45ea-a2df-4f06c08d9647"/*AmountFromVelocity*/,
-          "Type": "System.Single",
-          "Value": 4.0
-        },
-        {
           "Id": "e27a97ce-3d0f-41a9-93c3-a1691f4029aa"/*Amount*/,
           "Type": "System.Single",
           "Value": 0.0

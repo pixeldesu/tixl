@@ -3,8 +3,7 @@
   "Description": "Converts a list of integer values to a structured GPU buffer.",
   "InputUis": [
     {
-      "InputId": "1a2a3b9f-5269-479d-ab64-ac4ba69ed9a3"/*Params*/,
-      "Relevancy": "Required",
+      "InputId": "fdc560d8-0c47-4e31-ab93-a086468e8f96"/*IntList*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
@@ -14,10 +13,10 @@
   "SymbolChildUis": [],
   "OutputUis": [
     {
-      "OutputId": "71533459-0423-4f92-a2b2-d73aa79e90eb"/*Result*/,
+      "OutputId": "47ee96fe-baec-4f2d-bedc-0ac04f7720d9"/*Result*/,
       "Position": {
-        "X": 133.0,
-        "Y": 138.0
+        "X": 300.0,
+        "Y": 200.0
       }
     }
   ]

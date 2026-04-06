@@ -338,7 +338,7 @@
           }
         },
         {
-          "Id": "607fd90d-57f3-4a6a-b843-86c7170c854c"/*Center*/,
+          "Id": "607fd90d-57f3-4a6a-b843-86c7170c854c"/*Target*/,
           "Type": "System.Numerics.Vector3",
           "Value": {
             "X": 0.0,

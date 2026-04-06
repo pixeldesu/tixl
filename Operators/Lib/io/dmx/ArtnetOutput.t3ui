@@ -20,21 +20,11 @@
       "Description": "A trigger to manually send the Art-Net data. The data is sent when this value changes from 0 to 1."
     },
     {
-      "InputId": "4a9e2d3b-8c6f-4b1d-8d7e-9f3a5b2c1d0e"/*Priority*/,
+      "InputId": "32db51fa-ef32-478a-a8c4-c1f93f5451e9"/*EnableArtNet4*/,
       "Position": {
         "X": -200.0,
-        "Y": 750.0
-      },
-      "Description": "The priority of the sent DMX data (0-200). Higher priority data will override lower priority data on the receiving node."
-    },
-    {
-      "InputId": "5b1d9c8a-7e3f-4a2b-9c8d-1e0f3a5b2c1d"/*SourceName*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 825.0
-      },
-      "Description": "A user-defined name for this Art-Net source, which can help identify it on the network.",
-      "Usage": "Default"
+        "Y": 600.0
+      }
     },
     {
       "InputId": "65fb88ec-5772-4973-bd8b-bb2cb9f557e7"/*PrintArtnetPoll*/,
@@ -69,6 +59,14 @@
       "Description": "If enabled, sends Art-Net packets as unicast to the `TargetIpAddress`. Otherwise, packets are broadcast."
     },
     {
+      "InputId": "b2c3d4e5-f6a7-8901-bcde-f234567890ab"/*UniverseChannels*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Defines the starting universe number for each input. If an input has more than 512 channels, it automatically spans to the next universe. Auto-expands when you add more inputs."
+    },
+    {
       "InputId": "d0e1f2a3-b4c5-4678-9012-3456789abcde"/*PrintToLog*/,
       "Position": {
         "X": -200.0,
@@ -91,14 +89,6 @@
         "Y": 0.0
       },
       "Description": "A multi-input where each connected input provides DMX channel data for a separate universe. Each input should contain a list of float values (0-255) that are clamped to 0-255."
-    },
-    {
-      "InputId": "B2C3D4E5-F6A7-8901-BCDE-F234567890AB"/*UniverseChannels*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 75.0
-      },
-      "Description": "Defines the starting universe number for each input. If an input has more than 512 channels, it automatically spans to the next universe. Auto-expands when you add more inputs."
     },
     {
       "InputId": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,
