@@ -3,7 +3,6 @@
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.DataTypes;
-using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
@@ -12,7 +11,6 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.RenderExport;
-using T3.Editor.Skills;
 using T3.Editor.UiModel;
 using SkillTraining = T3.Editor.Skills.Training.SkillTraining;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -36,29 +34,7 @@ internal sealed class OutputWindow : Window
         _camSelectionHandling = new CameraSelectionHandling();
         OutputWindowInstances.Add(this);
     }
-
-    private static IEnumerable<OutputWindow> GetVisibleInstances()
-    {
-        foreach (var i in OutputWindowInstances)
-        {
-            if (i is not OutputWindow outputWindow)
-                continue;
-
-            if (!i.Config.Visible)
-                continue;
-
-            yield return outputWindow;
-        }
-    }
-
-    // protected override void DrawAllInstances()
-    // {
-    //     // Convert to array to enable removing of members during iteration
-    //     foreach (var w in OutputWindowInstances.ToArray())
-    //     {
-    //         w.DrawOneInstance();
-    //     }
-    // }
+    
 
     public static bool TryGetPrimaryOutputWindow([NotNullWhen(true)] out OutputWindow? outputWindow)
     {
