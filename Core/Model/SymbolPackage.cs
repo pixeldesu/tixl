@@ -112,7 +112,8 @@ public abstract partial class SymbolPackage : IResourcePackage
     
     static SymbolPackage()
     {
-        RenderStatsCollector.RegisterProvider(new OpUpdateCounter());
+        // OpUpdateCounter registers itself in its constructor.
+        _ = new OpUpdateCounter();
         RegisterTypes();
     }
 
