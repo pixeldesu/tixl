@@ -17,6 +17,7 @@ using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.SystemUi;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
@@ -210,7 +211,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
 
             if (UserActions.PinToOutputWindow.Triggered())
             {
-                if (UserSettings.Config.FocusMode)
+                if (LayoutHandling.FocusMode)
                 {
                     var selectedImage = _nodeSelection.GetFirstSelectedInstance();
                     if (selectedImage != null && ProjectView.Focused != null)

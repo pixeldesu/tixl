@@ -7,6 +7,7 @@ using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.Selection;
@@ -104,7 +105,7 @@ internal sealed partial class MagGraphView
                 _context.ActiveTargetInputId = Guid.Empty;
             }
 
-            if (!UserSettings.Config.FocusMode)
+            if (!LayoutHandling.FocusMode)
             {
                 DrawBackgroundGrids(drawList);
             }

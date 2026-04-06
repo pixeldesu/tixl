@@ -4,6 +4,7 @@ using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
@@ -74,7 +75,7 @@ internal static class KeyboardActions
 
         if (UserActions.PinToOutputWindow.Triggered())
         {
-            if (UserSettings.Config.FocusMode)
+            if (LayoutHandling.FocusMode)
             {
                 var selectedImage = context.Selector.GetFirstSelectedInstance();
                 if (selectedImage != null && ProjectView.Focused != null)

@@ -424,7 +424,7 @@ internal static class AppMenuBar
             ImGui.MenuItem("Fullscreen UI", UserActions.ToggleFullscreen.ListShortcuts(), ref UserSettings.Config.FullScreen);
             ImGui.Separator();
 
-            if (ImGui.MenuItem("Focus Mode", UserActions.ToggleFocusMode.ListShortcuts(), UserSettings.Config.FocusMode))
+            if (ImGui.MenuItem("Focus Mode", UserActions.ToggleFocusMode.ListShortcuts(), LayoutHandling.FocusMode))
             {
                 UiConfig.ToggleFocusMode();
             }

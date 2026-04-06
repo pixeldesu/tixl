@@ -279,7 +279,7 @@ internal sealed class GraphWindow : Windows.Window
                 ImGui.BeginGroup();
                 ImGui.SetScrollY(0);
 
-                if (!UserSettings.Config.FocusMode)
+                if (!LayoutHandling.FocusMode)
                     CustomComponents.DrawWindowFocusFrame();
 
                 if (ImGui.IsWindowFocused())

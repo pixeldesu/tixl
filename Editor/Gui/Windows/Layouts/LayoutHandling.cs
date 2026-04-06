@@ -102,7 +102,7 @@ internal static class LayoutHandling
             return;
         }
 
-        var switchingBackFromFocusMode = layoutId != Layouts.FocusMode && UserSettings.Config.FocusMode;
+        var switchingBackFromFocusMode = layoutId != Layouts.FocusMode && FocusMode;
         if (switchingBackFromFocusMode)
         {
             UiConfig.RestoreUiVisibilityAfterFocusMode();
@@ -272,4 +272,5 @@ internal static class LayoutHandling
     private static string LayoutSubfolder => "Layouts";
     public static string LayoutFolder => Path.Combine(FileLocations.SettingsDirectory, LayoutSubfolder);
     public static int ChangeCounter { get; private set; }
+    public static bool FocusMode = false;
 }

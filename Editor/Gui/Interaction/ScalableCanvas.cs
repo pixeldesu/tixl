@@ -6,6 +6,7 @@ using T3.Core.Utils;
 using T3.Editor.App;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.TimeLine;
 
 namespace T3.Editor.Gui.Interaction;
@@ -51,7 +52,7 @@ public partial class ScalableCanvas
     {
         if (FillMode == FillModes.FillWindow)
         {
-            var paddingForFocusBorder = UserSettings.Config.FocusMode ? 0 : 1;
+            var paddingForFocusBorder = LayoutHandling.FocusMode ? 0 : 1;
 
             WindowPos = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos() + paddingForFocusBorder * Vector2.One;
             WindowSize = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin() - paddingForFocusBorder * 2 * Vector2.One;

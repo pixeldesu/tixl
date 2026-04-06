@@ -67,7 +67,6 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         // UI-State
         public float UiScaleFactor = 1;
         public bool FullScreen = false;
-        public bool FocusMode = false;
         public int WindowLayoutIndex = 0;
         public bool EnableIdleMotion = true;
         public bool SuspendRenderingWhenHidden = true;

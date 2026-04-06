@@ -18,7 +18,7 @@ internal static class UiConfig
         if (projectView == null)
             return;
 
-        if (!UserSettings.Config.FocusMode)
+        if (!LayoutHandling.FocusMode)
         {
             TrySwitchToFocusMode(projectView);
         }
@@ -43,7 +43,7 @@ internal static class UiConfig
 
         LayoutHandling.LoadAndApplyLayoutOrFocusMode(LayoutHandling.Layouts.FocusMode);
         
-        UserSettings.Config.FocusMode = true;
+        LayoutHandling.FocusMode = true;
         return true;
     }
 
@@ -61,7 +61,7 @@ internal static class UiConfig
         newOutputWindow.Pinning.PinInstance(projectView.GraphImageBackground.OutputInstance, projectView);
         projectView.GraphImageBackground.ClearBackground();
         
-        UserSettings.Config.FocusMode = false;
+        LayoutHandling.FocusMode = false;
     }
     
 
@@ -114,7 +114,7 @@ internal static class UiConfig
                                                     TitleAndDescription: UserSettings.Config.ShowTitleAndDescription,
                                                     GraphToolbar: UserSettings.Config.ShowToolbar,
                                                     Timeline: UserSettings.Config.ShowTimeline,
-                                                    IsFocusMode: UserSettings.Config.FocusMode,
+                                                    IsFocusMode: LayoutHandling.FocusMode,
                                                     InteractionOverlay: UserSettings.Config.ShowInteractionOverlay,
                                                     ShowMiniMap: UserSettings.Config.ShowMiniMap
                                                    ),
@@ -141,7 +141,7 @@ internal static class UiConfig
         UserSettings.Config.ShowTitleAndDescription = visibility.TitleAndDescription;
         UserSettings.Config.ShowToolbar = visibility.GraphToolbar;
         UserSettings.Config.ShowTimeline = visibility.Timeline;
-        UserSettings.Config.FocusMode = visibility.IsFocusMode;
+        LayoutHandling.FocusMode = visibility.IsFocusMode;
         UserSettings.Config.ShowInteractionOverlay = visibility.InteractionOverlay;
         UserSettings.Config.ShowMiniMap = visibility.ShowMiniMap;
     }

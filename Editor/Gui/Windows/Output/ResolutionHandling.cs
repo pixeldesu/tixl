@@ -3,6 +3,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.UserData;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Serialization;
 
 namespace T3.Editor.Gui.Windows.Output;
@@ -104,7 +105,7 @@ internal static class ResolutionHandling
 
             var windowSize = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
 
-            var paddingForFocusBorder = UserSettings.Config.FocusMode ? 0 : 1;
+            var paddingForFocusBorder = LayoutHandling.FocusMode ? 0 : 1;
             
             if (Size.Width <= 0 || Size.Height <= 0)
             {
