@@ -1,5 +1,7 @@
 ﻿using System.Windows.Forms;
 using ImGuiNET;
+using T3.Editor.Gui.UiHelpers;
+
 // ReSharper disable InconsistentNaming
 
 namespace T3.Editor.App;
@@ -25,29 +27,27 @@ internal static class MouseWheelPanning
     /// <summary>
     /// Needs to be called from WndProc for WM_MOUSEHWHEEL and WM_MOUSEWHEEL
     /// </summary>
-    public static bool ProcessMouseWheelInput(Message m, ImGuiIOPtr imgGuiIo)
+    public static void ProcessMouseWheelInput(Message m, ImGuiIOPtr imgGuiIo)
     {
         var wparam = (long)m.WParam;
         var keyFlags = (int)(wparam & 0xffff);
         var delta = (short)((wparam >> 16) & 0xffff); // can be != 120 on precision devices :contentReference[oaicite:1]{index=1}
         var notches = delta / (float)WHEEL_DELTA;
 
-        
-        var isMouseCtrl = (keyFlags & MK_CONTROL) != 0;
-        var isKeyBoardCtrl = imgGuiIo.KeyCtrl;
-        var isImplicitZoomIndicator = isMouseCtrl && !isKeyBoardCtrl;  
+        // This is very sad: Most windows trackpad drivers "simulate" zooming
+        // with pinch gestures by sending "MouseWheel" AND pressing the ctrl-key?! WTF?
+        var isMouseCtrlTrackPadPinch = (keyFlags & MK_CONTROL) != 0;
 
         // Optional: sticky "zoom mode" for a short time to suppress stray pan events
         var now = Environment.TickCount64;
-        var inZoomGesture = (now - _lastZoomTick) < 80;
 
-        if (isImplicitZoomIndicator || inZoomGesture)
+        if (isMouseCtrlTrackPadPinch && UserSettings.Config.UseTouchPadPanning || (now - _lastZoomTick) < 80)
         {
             _zoomNotches += notches;
             _zoomNotches += notches; // use vertical delta as zoom input
             _lastZoomTick = now;
             m.Result = IntPtr.Zero;
-            return true;
+            return;
         }
 
         if (m.Msg == WM_MOUSEWHEEL)
@@ -62,11 +62,10 @@ internal static class MouseWheelPanning
         }
 
         m.Result = IntPtr.Zero;
-        return false;
     }
 
     private const int WM_MOUSEWHEEL = 0x020A;
-    private const int WM_MOUSEHWHEEL = 0x020E;
+    //private const int WM_MOUSEHWHEEL = 0x020E;
     private const int MK_CONTROL = 0x0008;
     private const int WHEEL_DELTA = 120;
 

@@ -11,12 +11,11 @@ namespace T3.Editor.App;
 /// <summary>
 /// A RenderForm class that maps windows RenderForm events and to ImGui 
 /// </summary>
-public class ImGuiDx11RenderForm : RenderForm
+internal class ImGuiDx11RenderForm : RenderForm
 {
-    internal static IWindowsFormsMessageHandler[] InputMethods = Array.Empty<IWindowsFormsMessageHandler>();
+    internal static IWindowsFormsMessageHandler[] InputMethods = [];
 
-    public ImGuiDx11RenderForm(string title)
-        : base(title)
+    internal ImGuiDx11RenderForm(string title): base(title)
     {
         AllowDrop = true;
 
@@ -25,16 +24,17 @@ public class ImGuiDx11RenderForm : RenderForm
         DragOver += OnDragOver;
         DragLeave += OnDragLeave;
 
-        MouseMove += (o, e) =>
-                     {
-                         if (this != ProgramWindows.Viewer?.Form) // Ignore mouse updates from Viewer
-                         {
-                             ImGui.GetIO().MousePos = new System.Numerics.Vector2(e.X, e.Y);
-                         }
-                     };
+        MouseMove += (_, e) =>
+        {
+            if (this != ProgramWindows.Viewer?.Form) // Ignore mouse updates from Viewer
+            {
+                ImGui.GetIO().MousePos = new System.Numerics.Vector2(e.X, e.Y);
+            }
+        };
     }
 
     #region WM Message Ids
+
     private const int WM_LBUTTONDOWN = 0x0201;
     private const int WM_LBUTTONUP = 0x0202;
     private const int WM_LBUTTONDBLCLK = 0x0203;
@@ -56,16 +56,19 @@ public class ImGuiDx11RenderForm : RenderForm
 
     private const int WM_SETFOCUS = 0x0007;
     private const int WM_ACTIVATEAPP = 0x001C;
+
     #endregion
 
     #region VK constants
+
     private const int VK_SHIFT = 0x10;
     private const int VK_CONTROL = 0x11;
     private const int VK_ALT = 0x12;
+
     #endregion
 
     public static event Action<string[], Vector2> FilesDropped;
-    
+
     private void OnDragEnter(object s, DragEventArgs e)
     {
         if (this == ProgramWindows.Viewer?.Form)
@@ -81,13 +84,13 @@ public class ImGuiDx11RenderForm : RenderForm
 
         e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ||
                    e.Data.GetDataPresent(DataFormats.UnicodeText)
-                       ? DragDropEffects.Copy
-                       : DragDropEffects.None;
-        
-        DragAndDropHandling.StartExternalDrag(DragAndDropHandling.DragTypes.ExternalFile, 
-                                              "External Files");        
+            ? DragDropEffects.Copy
+            : DragDropEffects.None;
+
+        DragAndDropHandling.StartExternalDrag(DragAndDropHandling.DragTypes.ExternalFile,
+            "External Files");
     }
-    
+
     private static void OnDragLeave(object s, EventArgs eventArgs)
     {
         DragAndDropHandling.CancelExternalDrag();
@@ -95,7 +98,7 @@ public class ImGuiDx11RenderForm : RenderForm
 
     private void OnDragDrop(object s, DragEventArgs e)
     {
-        if (this == ProgramWindows.Viewer?.Form || e.Data == null) 
+        if (this == ProgramWindows.Viewer?.Form || e.Data == null)
             return; // optional
 
         var p = PointToClient(new System.Drawing.Point(e.X, e.Y));
@@ -103,18 +106,18 @@ public class ImGuiDx11RenderForm : RenderForm
 
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
-            var files = (string[])e.Data.GetData(DataFormats.FileDrop)!;
+            var files = (string[]) e.Data.GetData(DataFormats.FileDrop)!;
             FilesDropped?.Invoke(files, pos);
-            DragAndDropHandling.CompleteExternalDrop(DragAndDropHandling.DragTypes.ExternalFile, 
-                                                  string.Join("|", files));
+            DragAndDropHandling.CompleteExternalDrop(DragAndDropHandling.DragTypes.ExternalFile,
+                string.Join("|", files));
         }
         else if (e.Data.GetDataPresent(DataFormats.UnicodeText))
         {
-            var t = ((string)e.Data.GetData(DataFormats.UnicodeText)!).Trim('"');
+            var t = ((string) e.Data.GetData(DataFormats.UnicodeText)!).Trim('"');
             if (System.IO.Path.IsPathRooted(t))
             {
-                DragAndDropHandling.CompleteExternalDrop(DragAndDropHandling.DragTypes.ExternalFile, t);                
-                FilesDropped?.Invoke(new[] { t }, pos);
+                DragAndDropHandling.CompleteExternalDrop(DragAndDropHandling.DragTypes.ExternalFile, t);
+                FilesDropped?.Invoke(new[] {t}, pos);
             }
         }
     }
@@ -123,15 +126,16 @@ public class ImGuiDx11RenderForm : RenderForm
     {
         var p = PointToClient(new System.Drawing.Point(e.X, e.Y));
         ImGui.GetIO().MousePos = new System.Numerics.Vector2(p.X, p.Y);
-    
+
         e.Effect = DragDropEffects.Copy;
     }
-    
+
     protected override void WndProc(ref System.Windows.Forms.Message m)
     {
         try
         {
-            var filterAltKeyToPreventFocusLoss = (m.Msg == WM_SYSKEYDOWN || m.Msg == WM_SYSKEYUP) && (int)m.WParam == VK_ALT;
+            var filterAltKeyToPreventFocusLoss =
+                (m.Msg == WM_SYSKEYDOWN || m.Msg == WM_SYSKEYUP) && (int) m.WParam == VK_ALT;
             if (!filterAltKeyToPreventFocusLoss)
                 base.WndProc(ref m);
 
@@ -181,32 +185,34 @@ public class ImGuiDx11RenderForm : RenderForm
                 case WM_MOUSEWHEEL:
                 case WM_MOUSEHWHEEL:
                 {
-                    if (MouseWheelPanning.ProcessMouseWheelInput(m, io)) return;
-                    break;
+                    MouseWheelPanning.ProcessMouseWheelInput(m, io);
+                    return;
                 }
 
                 case WM_KEYDOWN:
                 case WM_SYSKEYDOWN:
-                    switch ((int)m.WParam)
+                    switch ((int) m.WParam)
                     {
                         case VK_SHIFT:
                             io.KeyShift = true;
-                            io.KeysDown[(int)m.WParam] = true;
-                            io.KeysDown[(int)Key.ShiftKey] = true;
+                            io.KeysDown[(int) m.WParam] = true;
+                            io.KeysDown[(int) Key.ShiftKey] = true;
                             break;
+                        // Careful: Windows Legacy Trackpad handlers will set this
+                        // on mouse wheel zoom (WTF?!)
                         case VK_CONTROL:
                             io.KeyCtrl = true;
-                            io.KeysDown[(int)Key.CtrlKey] = true;
+                            io.KeysDown[(int) Key.CtrlKey] = true;
                             break;
                         case VK_ALT:
                             io.KeyAlt = true;
-                            io.KeysDown[(int)Key.Alt] = true;
+                            io.KeysDown[(int) Key.Alt] = true;
                             KeyHandler.SetKeyDown(Key.Alt);
                             break;
                         default:
                         {
-                            if ((int)m.WParam < 256)
-                                io.KeysDown[(int)m.WParam] = true;
+                            if ((int) m.WParam < 256)
+                                io.KeysDown[(int) m.WParam] = true;
                             break;
                         }
                     }
@@ -214,25 +220,25 @@ public class ImGuiDx11RenderForm : RenderForm
                     return;
                 case WM_KEYUP:
                 case WM_SYSKEYUP:
-                    switch ((int)m.WParam)
+                    switch ((int) m.WParam)
                     {
                         case VK_SHIFT:
                             io.KeyShift = false;
-                            io.KeysDown[(int)Key.ShiftKey] = false;
+                            io.KeysDown[(int) Key.ShiftKey] = false;
                             break;
                         case VK_CONTROL:
                             io.KeyCtrl = false;
-                            io.KeysDown[(int)Key.CtrlKey] = false;
+                            io.KeysDown[(int) Key.CtrlKey] = false;
                             break;
                         case VK_ALT:
                             io.KeyAlt = false;
-                            io.KeysDown[(int)Key.Alt] = false;
+                            io.KeysDown[(int) Key.Alt] = false;
                             KeyHandler.SetKeyUp(Key.Alt);
                             break;
                         default:
                         {
-                            if ((int)m.WParam < 256)
-                                io.KeysDown[(int)m.WParam] = false;
+                            if ((int) m.WParam < 256)
+                                io.KeysDown[(int) m.WParam] = false;
                             break;
                         }
                     }
@@ -240,12 +246,12 @@ public class ImGuiDx11RenderForm : RenderForm
                     return;
                 case WM_CHAR:
                     // You can also use ToAscii()+GetKeyboardState() to retrieve characters.
-                    if ((int)m.WParam > 0 && (int)m.WParam < 0x10000)
-                        io.AddInputCharacter((ushort)m.WParam);
+                    if ((int) m.WParam > 0 && (int) m.WParam < 0x10000)
+                        io.AddInputCharacter((ushort) m.WParam);
                     return;
                 case WM_SETCURSOR:
-                    if ((((int)m.LParam & 0xFFFF) == 1) && UpdateMouseCursor())
-                        m.Result = (IntPtr)1;
+                    if ((((int) m.LParam & 0xFFFF) == 1) && UpdateMouseCursor())
+                        m.Result = 1;
                     return;
                 case WM_SETFOCUS:
                     for (int i = 0; i < io.KeysDown.Count; i++)
@@ -258,7 +264,7 @@ public class ImGuiDx11RenderForm : RenderForm
                 case WM_ACTIVATEAPP:
                     if (m.WParam.ToInt64() == 0) /* Being deactivated */
                     {
-                        io.KeysDown[(int)Key.Alt] = false;
+                        io.KeysDown[(int) Key.Alt] = false;
                         KeyHandler.SetKeyUp(Key.Alt);
                     }
 
@@ -274,7 +280,7 @@ public class ImGuiDx11RenderForm : RenderForm
     private bool UpdateMouseCursor()
     {
         ImGuiIOPtr io = ImGui.GetIO();
-        if (((uint)io.ConfigFlags & (uint)ImGuiConfigFlags.NoMouseCursorChange) > 0)
+        if (((uint) io.ConfigFlags & (uint) ImGuiConfigFlags.NoMouseCursorChange) > 0)
             return false;
 
         ImGuiMouseCursor imgui_cursor = ImGui.GetMouseCursor();
@@ -285,7 +291,7 @@ public class ImGuiDx11RenderForm : RenderForm
             return true;
         }
 
-        Cursor newCursor = null;
+        Cursor newCursor;
 
         // Show OS mouse cursor
         switch (imgui_cursor)
