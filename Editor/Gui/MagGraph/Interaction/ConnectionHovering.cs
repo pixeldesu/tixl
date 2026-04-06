@@ -14,6 +14,7 @@ using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
+using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
 using Color = T3.Core.DataTypes.Vector.Color;
 using Vector2 = System.Numerics.Vector2;
@@ -300,7 +301,11 @@ internal static class ToolTipContentDrawer
             _imageCanvasForTooltips.Update();
             _imageCanvasForTooltips.SetAsCurrent();
             _evaluationContext.Reset();
-            _evaluationContext.RequestedResolution = new Int2(1280 / 2, 720 / 2);
+
+            _evaluationContext.RequestedResolution = RenderProcess.OutputWindow != null 
+                ? RenderProcess.OutputWindow.RequestedResolution 
+                : new Int2(1280 / 2, 1720 / 2);
+            
             sourceOutputUi.DrawValue(outputSlot,
                                      _evaluationContext,
                                      "connectionLineThumbnail",

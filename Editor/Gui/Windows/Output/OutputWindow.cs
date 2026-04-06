@@ -3,6 +3,7 @@
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.DataTypes;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
@@ -385,9 +386,10 @@ internal sealed class OutputWindow : Window
         // Prepare context
         EvaluationContext.Reset();
         EvaluationContext.BypassCameras = _camSelectionHandling.BypassCamera;
-        EvaluationContext.RequestedResolution = RenderProcess.TryGetActiveExportResolution(out var overrideResolution) 
-                                                    ? overrideResolution 
-                                                    : _selectedResolution.ComputeResolution();
+        RequestedResolution = RenderProcess.TryGetActiveExportResolution(out var overrideResolution)
+            ? overrideResolution
+            : _selectedResolution.ComputeResolution();
+        EvaluationContext.RequestedResolution = RequestedResolution;
 
         // Set camera
         if (_camSelectionHandling.CameraForRendering != null)
@@ -458,5 +460,6 @@ internal sealed class OutputWindow : Window
     private readonly CameraSelectionHandling _camSelectionHandling;
     private static int _instanceCounter;
     private ResolutionHandling.Resolution _selectedResolution = ResolutionHandling.DefaultResolution;
+    internal Int2 RequestedResolution { get; private set; }
     private readonly EditResolutionDialog _resolutionDialog = new();
 }

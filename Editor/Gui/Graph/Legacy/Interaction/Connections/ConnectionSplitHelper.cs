@@ -8,6 +8,7 @@ using T3.Editor.Gui.Interaction.TransformGizmos;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
+using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 using Color = T3.Core.DataTypes.Vector.Color;
@@ -98,7 +99,11 @@ internal static class ConnectionSplitHelper
                             var sourceOpUi = sourceOpInstance.GetSymbolUi();
                             var outputUi = sourceOpUi.OutputUis[output.OutputDefinition.Id];
                             _evaluationContext.Reset();
-                            _evaluationContext.RequestedResolution = new Int2(1280 / 2, 720 / 2);
+                            
+                            _evaluationContext.RequestedResolution = RenderProcess.OutputWindow != null 
+                                ? RenderProcess.OutputWindow.RequestedResolution 
+                                : new Int2(1280 / 2, 1720 / 2);
+                            
                             outputUi.DrawValue(outputSlot, 
                                                _evaluationContext,
                                                "connectionLineThumbnail",
