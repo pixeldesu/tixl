@@ -52,6 +52,24 @@ Allocations are acceptable for explicit user-triggered actions.
 - Prefix private fields with `_`
 - Prefer clear variable names (`faceIndex` over `i` when clarity helps)
 
+## Line Endings (Important for Bulk Edits)
+
+The repo has **mixed line endings**: most `.cs` files use CRLF, some are LF.
+There is no `.gitattributes` enforcing a single convention and `core.autocrlf`
+is `false`. When writing scripts that batch-rewrite many files this is the
+single biggest source of noisy diffs.
+
+Rules for any bulk-edit script (Python, sed, etc.):
+
+1. Read files in **binary mode** (`open(path, 'rb')`). Do NOT use `read_text` or
+   text-mode reads — they silently strip `\r`.
+2. **Detect each file's existing line ending** before writing. If the file
+   contains `\r\n`, write CRLF; otherwise LF. Per-file, not per-repo.
+3. Write in **binary mode** (`open(path, 'wb')`) with the bytes you produced.
+4. Sanity-check with `git diff --shortstat` before committing. If the line
+   count is much higher than the logic change implies, line endings were
+   munged — fix the working tree and `commit --amend`.
+
 ## Review and Quality Expectations
 
 - Point out obvious bugs, misleading code, incorrect implementations, and typos
