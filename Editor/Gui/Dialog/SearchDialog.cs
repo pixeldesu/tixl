@@ -87,7 +87,7 @@ internal sealed class SearchDialog : ModalDialog
 
         var matchingItems = _matchingItems;
 
-        if (ImGui.BeginChildFrame(999, size))
+        if (ImGui.BeginChild("##results", size, ImGuiChildFlags.FrameStyle))
         {
             if (ImGui.IsKeyReleased(Key.CursorDown.ToImGuiKey()))
             {
@@ -132,7 +132,7 @@ internal sealed class SearchDialog : ModalDialog
             }
         }
 
-        ImGui.EndChildFrame();
+        ImGui.EndChild();
 
         ImGui.PopStyleVar(2);
     }

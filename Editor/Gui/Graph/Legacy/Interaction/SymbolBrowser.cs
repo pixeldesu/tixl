@@ -268,7 +268,7 @@ internal sealed class SymbolBrowser
             
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundPopup.Rgba);
 
-        if (ImGui.BeginChildFrame(999, size))
+        if (ImGui.BeginChild("##results", size, ImGuiChildFlags.FrameStyle))
         {
             // if (_filter.PresetFilterString == null)
             // {
@@ -373,7 +373,7 @@ internal sealed class SymbolBrowser
             }
         }
 
-        ImGui.EndChildFrame();
+        ImGui.EndChild();
 
         ImGui.PopStyleColor();
         ImGui.PopStyleVar(2);
@@ -428,7 +428,7 @@ internal sealed class SymbolBrowser
 
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundPopup.Rgba);
         ImGui.SetCursorPos(position);
-        if (ImGui.BeginChildFrame(998, size))
+        if (ImGui.BeginChild("##presets", size, ImGuiChildFlags.FrameStyle))
         {
             if (ImGui.IsKeyReleased(Key.CursorDown.ToImGuiKey()))
             {
@@ -464,7 +464,7 @@ internal sealed class SymbolBrowser
             }
 
             ImGui.PopStyleVar();
-            ImGui.EndChildFrame();
+            ImGui.EndChild();
         }
         ImGui.PopStyleColor();
             
@@ -490,7 +490,7 @@ internal sealed class SymbolBrowser
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.One); // Padding between panels
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundPopup.Rgba);
 
-        if (ImGui.BeginChildFrame(998, size))
+        if (ImGui.BeginChild("##description", size, ImGuiChildFlags.FrameStyle))
         {
             if (!string.IsNullOrEmpty(_selectedSymbolUi.Description))
             {
@@ -505,7 +505,7 @@ internal sealed class SymbolBrowser
                 ListExampleOperators(examplesIds);
             }
 
-            ImGui.EndChildFrame();
+            ImGui.EndChild();
         }
 
         ImGui.PopStyleColor();
