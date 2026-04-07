@@ -107,7 +107,7 @@ internal static class LayoutHandling
         if (!IsLayoutCompatibleWithCurrentImGui(layout))
         {
             var legacyTag = string.IsNullOrEmpty(layout.ImGuiVersion) ? "<missing>" : layout.ImGuiVersion;
-            Log.Warning($"Layout {index} was saved with ImGui {legacyTag}; current is {ImGui.GetVersion()}. Replacing with shipped default.");
+            Log.Warning($"Layout {index} was saved with ImGui {legacyTag}; minimum supported is {MinSupportedImGuiVersion} (running {ImGui.GetVersion()}). Replacing with shipped default.");
 
             var userFilePath = Path.Combine(LayoutFolder, GetLayoutFilename(index));
             try
@@ -304,11 +304,27 @@ internal static class LayoutHandling
         public string? ImGuiVersion;
     }
 
+    /// <summary>
+    /// Lowest ImGui version whose ini/docking serialization is still readable by the
+    /// currently bundled ImGui.NET. Bump this whenever upstream ImGui makes a breaking
+    /// change to the settings format that we cannot migrate in place.
+    /// </summary>
+    private static readonly Version MinSupportedImGuiVersion = new(1, 90, 0);
+
     private static bool IsLayoutCompatibleWithCurrentImGui(Layout layout)
     {
         if (string.IsNullOrEmpty(layout.ImGuiVersion))
             return false;
-        return layout.ImGuiVersion == ImGui.GetVersion();
+        if (!TryParseImGuiVersion(layout.ImGuiVersion, out var saved))
+            return false;
+        return saved >= MinSupportedImGuiVersion;
+    }
+
+    private static bool TryParseImGuiVersion(string raw, out Version version)
+    {
+        // ImGui.GetVersion() returns strings like "1.90.9" or "1.91.0 WIP".
+        var token = raw.Split(' ', '-')[0];
+        return Version.TryParse(token, out version!);
     }
 
     private const string LayoutFileNameFormat = "layout{0}.json";
