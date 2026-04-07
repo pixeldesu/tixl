@@ -176,10 +176,8 @@ internal sealed class UiElements
         if (!UserSettings.Config.ShowToolbar)
             return;
 
-        ImGui.SetCursorPos(
-                           new Vector2(
-                                       ImGui.GetWindowContentRegionMin().X+1,
-                                       ImGui.GetWindowContentRegionMax().Y - TimeControls.ControlSize.Y-1));
+        ImGui.SetCursorPos(new Vector2(1,
+                                       ImGui.GetWindowSize().Y - TimeControls.ControlSize.Y - 1));
         ImGui.BeginChild("TimeControls", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
         {
             var icon = components.TimeLineCanvas.FoldingHeight.UsingCustomTimelineHeight ? Icon.ChevronDown : Icon.ChevronUp;

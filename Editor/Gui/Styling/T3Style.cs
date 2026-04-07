@@ -73,6 +73,9 @@ public static class T3Style
         // others...
         style.Colors[(int)ImGuiCol.DragDropTarget] = Color.Transparent;
         
+        // Editor code relies on this being zero: it uses ImGui.GetWindowSize()/GetWindowPos()
+        // directly as the inner content rect (the original ImGui.GetWindowContentRegionMin/Max
+        // helpers were removed in 1.91). If this is ever changed, audit those call sites.
         style.WindowPadding = Vector2.Zero;
         style.FramePadding = new Vector2(7, 4);
         style.ItemSpacing = new Vector2(1, 1.49f);

@@ -372,7 +372,7 @@ internal static class PlaybackSettingsPopup
                     foreach (var d in WasapiAudioInput.InputDevices)
                     {
                         var isSelected = d.DeviceInfo.Name == settings.AudioInputDeviceName;
-                        if (ImGui.Selectable($"{d.DeviceInfo.Name}", isSelected, ImGuiSelectableFlags.DontClosePopups))
+                        if (ImGui.Selectable($"{d.DeviceInfo.Name}", isSelected, ImGuiSelectableFlags.NoAutoClosePopups))
                         {
                             Bass.Configure(Configuration.UpdateThreads, false);
                             settings.AudioInputDeviceName = d.DeviceInfo.Name;

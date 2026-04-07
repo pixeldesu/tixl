@@ -117,9 +117,8 @@ internal sealed class ClipRange : IValueSnapAttractor
 
     private static void SetCursorToBottom(float xInScreen, float paddingFromBottom)
     {
-        var max = ImGui.GetWindowContentRegionMax() + ImGui.GetWindowPos();
-        var p = new Vector2(xInScreen, max.Y - paddingFromBottom);
-        ImGui.SetCursorScreenPos(p);
+        var maxY = ImGui.GetWindowPos().Y + ImGui.GetWindowSize().Y;
+        ImGui.SetCursorScreenPos(new Vector2(xInScreen, maxY - paddingFromBottom));
     }
 
     private static readonly Vector2 _timeRangeHandleSize = new(10, 20);

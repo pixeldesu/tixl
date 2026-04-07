@@ -103,7 +103,7 @@ internal static class ResolutionHandling
             if (!UseAsAspectRatio)
                 return Size;
 
-            var windowSize = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
+            var windowSize = ImGui.GetWindowSize();
 
             var paddingForFocusBorder = LayoutHandling.FocusMode ? 0 : 1;
             

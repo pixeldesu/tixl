@@ -244,7 +244,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         if (Playback == null)
             return;
 
-        var max = ImGui.GetContentRegionMax();
+        var max = ImGui.GetWindowSize();
         var clampedSize = max;
         clampedSize.Y = Math.Min(TimeLineDragHeight, max.Y - 1);
 

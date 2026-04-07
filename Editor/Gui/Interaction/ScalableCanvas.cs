@@ -54,8 +54,8 @@ public partial class ScalableCanvas
         {
             var paddingForFocusBorder = LayoutHandling.FocusMode ? 0 : 1;
 
-            WindowPos = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos() + paddingForFocusBorder * Vector2.One;
-            WindowSize = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin() - paddingForFocusBorder * 2 * Vector2.One;
+            WindowPos = ImGui.GetWindowPos() + paddingForFocusBorder * Vector2.One;
+            WindowSize = ImGui.GetWindowSize() - paddingForFocusBorder * 2 * Vector2.One;
         }
         else
         {
@@ -386,8 +386,8 @@ public partial class ScalableCanvas
 
         // // Test window content region:
         // var paddingForFocusBorder = 1;
-        // var pos = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos() + paddingForFocusBorder * Vector2.One;
-        // var size = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin() - paddingForFocusBorder * 2  * Vector2.One;
+        // var pos = ImGui.GetCursorStartPos() + ImGui.GetWindowPos() + paddingForFocusBorder * Vector2.One;
+        // var size = (ImGui.GetWindowSize() - ImGui.GetStyle().WindowPadding) - ImGui.GetCursorStartPos() - paddingForFocusBorder * 2  * Vector2.One;
         // dl.AddRect(pos, pos + size, Color.Red);
     }
 

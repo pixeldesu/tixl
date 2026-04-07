@@ -103,7 +103,7 @@ internal sealed partial class SettingsWindow
         
         changed |= DrawResetButton(ref volume, defaultVolume, "Reset to default");
         
-        var contentMaxX = ImGui.GetContentRegionMax().X;
+        var contentMaxX = ImGui.GetWindowSize().X;
         ImGui.SameLine(contentMaxX - muteTextWidth - EdgePadding);
         if (ImGui.Checkbox("Mute", ref mute))
         {
@@ -117,8 +117,8 @@ internal sealed partial class SettingsWindow
         ImGui.PopID();
         
         var windowPos = ImGui.GetWindowPos();
-        var meterLeftEdge = windowPos.X + ImGui.GetWindowContentRegionMin().X + EdgePadding;
-        var meterRightEdge = windowPos.X + ImGui.GetWindowContentRegionMax().X - EdgePadding;
+        var meterLeftEdge = windowPos.X + EdgePadding;
+        var meterRightEdge = windowPos.X + ImGui.GetWindowSize().X - EdgePadding;
         
         AudioLevelMeter.DrawAbsoluteWithinBounds("", currentLevel, ref smoothedLevel, 2f, meterLeftEdge, meterRightEdge);
         

@@ -22,12 +22,8 @@ internal sealed class TimeLineImage
             
         var clip = soundTrackHandle.Clip;
 
-        var contentRegionMin = ImGui.GetWindowContentRegionMin();
-        var contentRegionMax = ImGui.GetWindowContentRegionMax();
-        var windowPos = ImGui.GetWindowPos();
-            
-        var size = contentRegionMax - contentRegionMin;
-        var yMin = (contentRegionMin + windowPos).Y;
+        var size = ImGui.GetWindowSize();
+        var yMin = ImGui.GetWindowPos().Y;
         
             
         var songDurationInBars = (float)(clip.LengthInSeconds * clip.Bpm / 240);

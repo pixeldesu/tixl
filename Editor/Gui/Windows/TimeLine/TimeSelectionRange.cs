@@ -28,8 +28,8 @@ internal sealed class TimeSelectionRange : IValueSnapAttractor
             return;
 
         var compositionSymbolId = composition.Symbol.Id;
-        var contentRegionMin = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos();
-        var contentRegionMax = ImGui.GetWindowContentRegionMax() + ImGui.GetWindowPos();
+        var contentRegionMin = ImGui.GetWindowPos();
+        var contentRegionMax = contentRegionMin + ImGui.GetWindowSize();
         ImGui.PushStyleColor(ImGuiCol.Button, _timeRangeMarkerColor.Rgba);
         // Range start
         {
@@ -122,9 +122,8 @@ internal sealed class TimeSelectionRange : IValueSnapAttractor
 
     private static void SetCursorToBottom(float xInScreen, float paddingFromBottom)
     {
-        var max = ImGui.GetWindowContentRegionMax() + ImGui.GetWindowPos();
-        var p = new Vector2(xInScreen, max.Y - paddingFromBottom);
-        ImGui.SetCursorScreenPos(p);
+        var maxY = ImGui.GetWindowPos().Y + ImGui.GetWindowSize().Y;
+        ImGui.SetCursorScreenPos(new Vector2(xInScreen, maxY - paddingFromBottom));
     }
 
     #region implement snapping interface -----------------------------------

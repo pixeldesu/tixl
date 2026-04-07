@@ -223,7 +223,7 @@ internal sealed partial class AssetLibrary
                 if (ContainsTargetFile(folder))
                 {
                     var h = ImGui.GetFontSize();
-                    var x = ImGui.GetContentRegionMax().X - h;
+                    var x = ImGui.GetWindowSize().X - h;
                     ImGui.SameLine(x);
 
                     var clicked = ImGui.InvisibleButton("Reveal", new Vector2(h));

@@ -46,10 +46,11 @@ public sealed class SelectionFence
         var interactionMin = Vector2.Max(_startPositionInScreen, globalMousePos);
         var interactionMax = Vector2.Min(_startPositionInScreen, globalMousePos);
             
-        var minContentRegion = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos();
-        var maxContentRegion = ImGui.GetWindowContentRegionMax() + ImGui.GetWindowPos();
-        var onScreenMin = Vector2.Max(minContentRegion, interactionMin);
-        var onScreenMax = Vector2.Min(maxContentRegion, interactionMax);
+        // TiXL runs with style.WindowPadding = 0, so the window rect equals the inner content rect.
+        var windowMin = ImGui.GetWindowPos();
+        var windowMax = windowMin + ImGui.GetWindowSize();
+        var onScreenMin = Vector2.Max(windowMin, interactionMin);
+        var onScreenMax = Vector2.Min(windowMax, interactionMax);
         
         BoundsInScreen = ImRect.RectBetweenPoints(onScreenMin, onScreenMax);
         BoundsUnclamped = ImRect.RectBetweenPoints(_startPositionInScreen, globalMousePos);

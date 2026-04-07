@@ -64,8 +64,8 @@ public static class DrawUtils
 
     public static ImRect GetContentRegionArea()
     {
-        return new ImRect(ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos(),
-                          ImGui.GetWindowContentRegionMax() + ImGui.GetWindowPos());
+        var windowPos = ImGui.GetWindowPos();
+        return new ImRect(windowPos, windowPos + ImGui.GetWindowSize());
     }
 
     // This has to be called on open

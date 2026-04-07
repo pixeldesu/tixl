@@ -72,7 +72,7 @@ internal abstract class Window
 
             // Draw child to prevent imgui window dragging
             {
-                ImGui.BeginChild("inner", ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin(),
+                ImGui.BeginChild("inner", ImGui.GetContentRegionAvail(),
                                  ImGuiChildFlags.Border,
                                  ImGuiWindowFlags.NoMove | preventMouseScrolling | WindowFlags);
 

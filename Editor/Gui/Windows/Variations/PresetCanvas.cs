@@ -55,8 +55,8 @@ internal class PresetCanvas : VariationBaseCanvas
 
         CanvasElementSelection.SetSelection(newVariation);
         
-        _keepWindowPos = ImGui.GetWindowContentRegionMin( ) + ImGui.GetWindowPos();
-        _keepWindowSize = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
+        _keepWindowPos = ImGui.GetWindowPos();
+        _keepWindowSize = ImGui.GetWindowSize();
         RequestResetView();
         TriggerThumbnailSave();
     }
