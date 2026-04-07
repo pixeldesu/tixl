@@ -82,7 +82,7 @@ internal sealed class OutputWindow : Window
     {
         ImGui.BeginChild("##content",
                          new Vector2(0, ImGui.GetWindowHeight()),
-                         false,
+                         ImGuiChildFlags.None,
                          ImGuiWindowFlags.NoScrollbar |
                          ImGuiWindowFlags.NoMove |
                          ImGuiWindowFlags.NoScrollWithMouse |
@@ -164,7 +164,7 @@ internal sealed class OutputWindow : Window
         var toolbarHeight = ImGui.GetTextLineHeight() + 22;
         
         // Begin a horizontally scrollable child region
-        ImGui.BeginChild("##toolbar_scroll", new Vector2(availableWidth, toolbarHeight), false, ImGuiWindowFlags.HorizontalScrollbar);
+        ImGui.BeginChild("##toolbar_scroll", new Vector2(availableWidth, toolbarHeight), ImGuiChildFlags.None, ImGuiWindowFlags.HorizontalScrollbar);
 
         Pinning.DrawPinning();
 

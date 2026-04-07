@@ -52,7 +52,7 @@ internal static class SkillMapPopup
                 _mapCanvas.FocusTopics(_topicSelection, 400);
             }
             
-            ImGui.BeginChild("Map", new Vector2(0, -10), false, ImGuiWindowFlags.NoBackground);
+            ImGui.BeginChild("Map", new Vector2(0, -10), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
             {
                 _topicSelection ??= [];
                 _mapCanvas.DrawContent(HandleTopicInteraction, out _, _topicSelection);

@@ -103,7 +103,7 @@ internal sealed class FloatListOutputUi : OutputUi<List<float>>
                     CustomComponents.StylizedText(text, Fonts.FontSmall, UiColors.TextMuted);
                 }
 
-                ImGui.BeginChild("ScrollableList", new Vector2(0, 0), false,
+                ImGui.BeginChild("ScrollableList", new Vector2(0, 0), ImGuiChildFlags.None,
                                  ImGuiWindowFlags.AlwaysVerticalScrollbar | ImGuiWindowFlags.AlwaysHorizontalScrollbar);
                 {
                     int columnIndex = 0;

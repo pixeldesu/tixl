@@ -139,12 +139,11 @@ internal sealed class ParameterWindow : Window
         var modified = false;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
         ImGui.BeginChild("header", new Vector2(0, ImGui.GetFrameHeight() + 5),
-                         false,
+                         ImGuiChildFlags.None | ImGuiChildFlags.AlwaysUseWindowPadding,
                          ImGuiWindowFlags.AlwaysAutoResize
                          | ImGuiWindowFlags.NoScrollbar
                          | ImGuiWindowFlags.NoScrollWithMouse
-                         | ImGuiWindowFlags.NoBackground
-                         | ImGuiWindowFlags.AlwaysUseWindowPadding);
+                         | ImGuiWindowFlags.NoBackground);
         {
             ImGui.AlignTextToFramePadding();
             // Namespace and symbol
@@ -383,7 +382,7 @@ internal sealed class ParameterWindow : Window
         }
         
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
-        ImGui.BeginChild("parameters", Vector2.Zero, false, ImGuiWindowFlags.AlwaysUseWindowPadding| ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("parameters", Vector2.Zero, ImGuiChildFlags.None | ImGuiChildFlags.AlwaysUseWindowPadding, ImGuiWindowFlags.NoBackground);
 
         // Scroll back up on operator change
         if (_selectionChanged)

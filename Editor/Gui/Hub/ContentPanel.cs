@@ -12,7 +12,7 @@ internal static class ContentPanel
 {
     internal static void Begin(string title, string? subtitle = null, Action? drawTools = null, float height = 0)
     {
-        ImGui.BeginChild(title, new Vector2(0, height), false, ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild(title, new Vector2(0, height), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         ImGui.Indent(10 * T3Ui.UiScaleFactor);
         FormInputs.AddVerticalSpace();
         FormInputs.AddSectionHeader(title);
@@ -33,7 +33,7 @@ internal static class ContentPanel
             FormInputs.AddVerticalSpace();
         }
         
-        ImGui.BeginChild(title, Vector2.Zero,false, ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild(title, Vector2.Zero,ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
     }
 
     internal static void End()

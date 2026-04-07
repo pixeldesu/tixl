@@ -73,7 +73,7 @@ internal static class SampleCurveUi
 
         ImGui.PushClipRect(innerRect.Min, innerRect.Max, true);
         ImGui.SetCursorScreenPos(innerRect.Min);
-        ImGui.BeginChild("curve" + instance.SymbolChildId.GetHashCode(), innerRect.GetSize(), false, ImGuiWindowFlags.NoScrollbar);
+        ImGui.BeginChild("curve" + instance.SymbolChildId.GetHashCode(), innerRect.GetSize(), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar);
         {
             var cloneIfModified = data.Curve.Input.IsDefault;
 

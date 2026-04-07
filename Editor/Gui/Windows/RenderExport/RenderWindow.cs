@@ -71,7 +71,7 @@ internal sealed class RenderWindow : Window
         ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.12f, 0.12f, 0.12f, 0.45f));
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
         
-        if (ImGui.BeginChild("Summary", new Vector2(-1, 64 * T3Ui.UiScaleFactor), false, ImGuiWindowFlags.NoScrollbar))
+        if (ImGui.BeginChild("Summary", new Vector2(-1, 64 * T3Ui.UiScaleFactor), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar))
         {
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 4);
             DrawRenderSummary(RenderProcess.GetActiveOrRequestedSettings());

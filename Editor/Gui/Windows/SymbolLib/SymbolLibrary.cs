@@ -130,7 +130,7 @@ internal sealed class SymbolLibrary : Window
 
         var textColor = UiColors.Text.Fade(0.8f);
         ImGui.PushStyleColor(ImGuiCol.Text, textColor.Rgba);
-        ImGui.BeginChild("scrolling", Vector2.Zero, false, ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("scrolling", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         {
             // Show filtered or full tree depending on filter/search state
             if (_libraryFiltering.AnyFilterActive)

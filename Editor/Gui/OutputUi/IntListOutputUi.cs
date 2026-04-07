@@ -104,7 +104,7 @@ internal sealed class IntListOutputUi : OutputUi<List<int>>
                     CustomComponents.StylizedText(text, Fonts.FontSmall, UiColors.TextMuted);
                 }
                 FormInputs.AddVerticalSpace(2);
-                ImGui.BeginChild("ScrollableList", new Vector2(0, 0), false,
+                ImGui.BeginChild("ScrollableList", new Vector2(0, 0), ImGuiChildFlags.None,
                                  ImGuiWindowFlags.AlwaysVerticalScrollbar | ImGuiWindowFlags.AlwaysHorizontalScrollbar);
                 {
                     int columnIndex = 0;

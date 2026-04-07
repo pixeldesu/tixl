@@ -70,7 +70,7 @@ internal static class EditTourPointsPopup
         {
             ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.WindowBackground.Fade(0.8f).Rgba);
 
-            ImGui.BeginChild("Inner", Vector2.Zero, false, ImGuiWindowFlags.NoMove);
+            ImGui.BeginChild("Inner", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoMove);
             {
                 _compositionUi = operatorSymbol.GetSymbolUi();
 
@@ -198,7 +198,7 @@ internal static class EditTourPointsPopup
             height = 0;
         }
 
-        ImGui.BeginChild("item", new Vector2(-5, height), true);
+        ImGui.BeginChild("item", new Vector2(-5, height), ImGuiChildFlags.Border);
         {
             FormInputs.AddVerticalSpace(3);
             var padding = 10;

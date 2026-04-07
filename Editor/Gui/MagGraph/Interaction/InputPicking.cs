@@ -201,10 +201,9 @@ internal static class InputPicking
         //ImGui.PushStyleColor(ImGuiCol.PopupBg, UiColors.BackgroundFull.Fade(0.6f).Rgba);
         if (ImGui.BeginChild("Popup",
                              lastSize,
-                             true,
+                             ImGuiChildFlags.Border | ImGuiChildFlags.AlwaysUseWindowPadding,
                              ImGuiWindowFlags.NoResize
                              | ImGuiWindowFlags.NoScrollbar
-                             | ImGuiWindowFlags.AlwaysUseWindowPadding
                              ))
         {
             var visibleInputCount = 0;

@@ -57,7 +57,7 @@ internal sealed class UiElements
         ImGui.SetCursorPos(localPos);
         var widgetPos = ImGui.GetCursorScreenPos();
 
-        if (ImGui.BeginChild("##minimap", widgetSize, false,
+        if (ImGui.BeginChild("##minimap", widgetSize, ImGuiChildFlags.None,
                              ImGuiWindowFlags.NoScrollbar
                              | ImGuiWindowFlags.NoMove
                              | ImGuiWindowFlags.NoScrollWithMouse
@@ -180,7 +180,7 @@ internal sealed class UiElements
                            new Vector2(
                                        ImGui.GetWindowContentRegionMin().X+1,
                                        ImGui.GetWindowContentRegionMax().Y - TimeControls.ControlSize.Y-1));
-        ImGui.BeginChild("TimeControls", Vector2.Zero, false, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("TimeControls", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
         {
             var icon = components.TimeLineCanvas.FoldingHeight.UsingCustomTimelineHeight ? Icon.ChevronDown : Icon.ChevronUp;
             if (CustomComponents.IconButton(icon, TimeControls.ControlSize, CustomComponents.ButtonStates.Dimmed))

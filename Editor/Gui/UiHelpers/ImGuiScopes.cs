@@ -65,8 +65,8 @@ namespace T3.Editor.Gui.UiHelpers;
             ImGui.PushStyleColor(ImGuiCol.ChildBg, backgroundColor.Rgba);
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(padding,padding));
             ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, rounding);
-            ImGui.BeginChild(name, size, false,
-                             flags|ImGuiWindowFlags.AlwaysUseWindowPadding|ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginChild(name, size, ImGuiChildFlags.None | ImGuiChildFlags.AlwaysUseWindowPadding,
+                             flags|ImGuiWindowFlags.ChildWindow);
         }
         
         public void Dispose()

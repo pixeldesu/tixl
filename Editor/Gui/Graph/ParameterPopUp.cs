@@ -92,7 +92,7 @@ internal static class ParameterPopUp
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4);
         if (ImGui.BeginChild("Popup",
                              new Vector2(DefaultWindowSize.X, height),
-                             true,
+                             ImGuiChildFlags.Border,
                              preventTabbingIntoUnfocusedStringInputs
                              | ImGuiWindowFlags.NoScrollWithMouse
                              | ImGuiWindowFlags.NoScrollbar))
@@ -188,7 +188,7 @@ internal static class ParameterPopUp
             {
                 case ViewModes.Parameters:
                     
-                    ImGui.BeginChild("Scrolling", new Vector2(DefaultWindowSize.X, height - 20 ), false);
+                    ImGui.BeginChild("Scrolling", new Vector2(DefaultWindowSize.X, height - 20 ), ImGuiChildFlags.None);
                     CustomComponents.HandleDragScrolling(_parameterPopUpReference);
                     ImGui.PushFont(Fonts.FontSmall);
                     ParameterWindow.DrawParameters(_selectedInstance, symbolUi, symbolChildUi, compositionSymbolUi, hideNonEssentials: true);
@@ -206,7 +206,7 @@ internal static class ParameterPopUp
                         if (w is not VariationsWindow variationsWindow)
                             continue;
 
-                        ImGui.BeginChild("Scrolling", DefaultWindowSize, false, 
+                        ImGui.BeginChild("Scrolling", DefaultWindowSize, ImGuiChildFlags.None, 
                                          ImGuiWindowFlags.NoScrollWithMouse|
                                          ImGuiWindowFlags.NoScrollbar |
                                          ImGuiWindowFlags.NoBackground);
@@ -223,7 +223,7 @@ internal static class ParameterPopUp
                     ImGui.BeginChild("Scrolling", 
                                      new Vector2(DefaultWindowSize.X, 
                                                  height), 
-                                     false,
+                                     ImGuiChildFlags.None,
                                      ImGuiWindowFlags.NoBackground
                                     );
                     FormInputs.AddVerticalSpace();

@@ -59,9 +59,9 @@ public static class T3Style
         // Tab
         style.Colors[(int)ImGuiCol.Tab] = UiColors.BackgroundTabInActive;
         style.Colors[(int)ImGuiCol.TabHovered] = UiColors.BackgroundActive.Rgba;
-        style.Colors[(int)ImGuiCol.TabActive] = UiColors.BackgroundTabActive;
-        style.Colors[(int)ImGuiCol.TabUnfocusedActive] = UiColors.BackgroundTabActive;
-        style.Colors[(int)ImGuiCol.TabUnfocused] = UiColors.BackgroundTabInActive;
+        style.Colors[(int)ImGuiCol.TabSelected] = UiColors.BackgroundTabActive;
+        style.Colors[(int)ImGuiCol.TabDimmedSelected] = UiColors.BackgroundTabActive;
+        style.Colors[(int)ImGuiCol.TabDimmed] = UiColors.BackgroundTabInActive;
         // Title
         style.Colors[(int)ImGuiCol.TitleBgActive] = UiColors.BackgroundGaps;
         style.Colors[(int)ImGuiCol.TitleBg] = UiColors.BackgroundGaps;

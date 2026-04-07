@@ -59,7 +59,7 @@ internal sealed class ExplorationWindow : Window
         ImGui.PopStyleVar();
 
         ImGui.SameLine();
-        ImGui.BeginChild("canvas", new Vector2(-1, -1), false, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar);
+        ImGui.BeginChild("canvas", new Vector2(-1, -1), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar);
         {
             _variationCanvas.Draw(ProjectView.Focused?.Structure);
         }

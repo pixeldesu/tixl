@@ -287,9 +287,8 @@ internal static class PlaceHolderUi
         bool childOpen = ImGui.BeginChild(
             999,
             last,
-            true,
-            ImGuiWindowFlags.AlwaysUseWindowPadding
-            | ImGuiWindowFlags.NoResize);
+            ImGuiChildFlags.Border | ImGuiChildFlags.AlwaysUseWindowPadding,
+            ImGuiWindowFlags.NoResize);
 
         if (childOpen)
         {

@@ -33,7 +33,7 @@ internal sealed class DataSetViewCanvas
         void DrawCanvas()
         {
             var currentTime = Playback.RunTimeInSecs;
-            ImGui.BeginChild("Scrollable", Vector2.Zero, false, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground);
+            ImGui.BeginChild("Scrollable", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground);
 
             var isRangeSelected = Math.Abs(_selectRangeStart - _selectRangeEnd) > 0.001;
             var areChannelsSelected = _selectedChannels.Count > 0;

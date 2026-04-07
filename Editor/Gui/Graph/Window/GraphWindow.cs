@@ -167,7 +167,7 @@ internal sealed class GraphWindow : Windows.Window
 
         //ImageBackgroundFading.HandleImageBackgroundFading(ProjectView.GraphImageBackground, out var backgroundImageOpacity);
         var backgroundImageOpacity = 1f;
-        ImGui.BeginChild("##graphbackground", new Vector2(0, windowContentHeight), false,
+        ImGui.BeginChild("##graphbackground", new Vector2(0, windowContentHeight), ImGuiChildFlags.None,
                          ImGuiWindowFlags.NoScrollbar
                          | ImGuiWindowFlags.NoMove
                          | ImGuiWindowFlags.NoScrollWithMouse
@@ -180,7 +180,7 @@ internal sealed class GraphWindow : Windows.Window
         ImGui.EndChild();
         ImGui.SetCursorPos(Vector2.Zero);
 
-        ImGui.BeginChild("##graph", new Vector2(0, windowContentHeight), false,
+        ImGui.BeginChild("##graph", new Vector2(0, windowContentHeight), ImGuiChildFlags.None,
                          ImGuiWindowFlags.NoScrollbar
                          | ImGuiWindowFlags.NoMove
                          | ImGuiWindowFlags.NoScrollWithMouse
@@ -219,7 +219,7 @@ internal sealed class GraphWindow : Windows.Window
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + splitterWidth - 1); // leave gap for splitter
                 ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 0);
 
-                ImGui.BeginChild("##timeline", Vector2.Zero, false,
+                ImGui.BeginChild("##timeline", Vector2.Zero, ImGuiChildFlags.None,
                                  ImGuiWindowFlags.NoResize
                                  | ImGuiWindowFlags.NoBackground
                                 );
@@ -279,7 +279,7 @@ internal sealed class GraphWindow : Windows.Window
                 ImGui.BeginGroup();
                 ImGui.SetScrollY(0);
 
-                if (!LayoutHandling.FocusMode)
+                if (!UserSettings.Config.FocusMode)
                     CustomComponents.DrawWindowFocusFrame();
 
                 if (ImGui.IsWindowFocused())

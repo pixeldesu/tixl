@@ -79,7 +79,7 @@ internal sealed class VariationsWindow : Window
             {
                 ImGui.BeginChild("header",
                                  new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetFrameHeight()),
-                                 false,
+                                 ImGuiChildFlags.None,
                                  ImGuiWindowFlags.NoScrollbar);
                 
                 if (FormInputs.SegmentedButton(ref _interactionMode))

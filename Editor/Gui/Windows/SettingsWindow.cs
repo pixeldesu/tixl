@@ -41,7 +41,7 @@ internal sealed partial class SettingsWindow : Window
         var projectSettingsChanged = false;
         
         ImGui.BeginChild("categories", new Vector2(120 * T3Ui.UiScaleFactor, -1),
-                         true,
+                         ImGuiChildFlags.Border,
                          ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
         {
             ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(0, 0.5f));
@@ -52,7 +52,7 @@ internal sealed partial class SettingsWindow : Window
 
         ImGui.SameLine();
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(20, 5));
-        ImGui.BeginChild("content", new Vector2(0, 0), true, ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("content", new Vector2(0, 0), ImGuiChildFlags.Border, ImGuiWindowFlags.NoBackground);
         {
             FormInputs.SetIndentToParameters();
             switch (_activeCategory)
