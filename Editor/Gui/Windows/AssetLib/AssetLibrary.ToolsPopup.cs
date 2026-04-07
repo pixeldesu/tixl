@@ -100,7 +100,7 @@ internal sealed partial class AssetLibrary
 
             CustomComponents.SeparatorLine();
             CustomComponents.DrawMenuItem(_syncToSelectionId, "Sync with Selection", ref UserSettings.Config.SyncWithOperatorSelection);
-            ImGui.End();
+            ImGui.EndPopup();
         }
 
         ImGui.PopStyleVar(2);
@@ -142,7 +142,7 @@ internal sealed partial class AssetLibrary
 
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
         ImGui.PushID(id);
-        var clicked = ImGui.InvisibleButton(string.Empty, new Vector2(width, h));
+        var clicked = ImGui.InvisibleButton("##tool", new Vector2(width, h));
         ImGui.PopID();
         ImGui.PopStyleVar();
 

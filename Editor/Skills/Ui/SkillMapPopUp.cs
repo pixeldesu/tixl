@@ -39,36 +39,39 @@ internal static class SkillMapPopup
 
         if (ImGui.BeginPopupModal(MapPopupId, ref _open, ImGuiWindowFlags.None))
         {
+            var skipContent = false;
             if (ImGui.IsWindowAppearing())
             {
                 if (!SkillTraining.TryGetActiveTopicAndLevel(out var topic, out _))
                 {
-                    ImGui.End();
-                    return;
+                    skipContent = true;
                 }
+                else
+                {
+                    _topicSelection.Clear();
+                    _topicSelection.Add(topic);
+                    _mapCanvas.FocusTopics(_topicSelection, 400);
+                }
+            }
 
-                _topicSelection.Clear();
-                _topicSelection.Add(topic);
-                _mapCanvas.FocusTopics(_topicSelection, 400);
-            }
-            
-            ImGui.BeginChild("Map", new Vector2(0, -10), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
+            if (!skipContent)
             {
-                _topicSelection ??= [];
-                _mapCanvas.DrawContent(HandleTopicInteraction, out _, _topicSelection);
-            
+                ImGui.BeginChild("Map", new Vector2(0, -10), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
+                {
+                    _topicSelection ??= [];
+                    _mapCanvas.DrawContent(HandleTopicInteraction, out _, _topicSelection);
+                }
+                ImGui.EndChild();
+
+                if (UiHelpers.IsClickedOutsideWindow())
+                {
+                    Log.Debug("Closed?!");
+                    _open = false;
+                }
             }
-            
-            ImGui.EndChild();
-            
-            if (UiHelpers.IsClickedOutsideWindow())
-            {
-                Log.Debug("Closed?!");
-                _open = false;
-            }
+
+            ImGui.EndPopup();
         }
-
-        ImGui.End();
 
         ImGui.PopStyleColor();
     }

@@ -96,7 +96,10 @@ public static class SearchableDropDown
             //_lastTypeAheadResults.Clear();
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.Gray.Rgba);
 
-            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsWindowHovered(ImGuiHoveredFlags.RectOnly))
+            // ImGuiHoveredFlags.RectOnly contains AllowWhenOverlappedByItem/ByWindow which 1.91
+            // forbids for IsWindowHovered. Spell out the window-level valid flags.
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup
+                                                                                      | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem))
             {
                 _activeInputId = 0;
                 ImGui.CloseCurrentPopup();

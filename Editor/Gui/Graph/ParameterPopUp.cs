@@ -88,11 +88,10 @@ internal static class ParameterPopUp
         var preventTabbingIntoUnfocusedStringInputs = ImGui.IsAnyItemActive() ? ImGuiWindowFlags.None : ImGuiWindowFlags.NoNavInputs;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.One * 2);
         ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 2);
-        ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 2);
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4);
         if (ImGui.BeginChild("Popup",
                              new Vector2(DefaultWindowSize.X, height),
-                             ImGuiChildFlags.Border,
+                             ImGuiChildFlags.Borders,
                              preventTabbingIntoUnfocusedStringInputs
                              | ImGuiWindowFlags.NoScrollWithMouse
                              | ImGuiWindowFlags.NoScrollbar))

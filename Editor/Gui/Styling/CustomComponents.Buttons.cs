@@ -131,7 +131,7 @@ internal static partial class CustomComponents
         }
 
         ImGui.PushID((int)icon);
-        var clicked = ImGui.Button(string.Empty, size); 
+        var clicked = ImGui.Button("##iconBtn", size);
         ImGui.PopID();
         Icons.DrawIconOnLastItem(icon, GetStateColor(state).Rgba);
 

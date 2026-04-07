@@ -29,7 +29,7 @@ public static partial class T3Ui
     internal static void ProcessFrame()
     {
         Profiling.KeepFrameData();
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
+        //ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
         DragAndDropHandling.Update();
 
         CustomComponents.BeginFrame();

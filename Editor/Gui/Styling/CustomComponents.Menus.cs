@@ -81,7 +81,7 @@ internal static partial class CustomComponents
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
         ImGui.PushID(id);
         //var clicked = ImGui.Selectable(string.Empty);
-        var clicked = ImGui.InvisibleButton(string.Empty, new Vector2(width, h)) && isEnabled;
+        var clicked = ImGui.InvisibleButton("##menuItem", new Vector2(width, h)) && isEnabled;
         ImGui.PopID();
         ImGui.PopStyleVar();
 

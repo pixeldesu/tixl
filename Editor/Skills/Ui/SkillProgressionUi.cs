@@ -151,6 +151,7 @@ internal static class SkillProgressionUi
                     {
                         SkillTraining.ReplayLevel(previousLevel);
                     }
+                    ImGui.PopStyleColor(2);
                 }
 
                 ImGui.SameLine(ImGui.GetWindowWidth() - skipSize.X - actionSize.X - 20);
@@ -162,7 +163,6 @@ internal static class SkillProgressionUi
                 }
 
                 ImGui.SameLine(0, 10);
-                ImGui.PopStyleColor(2);
 
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.20f, 0.45f, 0.95f, 1f));
                 ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.25f, 0.55f, 1.00f, 1f));

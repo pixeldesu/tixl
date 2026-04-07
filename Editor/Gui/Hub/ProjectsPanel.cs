@@ -24,7 +24,7 @@ internal static class ProjectsPanel
 
         FormInputs.AddVerticalSpace(20);
 
-        ImGui.BeginChild("content", new Vector2(0, 0), ImGuiChildFlags.Border, ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("content", new Vector2(0, 0), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoBackground);
         {
             ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(5, 5));
             
@@ -49,7 +49,6 @@ internal static class ProjectsPanel
             ImGui.PopStyleVar();
         }
         ImGui.EndChild();
-        ImGui.PopStyleVar();
         ContentPanel.End();
     }
 

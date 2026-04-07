@@ -38,7 +38,7 @@ internal sealed class UtilitiesWindow : Window
 
     protected override void DrawContent()
     {
-        ImGui.BeginChild("categories", new Vector2(160 * T3Ui.UiScaleFactor, -1), ImGuiChildFlags.Border, ImGuiWindowFlags.NoScrollbar);
+        ImGui.BeginChild("categories", new Vector2(160 * T3Ui.UiScaleFactor, -1), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar);
         {
             ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(0, 0.5f));
             FormInputs.AddSegmentedButtonWithLabel(ref _activeCategory, "", 150 * T3Ui.UiScaleFactor);
@@ -48,7 +48,7 @@ internal sealed class UtilitiesWindow : Window
 
         ImGui.SameLine();
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(20, 5));
-        ImGui.BeginChild("content", new Vector2(-1, -1), ImGuiChildFlags.Border);
+        ImGui.BeginChild("content", new Vector2(-1, -1), ImGuiChildFlags.Borders);
         {
             FormInputs.SetIndentToParameters();
             switch (_activeCategory)

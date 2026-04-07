@@ -96,7 +96,11 @@ internal sealed class OutputWindow : Window
             _imageCanvas.SetAsCurrent();
 
             // Move down to avoid overlapping with the toolbar
-            ImGui.SetCursorPos(ImGui.GetCursorStartPos() + new Vector2(0, 40)); // this line as no effect?
+            ImGui.SetCursorPos(ImGui.GetCursorStartPos() + new Vector2(0, 40));
+            // ImGui 1.91 sets an internal IsSetPos flag on SetCursorPos and asserts in End()
+            // if no item is submitted afterwards. The image canvas draws to the raw draw list
+            // and does not emit items, so submit an empty Dummy as an extent marker.
+            ImGui.Dummy(Vector2.Zero);
 
             Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance, out var graphCanvas);
 

@@ -14,13 +14,18 @@ internal sealed partial class MagGraphView
         var canvas = context.View;
 
         var annotation = magAnnotation.Annotation;
-        var area = annotation.Collapsed 
+        var area = annotation.Collapsed
                        ? ImRect.RectWithSize(annotation.PosOnCanvas, new Vector2(annotation.Size.X, MagGraphItem.LineHeight))
                        :ImRect.RectWithSize(annotation.PosOnCanvas, annotation.Size) ;
 
-        
+
         if (!IsRectVisible(area))
             return;
+
+        // ImGui 1.91.2 ID-conflict guard: ensure all widgets in this annotation
+        // get a unique ID per annotation so the "##annotationHeader" / "##resize"
+        // labels don't collide between annotations.
+        ImGui.PushID(magAnnotation.Id.GetHashCode());
 
         var pMin = TransformPosition(magAnnotation.DampedPosOnCanvas);
         var dampedSize = annotation.Collapsed 
@@ -218,5 +223,7 @@ internal sealed partial class MagGraphView
             drawList.PopClipRect();
             ImGui.PopID();
         }
+
+        ImGui.PopID(); // outer per-annotation PushID
     }
 }

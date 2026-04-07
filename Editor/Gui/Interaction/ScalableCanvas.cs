@@ -241,7 +241,11 @@ public partial class ScalableCanvas
         if (_draggedCanvas == this && !ImGui.IsMouseDragging(ImGuiMouseButton.Right))
             _draggedCanvas = null;
 
-        var isDirectlyHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.RectOnly | ImGuiHoveredFlags.ChildWindows);
+        // ImGuiHoveredFlags.RectOnly includes AllowWhenOverlappedByItem/ByWindow which 1.91
+        // forbids for IsWindowHovered (item-level flags). Use only the window-level allowed bits.
+        var isDirectlyHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows
+                                                      | ImGuiHoveredFlags.AllowWhenBlockedByPopup
+                                                      | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
         var isInteractable = isDirectlyHovered && !FrameStats.Last.OpenedPopupHovered;
         var isPanning = _draggedCanvas == this;
         var isAnotherWindowPanning = _draggedCanvas != null && _draggedCanvas != this

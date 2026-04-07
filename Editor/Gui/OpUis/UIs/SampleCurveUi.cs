@@ -108,6 +108,7 @@ internal static class SampleCurveUi
             }
 
             DrawSamplePointIndicator();
+            ImGui.Dummy(Vector2.One); // ImGui 1.91 sentinel: clears any dangling SetCursorPos from helpers
         }
         ImGui.EndChild();
         ImGui.PopClipRect();

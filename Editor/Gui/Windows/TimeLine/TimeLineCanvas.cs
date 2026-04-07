@@ -82,7 +82,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
 
             HandleDeferredActions();
 
-            ImGui.BeginChild(ImGuiTitle, new Vector2(0, -30), ImGuiChildFlags.Border,
+            ImGui.BeginChild(ImGuiTitle, new Vector2(0, -30), ImGuiChildFlags.Borders,
                              ImGuiWindowFlags.NoMove
                              | ImGuiWindowFlags.NoBackground
                              | ImGuiWindowFlags.NoScrollWithMouse);

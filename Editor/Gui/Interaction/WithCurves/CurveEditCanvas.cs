@@ -25,7 +25,7 @@ internal abstract class CurveEditCanvas : ScalableCanvas, ITimeObjectManipulatio
     protected void DrawCurveCanvas(Action<InteractionState> drawAdditionalCanvasContent, SelectionFence selectionFence, float height = 0, T3Ui.EditingFlags flags = T3Ui.EditingFlags.None)
     {
 
-        ImGui.BeginChild(ImGuiTitle, new Vector2(0, height), ImGuiChildFlags.Border,
+        ImGui.BeginChild(ImGuiTitle, new Vector2(0, height), ImGuiChildFlags.Borders,
                          ImGuiWindowFlags.NoScrollbar | 
                          ImGuiWindowFlags.NoMove | 
                          ImGuiWindowFlags.NoScrollWithMouse |

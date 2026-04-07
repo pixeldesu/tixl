@@ -82,8 +82,6 @@ internal static class SkillMapEditor
             ImGui.EndChild();
         }
 
-        ImGui.PopStyleColor();
-
         ImGui.End();
         ImGui.PopStyleVar();
     }

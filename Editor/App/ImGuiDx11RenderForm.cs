@@ -139,6 +139,12 @@ internal class ImGuiDx11RenderForm : RenderForm
             if (!filterAltKeyToPreventFocusLoss)
                 base.WndProc(ref m);
 
+            // The form's HWND can receive messages before WindowsUiContentDrawer.Initialize()
+            // calls ImGui.CreateContext(). ImGui 1.91 hard-asserts on GetIO() when no context
+            // exists, where 1.89 was lax. Bail out for those very early messages.
+            if (ImGui.GetCurrentContext() == IntPtr.Zero)
+                return;
+
             foreach (var inputMethod in InputMethods)
                 inputMethod.ProcessMessage(m);
 

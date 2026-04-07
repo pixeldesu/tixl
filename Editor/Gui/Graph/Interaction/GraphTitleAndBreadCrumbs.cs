@@ -74,9 +74,11 @@ internal static class GraphTitleAndBreadCrumbs
                 if (clicked)
                 {
                     projectView.TrySetCompositionOpToParent();
+                    ImGui.PopID();
                     break;
                 }
 
+                ImGui.PopID();
                 DrawSeparator(_breadCrumbSeparator);
             }
         }
@@ -87,7 +89,6 @@ internal static class GraphTitleAndBreadCrumbs
         void DrawSeparator(string iconString, float padding = 0)
         {
             ImGui.SameLine(0, padding);
-            ImGui.PopID();
             ImGui.PushFont(Icons.IconFont);
             var yPadding = (frameHeight - Icons.IconFont.FontSize) / 2;
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(10,yPadding));

@@ -170,8 +170,6 @@ internal static class EditTourPointsPopup
             ImGui.PopStyleColor();
         }
 
-        ImGui.PopStyleColor();
-
         ImGui.End();
         ImGui.PopStyleVar();
         return result;
@@ -198,7 +196,7 @@ internal static class EditTourPointsPopup
             height = 0;
         }
 
-        ImGui.BeginChild("item", new Vector2(-5, height), ImGuiChildFlags.Border);
+        ImGui.BeginChild("item", new Vector2(-5, height), ImGuiChildFlags.Borders);
         {
             FormInputs.AddVerticalSpace(3);
             var padding = 10;

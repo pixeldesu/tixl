@@ -82,7 +82,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                 }
             }
 
-            ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(0, 3)); // keep some padding 
+            ImGui.Dummy(new Vector2(1, 3)); // top padding (was SetCursorPos+3, but ImGui 1.91 needs an item)
             _minScreenPos = ImGui.GetCursorScreenPos();
 
             var compositionSymbolChildId = compositionOp.SymbolChildId;

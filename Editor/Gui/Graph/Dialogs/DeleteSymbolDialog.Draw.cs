@@ -122,7 +122,7 @@ internal sealed partial class DeleteSymbolDialog
 
         if (ImGui.BeginChild("SymbolList",
                 new Vector2(0, scrollHeight),
-                ImGuiChildFlags.Border))
+                ImGuiChildFlags.Borders))
         {
             var lastGroupName = string.Empty;
             foreach (var symbolUi in _cachedMatches)

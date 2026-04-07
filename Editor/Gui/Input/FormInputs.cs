@@ -846,7 +846,10 @@ internal static class FormInputs
         SetCursorToParameterEdit();
     }
     
-    public static void SetCursorToParameterEdit() => ImGui.SetCursorPosX(LeftParameterPadding + ParameterSpacing);
+    public static void SetCursorToParameterEdit()
+    {
+        ImGui.SetCursorPosX(LeftParameterPadding + ParameterSpacing);
+    }
         
     public static bool DrawValueRangeControl(ref float min, ref float max, ref float scale, ref bool clampedMin, ref bool clampedMax, float defaultMin,
                                              float defaultMax, float defaultScale)

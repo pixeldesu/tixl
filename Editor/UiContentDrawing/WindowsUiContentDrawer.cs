@@ -68,9 +68,24 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
             SetPerFrameImGuiData(1f / 60f);
 
-            ImGui.GetIO().BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
-            ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+            var io = ImGui.GetIO();
+            io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
+            io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
+            // ImGui 1.91 ships an error-recovery system that turns stack imbalances
+            // (Push/Pop, Begin/End, ID stack, etc.) into recoverable, logged warnings
+            // instead of native asserts. Enable it so we can find offending windows
+            // through the log instead of via SEHException stack traces.
+            io.ConfigErrorRecovery = true;
+            io.ConfigErrorRecoveryEnableDebugLog = true;
+#if DEBUG
+            // Hard-fail on imgui stack imbalances in debug builds so the offending
+            // call site shows up in the debugger. Release builds keep the recoverable
+            // warning bar instead of crashing on end-user installs.
+            io.ConfigDebugIsDebuggerPresent  = true;
+            io.ConfigErrorRecoveryEnableAssert = true;
+#endif
+            
             // restore previous context
             if (previousContext != IntPtr.Zero)
             {

@@ -115,7 +115,7 @@ internal sealed class ImGuiHandler
             
             ImGui.Begin(_mainWindowId, windowFlags);
             
-            ImGui.BeginChild(_childWindowId, Vector2.Zero, false);
+            ImGui.BeginChild(_childWindowId, Vector2.Zero, ImGuiChildFlags.None);
             _drawer.OnRender(_windowTitle, deltaTime, _fontObj!);
             ImGui.EndChild();
             

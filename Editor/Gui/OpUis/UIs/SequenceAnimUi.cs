@@ -84,6 +84,7 @@ internal static class SequenceAnimUi
         var w = screenRect.GetWidth();
         if (h < 10 || data.CurrentSequence == null || data.CurrentSequence.Count == 0)
         {
+            ImGui.PopID(); // matches PushID above
             return OpUi.CustomUiResult.None;
         }
 

@@ -26,6 +26,8 @@ public static class CurveEditPopup
         ImGui.EndChild();
 
         ImGui.SetCursorPos(keepPositionForContentBelow);
+        ImGui.Dummy(Vector2.One);                             // ImGui 1.91 SetCursorPos extent check (non-zero so both axes extend)
+        ImGui.SetCursorPos(keepPositionForContentBelow);      // ...restore so caller layout continues here
 
         if (openPop)
         {
@@ -58,7 +60,9 @@ public static class CurveEditPopup
             return edited;
         
         // Close popup if clicked outside
-        if(ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows|ImGuiHoveredFlags.RectOnly))
+        if(ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows
+                                                                                  | ImGuiHoveredFlags.AllowWhenBlockedByPopup
+                                                                                  | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem))
             ImGui.CloseCurrentPopup();
         
         var keepScale = T3Ui.UiScaleFactor;

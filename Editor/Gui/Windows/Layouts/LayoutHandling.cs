@@ -309,7 +309,7 @@ internal static class LayoutHandling
     /// currently bundled ImGui.NET. Bump this whenever upstream ImGui makes a breaking
     /// change to the settings format that we cannot migrate in place.
     /// </summary>
-    private static readonly Version MinSupportedImGuiVersion = new(1, 90, 0);
+    private static readonly Version MinSupportedImGuiVersion = new(1, 91, 6);
 
     private static bool IsLayoutCompatibleWithCurrentImGui(Layout layout)
     {

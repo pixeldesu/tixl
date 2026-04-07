@@ -83,7 +83,10 @@ internal sealed class CreateFromTemplateDialog : ModalDialog
                     ImGui.PopStyleColor();
                     ImGui.PopFont();
                         
-                    ImGui.SetCursorScreenPos(keepCursor + new Vector2(0,2));
+                    var __extPos = keepCursor + new Vector2(0,2);
+                    ImGui.SetCursorScreenPos(__extPos);
+                    ImGui.Dummy(Vector2.Zero);                // ImGui 1.91 SetCursorPos extent check
+                    ImGui.SetCursorScreenPos(__extPos);
                     ImGui.PopID();
                 }
 

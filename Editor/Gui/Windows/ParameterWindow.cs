@@ -139,9 +139,8 @@ internal sealed class ParameterWindow : Window
         var modified = false;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
         ImGui.BeginChild("header", new Vector2(0, ImGui.GetFrameHeight() + 5),
-                         ImGuiChildFlags.None | ImGuiChildFlags.AlwaysUseWindowPadding,
-                         ImGuiWindowFlags.AlwaysAutoResize
-                         | ImGuiWindowFlags.NoScrollbar
+                         ImGuiChildFlags.AlwaysUseWindowPadding,
+                         ImGuiWindowFlags.NoScrollbar
                          | ImGuiWindowFlags.NoScrollWithMouse
                          | ImGuiWindowFlags.NoBackground);
         {
@@ -198,8 +197,6 @@ internal sealed class ParameterWindow : Window
             {
                 ImGui.Text(op.Symbol.Namespace);
             }
-
-            ImGui.PopStyleColor();
 
             // Tags...
             {

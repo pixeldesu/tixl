@@ -311,8 +311,11 @@ internal static class AssetInputWithTypeAheadSearch
                 }
 
                 CustomComponents.DrawSearchMatchUnderline(searchString, localPath, lastMin);
+                ImGui.PopFont(); // matches PushFont at the start of this iteration body
 
                 ImGui.SetCursorPos(keepNextPos);
+                ImGui.Dummy(Vector2.One);                        // ImGui 1.91 SetCursorPos extent check (non-zero so both axes extend)
+                ImGui.SetCursorPos(keepNextPos);                 // ...restore for next iteration
 
                 // Nested tooltips don't work. So we use foreground drawlist to draw thumbnail
                 if (isItemHovered)
