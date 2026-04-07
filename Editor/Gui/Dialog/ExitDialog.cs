@@ -18,7 +18,8 @@ internal sealed class ExitDialog : ModalDialog
     {
         DialogSize = new Vector2(420, 200);
 
-        if (BeginDialog(string.Empty))
+        // ImGui 1.90 rejects empty popup ids; use ### to keep the title bar visually empty.
+        if (BeginDialog("###ExitDialog"))
         {
             FormInputs.AddSectionHeader("Are you leaving?");
 
