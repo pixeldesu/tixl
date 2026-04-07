@@ -161,7 +161,7 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
 
         ImGui.SetCursorPos(keepPosition);
 
-        if (ImGui.BeginPopup("customFormats", ImGuiWindowFlags.Popup))
+        if (ImGui.BeginPopup("customFormats"))
         {
             ImGui.TextUnformatted("Apply formatting presets...");
             foreach (var p in _valueSettingPresets)

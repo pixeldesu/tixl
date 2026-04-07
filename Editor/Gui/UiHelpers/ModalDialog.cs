@@ -57,7 +57,8 @@ public abstract class ModalDialog
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(Padding, Padding));
 
         bool isOpen = true;
-        if (!ImGui.BeginPopupModal(title, ref isOpen, ImGuiWindowFlags.Popup | Flags ))
+        // ImGuiWindowFlags.Popup is an internal-only flag in ImGui 1.90; passing it crashes the native call.
+        if (!ImGui.BeginPopupModal(title, ref isOpen, Flags))
             return false;
             
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ItemSpacing);
