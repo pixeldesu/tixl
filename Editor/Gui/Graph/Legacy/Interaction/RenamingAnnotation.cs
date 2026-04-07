@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using ImGuiNET;
+using T3.Editor.App;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
@@ -41,7 +42,7 @@ internal static class RenamingAnnotation
             annotation.Title = text;
 
         if (!justOpened 
-            && (ImGui.IsItemDeactivated() || ImGui.IsKeyPressed((ImGuiKey)Key.Esc))
+            && (ImGui.IsItemDeactivated() || ImGui.IsKeyPressed(Key.Esc.ToImGuiKey()))
             && _changeAnnotationTextCommand != null)
         {
             _focusedAnnotationId = Guid.Empty;

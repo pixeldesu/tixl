@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using ImGuiNET;
+using T3.Editor.App;
 using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
@@ -30,7 +31,7 @@ internal static class RenamingOperator
             if ((renameTriggered || ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows) || ImGui.IsWindowFocused()) 
                 && !ImGui.IsAnyItemActive() 
                 && !ImGui.IsAnyItemFocused() 
-                && (renameTriggered || ImGui.IsKeyPressed((ImGuiKey)Key.Return)) // TODO: Should be keyboard action 
+                && (renameTriggered || ImGui.IsKeyPressed(Key.Return.ToImGuiKey())) // TODO: Should be keyboard action 
                 && string.IsNullOrEmpty(FrameStats.Current.OpenedPopUpName))
             {
                 var selectedInstances = projectView.NodeSelection.GetSelectedNodes<SymbolUi.Child>().ToList();
@@ -81,7 +82,7 @@ internal static class RenamingOperator
             
         }
             
-        if (!justOpened && (ImGui.IsItemDeactivated() || ImGui.IsKeyPressed((ImGuiKey)Key.Return)))
+        if (!justOpened && (ImGui.IsItemDeactivated() || ImGui.IsKeyPressed(Key.Return.ToImGuiKey())))
         {
             _focusedInstanceId = Guid.Empty;
         }

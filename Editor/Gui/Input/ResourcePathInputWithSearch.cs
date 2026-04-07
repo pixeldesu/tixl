@@ -2,6 +2,7 @@
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.Utils;
+using T3.Editor.App;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
@@ -52,7 +53,7 @@ internal static class AssetInputWithTypeAheadSearch
 
             State.LastActiveFrame = ImGui.GetFrameCount();
 
-            if (ImGui.IsKeyPressed((ImGuiKey)Key.CursorDown, true))
+            if (ImGui.IsKeyPressed(Key.CursorDown.ToImGuiKey(), true))
             {
                 if (State.Matches.Count > 0)
                 {
@@ -63,7 +64,7 @@ internal static class AssetInputWithTypeAheadSearch
                     upDownKeysPressed = true;
                 }
             }
-            else if (ImGui.IsKeyPressed((ImGuiKey)Key.CursorUp, true))
+            else if (ImGui.IsKeyPressed(Key.CursorUp.ToImGuiKey(), true))
             {
                 if (State.Matches.Count > 0)
                 {
@@ -77,7 +78,7 @@ internal static class AssetInputWithTypeAheadSearch
                 }
             }
 
-            if (ImGui.IsKeyPressed((ImGuiKey)Key.Return, false))
+            if (ImGui.IsKeyPressed(Key.Return.ToImGuiKey(), false))
             {
                 if (State.SelectedMatchIndex >= 0 && State.SelectedMatchIndex < State.Matches.Count)
                 {
@@ -94,7 +95,7 @@ internal static class AssetInputWithTypeAheadSearch
                 }
             }
 
-            if (ImGui.IsKeyPressed((ImGuiKey)Key.Esc, false))
+            if (ImGui.IsKeyPressed(Key.Esc.ToImGuiKey(), false))
             {
                 Log.Debug($"ESC revert {selectedValue} -> {State.ValueWhenOpened}");
                 selectedValue = State.ValueWhenOpened;

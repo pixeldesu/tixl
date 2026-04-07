@@ -9,6 +9,7 @@ using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Utils;
+using T3.Editor.App;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
@@ -181,7 +182,7 @@ internal static class PlaceHolderUi
             ImGui.PopStyleVar();
         }
 
-        if (ImGui.IsKeyPressed((ImGuiKey)Key.Return))
+        if (ImGui.IsKeyPressed(Key.Return.ToImGuiKey()))
         {
             if (_selectedSymbolUi != null)
             {
@@ -202,7 +203,7 @@ internal static class PlaceHolderUi
         var clickedOutside = false; // TODO: wire this up if window-hover based cancel is reintroduced
         var shouldCancelConnectionMaker = clickedOutside
                                           // ImGui.IsMouseClicked(ImGuiMouseButton.Right)
-                                          || ImGui.IsKeyDown((ImGuiKey)Key.Esc);
+                                          || ImGui.IsKeyDown(Key.Esc.ToImGuiKey());
 
         if (shouldCancelConnectionMaker)
         {
@@ -345,12 +346,12 @@ internal static class PlaceHolderUi
     {
         var result = UiResults.None;
 
-        if (ImGui.IsKeyReleased((ImGuiKey)Key.CursorDown))
+        if (ImGui.IsKeyReleased(Key.CursorDown.ToImGuiKey()))
         {
             UiListHelpers.AdvanceSelectedItem(filter.MatchingSymbolUis!, ref _selectedSymbolUi, 1);
             result = UiResults.SelectionChanged;
         }
-        else if (ImGui.IsKeyReleased((ImGuiKey)Key.CursorUp))
+        else if (ImGui.IsKeyReleased(Key.CursorUp.ToImGuiKey()))
         {
             UiListHelpers.AdvanceSelectedItem(filter.MatchingSymbolUis!, ref _selectedSymbolUi, -1);
             result = UiResults.SelectionChanged;

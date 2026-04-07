@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using ImGuiNET;
 using T3.Core.Operator;
+using T3.Editor.App;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -88,7 +89,7 @@ internal sealed class SearchDialog : ModalDialog
 
         if (ImGui.BeginChildFrame(999, size))
         {
-            if (ImGui.IsKeyReleased((ImGuiKey)Key.CursorDown))
+            if (ImGui.IsKeyReleased(Key.CursorDown.ToImGuiKey()))
             {
                 UiListHelpers.AdvanceSelectedItem(matchingItems!, ref _selectedInstance!, 1);
                 _selectedItemChanged = true;
@@ -96,7 +97,7 @@ internal sealed class SearchDialog : ModalDialog
                 if (index == 0)
                     ImGui.SetScrollY(0);
             }
-            else if (ImGui.IsKeyReleased((ImGuiKey)Key.CursorUp))
+            else if (ImGui.IsKeyReleased(Key.CursorUp.ToImGuiKey()))
             {
                 UiListHelpers.AdvanceSelectedItem(matchingItems!, ref _selectedInstance!, -1);
                 _selectedItemChanged = true;

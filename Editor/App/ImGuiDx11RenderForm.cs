@@ -191,58 +191,11 @@ internal class ImGuiDx11RenderForm : RenderForm
 
                 case WM_KEYDOWN:
                 case WM_SYSKEYDOWN:
-                    switch ((int) m.WParam)
-                    {
-                        case VK_SHIFT:
-                            io.KeyShift = true;
-                            io.KeysDown[(int) m.WParam] = true;
-                            io.KeysDown[(int) Key.ShiftKey] = true;
-                            break;
-                        // Careful: Windows Legacy Trackpad handlers will set this
-                        // on mouse wheel zoom (WTF?!)
-                        case VK_CONTROL:
-                            io.KeyCtrl = true;
-                            io.KeysDown[(int) Key.CtrlKey] = true;
-                            break;
-                        case VK_ALT:
-                            io.KeyAlt = true;
-                            io.KeysDown[(int) Key.Alt] = true;
-                            KeyHandler.SetKeyDown(Key.Alt);
-                            break;
-                        default:
-                        {
-                            if ((int) m.WParam < 256)
-                                io.KeysDown[(int) m.WParam] = true;
-                            break;
-                        }
-                    }
-
+                    HandleKeyEvent(io, (int)m.WParam, down: true);
                     return;
                 case WM_KEYUP:
                 case WM_SYSKEYUP:
-                    switch ((int) m.WParam)
-                    {
-                        case VK_SHIFT:
-                            io.KeyShift = false;
-                            io.KeysDown[(int) Key.ShiftKey] = false;
-                            break;
-                        case VK_CONTROL:
-                            io.KeyCtrl = false;
-                            io.KeysDown[(int) Key.CtrlKey] = false;
-                            break;
-                        case VK_ALT:
-                            io.KeyAlt = false;
-                            io.KeysDown[(int) Key.Alt] = false;
-                            KeyHandler.SetKeyUp(Key.Alt);
-                            break;
-                        default:
-                        {
-                            if ((int) m.WParam < 256)
-                                io.KeysDown[(int) m.WParam] = false;
-                            break;
-                        }
-                    }
-
+                    HandleKeyEvent(io, (int)m.WParam, down: false);
                     return;
                 case WM_CHAR:
                     // You can also use ToAscii()+GetKeyboardState() to retrieve characters.
@@ -254,17 +207,16 @@ internal class ImGuiDx11RenderForm : RenderForm
                         m.Result = 1;
                     return;
                 case WM_SETFOCUS:
-                    for (int i = 0; i < io.KeysDown.Count; i++)
-                        io.KeysDown[i] = false;
-                    io.KeyShift = false;
-                    io.KeyCtrl = false;
-                    io.KeyAlt = false;
+                    io.AddFocusEvent(true);
                     break;
 
                 case WM_ACTIVATEAPP:
                     if (m.WParam.ToInt64() == 0) /* Being deactivated */
                     {
-                        io.KeysDown[(int) Key.Alt] = false;
+                        // Clear all key state to avoid stuck keys when focus is lost
+                        // (especially Alt, which can desync via Alt+Tab).
+                        io.AddFocusEvent(false);
+                        io.ClearInputKeys();
                         KeyHandler.SetKeyUp(Key.Alt);
                     }
 
@@ -275,6 +227,41 @@ internal class ImGuiDx11RenderForm : RenderForm
         {
             Log.Warning("Detected invalid event message that would trigger null-reference exception");
         }
+    }
+
+    /// <summary>
+    /// Forwards a single Win32 keyboard event to ImGui's new input system,
+    /// updates ImGui's modifier flags, and keeps TiXL's <see cref="KeyHandler"/>
+    /// state in sync for the Alt key (used by the WndProc filter above).
+    /// </summary>
+    private static void HandleKeyEvent(ImGuiIOPtr io, int vkCode, bool down)
+    {
+        // Modifier flags — set both the dedicated mod event (used by ImGui shortcut
+        // matching) and the legacy bool fields (used by InputText etc.).
+        switch (vkCode)
+        {
+            case VK_SHIFT:
+                io.KeyShift = down;
+                io.AddKeyEvent(ImGuiKey.ModShift, down);
+                break;
+            case VK_CONTROL:
+                io.KeyCtrl = down;
+                io.AddKeyEvent(ImGuiKey.ModCtrl, down);
+                break;
+            case VK_ALT:
+                io.KeyAlt = down;
+                io.AddKeyEvent(ImGuiKey.ModAlt, down);
+                if (down)
+                    KeyHandler.SetKeyDown(Key.Alt);
+                else
+                    KeyHandler.SetKeyUp(Key.Alt);
+                break;
+        }
+
+        // Forward the actual key as an ImGuiKey event.
+        var imguiKey = ((Key)vkCode).ToImGuiKey();
+        if (imguiKey != ImGuiKey.None)
+            io.AddKeyEvent(imguiKey, down);
     }
 
     private bool UpdateMouseCursor()

@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using T3.Core.Animation;
+using T3.Editor.App;
 using T3.Editor.Gui.Interaction.Keyboard;
 using Vector2 = System.Numerics.Vector2;
 
@@ -68,7 +69,7 @@ internal static class PlaybackTimeScrubHandling
             if (!binding.KeyCombination.ModifiersMatch(io))
                 continue;
 
-            if (ImGui.IsKeyDown((ImGuiKey)binding.KeyCombination.Key))
+            if (ImGui.IsKeyDown(binding.KeyCombination.Key.ToImGuiKey()))
                 return true;
         }
 

@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
+using T3.Editor.App;
 using T3.Editor.Gui.Interaction.Timing;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -158,7 +159,7 @@ internal static class SingleValueEdit
                     if (shouldFocus)
                     {
                         ImGui.SetKeyboardFocusHere(-1);
-                        if (ImGui.IsKeyReleased((ImGuiKey)Key.Tab))
+                        if (ImGui.IsKeyReleased(Key.Tab.ToImGuiKey()))
                         {
                             _tabFocusIndex = -1;
                         }
@@ -166,13 +167,13 @@ internal static class SingleValueEdit
 
                     ImGui.PopStyleColor();
                     var completedAfterTabbing = false;
-                    if (ImGui.IsKeyPressed((ImGuiKey)Key.Tab) && _tabFocusIndex == -1)
+                    if (ImGui.IsKeyPressed(Key.Tab.ToImGuiKey()) && _tabFocusIndex == -1)
                     {
                         _tabFocusIndex = _currentTabIndex + (ImGui.GetIO().KeyShift ? -1 : 1);
                         completedAfterTabbing = true;
                     }
 
-                    var completedAfterFocusLoss = ImGui.IsKeyPressed((ImGuiKey)Key.Esc) || ImGui.IsItemDeactivated() || !ImGui.IsWindowFocused();
+                    var completedAfterFocusLoss = ImGui.IsKeyPressed(Key.Esc.ToImGuiKey()) || ImGui.IsItemDeactivated() || !ImGui.IsWindowFocused();
 
                     var cancelInputAfterFocusLoss = !shouldFocus && !ImGui.IsItemActive();
                     if (cancelInputAfterFocusLoss || completedAfterFocusLoss)

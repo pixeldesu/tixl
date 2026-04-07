@@ -5,6 +5,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.SystemUi;
+using T3.Editor.App;
 using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
@@ -182,7 +183,7 @@ internal sealed class ParameterWindow : Window
                                                                       ref namespaceForEdit, 
                                                                       out _, 
                                                                       out _);
-                if (namespaceModified && !string.IsNullOrEmpty(namespaceForEdit) && ImGui.IsKeyPressed((ImGuiKey)Key.Return))
+                if (namespaceModified && !string.IsNullOrEmpty(namespaceForEdit) && ImGui.IsKeyPressed(Key.Return.ToImGuiKey()))
                 {
                     if (!EditableSymbolProject.ChangeSymbolNamespace(symbol, namespaceForEdit, out var reason))
                     {

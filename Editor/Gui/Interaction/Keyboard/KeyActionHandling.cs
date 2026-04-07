@@ -1,6 +1,7 @@
 #nullable enable
 using ImGuiNET;
 using T3.Editor.Gui.UiHelpers;
+using T3.SystemUi;
 
 namespace T3.Editor.Gui.Interaction.Keyboard;
 
@@ -22,19 +23,18 @@ internal static class KeyActionHandling
             _initialized = true;
         }
 
-        var keysDown = ImGui.GetIO().KeysDown;
+        // ImGui's legacy KeysDown[] array was removed in 1.90, so we use TiXL's
+        // own KeyHandler state (populated by WndProc) as the source of truth.
         _anyKeysPressed = false;
-        for(var index =0 ; index< keysDown.Count;index++)
+        var pressedKeys = KeyHandler.PressedKeys;
+        for (var index = 0; index < pressedKeys.Count; index++)
         {
-            if (!keysDown[index]) 
+            if (!pressedKeys[index])
                 continue;
-            
+
             _anyKeysPressed = true;
             break;
-
         }
-        //_anyKeysPressed = ImGui.GetIO().KeysDown.Count > 0;
-        //Log.Debug($" Any Active {_anyKeysPressed}  count: {ImGui.GetIO().k.Count}");
     }
 
     internal static bool Triggered(this UserActions action)
