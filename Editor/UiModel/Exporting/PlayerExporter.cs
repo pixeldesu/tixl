@@ -80,7 +80,7 @@ internal static partial class PlayerExporter
         // Include implicitly shared assets
         foreach (var shared in (string[]) [
                          "Lib:shaders/dx11/resolve-multisampled-depth-buffer-cs.hlsl",
-                         "Lib:pbr/studio_small_08-prefiltered.dds ",
+                         "Lib:pbr/studio_small_08-prefiltered.dds",
                          "Lib:pbr/BRDF-LookUp.dds",
                      ])
         {
