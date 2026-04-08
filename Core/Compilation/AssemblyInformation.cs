@@ -49,6 +49,14 @@ public sealed partial class AssemblyInformation
 
     public bool IsLoaded => _loadContext != null;
 
+    /// <summary>
+    /// True if the package has an OperatorPackage.json but no compiled assembly DLL beside it (e.g. an
+    /// asset-only package exported to the Player). Such packages still need to be registered as
+    /// <see cref="T3.Core.Model.SymbolPackage"/> instances so their assets can be resolved, but they
+    /// have no managed types to load.
+    /// </summary>
+    public bool IsAssetsOnly { get; private set; }
+
     private bool _loadedTypes;
     public event Action<AssemblyInformation>? Unloaded;
     public event Action<AssemblyInformation>? UnloadComplete;
@@ -122,14 +130,22 @@ public sealed partial class AssemblyInformation
     {
         lock (_assemblyLock)
         {
-            if (_loadContext == null)
+            if (_loadContext == null && !IsAssetsOnly)
             {
                 GenerateLoadContext();
-                if (_loadContext == null)
+                if (_loadContext == null && !IsAssetsOnly)
                     return false;
             }
-            
-            var rootNode = _loadContext.Root;
+
+            if (IsAssetsOnly)
+            {
+                // Assets-only packages have no managed types - report success with an empty type set.
+                _loadedTypes = true;
+                ShouldShareResources = false;
+                return true;
+            }
+
+            var rootNode = _loadContext!.Root;
             if (rootNode != null && _loadedTypes)
             {
                 Log.Debug($"{Name}: Already loaded types");
@@ -385,6 +401,19 @@ public sealed partial class AssemblyInformation
                 if (!TryLoadReleaseInfo(_directory, out releaseInfo))
                 {
                     throw new Exception($"Failed to load release info from {_directory} - does it need to be compiled?");
+                }
+
+                // Assets-only packages (e.g. exported to the Player) ship just an OperatorPackage.json
+                // with no compiled assembly. Register them without creating a load context so the
+                // asset registry can still resolve their files.
+                var assemblyPath = Path.Combine(_directory, releaseInfo.AssemblyFileName + ".dll");
+                if (!File.Exists(assemblyPath))
+                {
+                    Log.Debug($"{releaseInfo.AssemblyFileName}: No assembly file at \"{assemblyPath}\" - treating as assets-only package");
+                    IsAssetsOnly = true;
+                    _releaseInfo = releaseInfo;
+                    Name = releaseInfo.AssemblyFileName;
+                    return;
                 }
 
                 _loadContext = new TixlAssemblyLoadContext(releaseInfo.AssemblyFileName, Directory, _isReadOnly);
