@@ -94,6 +94,12 @@ internal static class FileImport
         }
 
         asset = AssetRegistry.RegisterPackageEntry(destFileInfo, package, false);
+
+        // Force the asset library window (and any other UI that polls this counter) to refresh
+        // immediately. The file system watcher would also bump it eventually, but its debounce
+        // delays the UI update for ~400ms after the drop.
+        ResourceFileWatcher.FileStateChangeCounter++;
+
         return true;
     }
 }

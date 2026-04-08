@@ -152,8 +152,12 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
         _resourceFileWatcher.FileCreated += (_, path) =>
                                             {
                                                 var isDirectory = Directory.Exists(path);
-                                                
-                                                AssetRegistry.RegisterPackageEntry(new FileInfo(path), this, isDirectory);
+
+                                                FileSystemInfo info = isDirectory
+                                                                          ? new DirectoryInfo(path)
+                                                                          : new FileInfo(path);
+
+                                                AssetRegistry.RegisterPackageEntry(info, this, isDirectory);
                                                 ResourceFileWatcher.FileStateChangeCounter++;
                                             };
 
