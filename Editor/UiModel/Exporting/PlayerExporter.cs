@@ -44,8 +44,8 @@ internal static partial class PlayerExporter
         var package = composition.Symbol.SymbolPackage;
         exportDir = Path.Combine(package.Folder, FileLocations.ExportSubFolder, childUi.SymbolChild.ReadableName);
 
-        // if (!KeepCopyOfExportDir(out reason, exportDir)) 
-        //     return false;
+        if (!TryRemoveExistingExportDir(out reason, exportDir))
+            return false;
 
         Directory.CreateDirectory(exportDir);
 
@@ -468,18 +468,18 @@ internal static partial class PlayerExporter
         return false;
     }
 
-    private static bool KeepCopyOfExportDir(out string reason, string exportDir)
+    private static bool TryRemoveExistingExportDir(out string reason, string exportDir)
     {
         try
         {
             if (Directory.Exists(exportDir))
             {
-                Directory.Move(exportDir, exportDir + '_' + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
+                Directory.Delete(exportDir, recursive: true);
             }
         }
         catch (Exception e)
         {
-            reason = $"Failed to move export dir: {exportDir} ({e.Message}). Please close all files and File Explorer windows.";
+            reason = $"Failed to remove export dir: {exportDir} ({e.Message}). Please close all files and File Explorer windows.";
             return false;
         }
 
