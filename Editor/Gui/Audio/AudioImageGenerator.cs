@@ -2,10 +2,13 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using ManagedBass;
 using T3.Core.Audio;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
+using T3.Core.UserData;
 using T3.Core.Utils;
 using T3.Editor.Gui.UiHelpers;
 
@@ -30,17 +33,29 @@ internal static class AudioImageGenerator
             return false;
         }
 
-        string imageExtension = UserSettings.Config.ExpandSpectrumVisualizerVertically ? ".10.waveform.png" : ".waveform.png";
-        var imageFilePath = clip.FilePath! + imageExtension;
-        imagePathAbsolute = soundFilePathAbsolute + imageExtension;
-            
+        // Cache waveform images in a per-user temp folder instead of next to the audio file -
+        // they are fully derived/temporary and shouldn't pollute the user's project assets.
+        var imageVariantSuffix = UserSettings.Config.ExpandSpectrumVisualizerVertically ? ".10.waveform.png" : ".waveform.png";
+        imagePathAbsolute = GetWaveformImageCachePath(soundFilePathAbsolute, imageVariantSuffix);
+
         if (File.Exists(imagePathAbsolute))
         {
-            Log.Debug($"Reusing sound image file: {imageFilePath}");
+            Log.Debug($"Reusing sound image file: {imagePathAbsolute}");
             return true;
         }
 
-        Log.Debug($"Generating {imageFilePath}...");
+        Log.Debug($"Generating {imagePathAbsolute}...");
+
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(imagePathAbsolute)!);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Failed to create soundtrack image cache directory: {e.Message}");
+            imagePathAbsolute = null;
+            return false;
+        }
 
         // Use the offline analysis stream from AudioMixerManager instead of calling Bass.Init()
         // This prevents interference with live playback and operator audio streams
@@ -197,6 +212,27 @@ internal static class AudioImageGenerator
             }
         }
     }
+
+    /// <summary>
+    /// Builds a stable cache path for the waveform image of the given audio file inside
+    /// %AppData%\TiXL\Tmp\SoundtrackImages. The filename hashes the absolute audio path so two
+    /// soundtracks with the same name in different folders never collide, and the original
+    /// filename is kept as a prefix to make the temp folder readable.
+    /// </summary>
+    private static string GetWaveformImageCachePath(string soundFilePathAbsolute, string variantSuffix)
+    {
+        var normalized = soundFilePathAbsolute.Replace('\\', '/');
+        var hashBytes = SHA1.HashData(Encoding.UTF8.GetBytes(normalized.ToLowerInvariant()));
+        var hash = Convert.ToHexString(hashBytes).AsSpan(0, 16).ToString();
+
+        var safePrefix = Path.GetFileNameWithoutExtension(soundFilePathAbsolute);
+        foreach (var invalid in Path.GetInvalidFileNameChars())
+            safePrefix = safePrefix.Replace(invalid, '_');
+
+        return Path.Combine(SoundtrackImageCacheFolder, $"{safePrefix}.{hash}{variantSuffix}");
+    }
+
+    private static readonly string SoundtrackImageCacheFolder = Path.Combine(FileLocations.TempFolder, "SoundtrackImages");
 
     private static readonly PreComputedLogs PrecomputedLogs = new();
     private static readonly Color[] IntensityPalette = GeneratePalette();
