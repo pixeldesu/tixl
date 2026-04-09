@@ -10,7 +10,7 @@ runs:
         # explicitly specify the version for the CI environment.
         # Remove or comment out 'dotnet-version-file'.
         # dotnet-version-file: './global.json' 
-        dotnet-version: '9.0.203' # Specify the exact SDK version for CI
+        dotnet-version: '10.0.x' # .NET 10 LTS
 
     - name: Display .NET SDK Version used in CI
       shell: pwsh

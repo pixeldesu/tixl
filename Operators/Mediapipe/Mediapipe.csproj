@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>4ddcedc9-2c55-476d-9aeb-8e069ecd278a</UserSecretsId>
@@ -105,7 +105,7 @@
     <PackageReference Include="OpenGL.Net" Version="0.8.4">
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
-    <PackageReference Include="Google.Protobuf" Version="3.31.1" />
+    <PackageReference Include="Google.Protobuf" Version="3.34.1" />
   </ItemGroup>
   <!-- Native dependencies -->
   <ItemGroup>
