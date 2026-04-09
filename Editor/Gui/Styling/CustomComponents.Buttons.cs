@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
+using T3.Editor.App;
 using T3.SystemUi;
 
 namespace T3.Editor.Gui.Styling;
@@ -130,7 +131,7 @@ internal static partial class CustomComponents
         }
 
         ImGui.PushID((int)icon);
-        var clicked = ImGui.Button(string.Empty, size); 
+        var clicked = ImGui.Button("##iconBtn", size);
         ImGui.PopID();
         Icons.DrawIconOnLastItem(icon, GetStateColor(state).Rgba);
 
@@ -231,7 +232,7 @@ internal static partial class CustomComponents
         {
             ImGui.PushFont(Fonts.FontBold);
             if (ImGui.Button(label)
-                || (enableTriggerWithReturn && ImGui.IsKeyPressed((ImGuiKey)Key.Return)))
+                || (enableTriggerWithReturn && ImGui.IsKeyPressed(Key.Return.ToImGuiKey())))
             {
                 ImGui.PopFont();
                 return true;

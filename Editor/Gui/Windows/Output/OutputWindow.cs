@@ -82,7 +82,7 @@ internal sealed class OutputWindow : Window
     {
         ImGui.BeginChild("##content",
                          new Vector2(0, ImGui.GetWindowHeight()),
-                         false,
+                         ImGuiChildFlags.None,
                          ImGuiWindowFlags.NoScrollbar |
                          ImGuiWindowFlags.NoMove |
                          ImGuiWindowFlags.NoScrollWithMouse |
@@ -96,7 +96,11 @@ internal sealed class OutputWindow : Window
             _imageCanvas.SetAsCurrent();
 
             // Move down to avoid overlapping with the toolbar
-            ImGui.SetCursorPos(ImGui.GetWindowContentRegionMin() + new Vector2(0, 40)); // this line as no effect?
+            ImGui.SetCursorPos(ImGui.GetCursorStartPos() + new Vector2(0, 40));
+            // ImGui 1.91 sets an internal IsSetPos flag on SetCursorPos and asserts in End()
+            // if no item is submitted afterwards. The image canvas draws to the raw draw list
+            // and does not emit items, so submit an empty Dummy as an extent marker.
+            ImGui.Dummy(Vector2.Zero);
 
             Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance, out var graphCanvas);
 
@@ -157,14 +161,14 @@ internal sealed class OutputWindow : Window
     private void DrawToolbar(Type? drawnType)
     {
         // Set cursor to top of the window
-        ImGui.SetCursorPos(ImGui.GetWindowContentRegionMin());
+        ImGui.SetCursorPos(ImGui.GetCursorStartPos());
 
         // Calculate available width
-        var availableWidth = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
+        var availableWidth = ImGui.GetWindowSize().X;
         var toolbarHeight = ImGui.GetTextLineHeight() + 22;
         
         // Begin a horizontally scrollable child region
-        ImGui.BeginChild("##toolbar_scroll", new Vector2(availableWidth, toolbarHeight), false, ImGuiWindowFlags.HorizontalScrollbar);
+        ImGui.BeginChild("##toolbar_scroll", new Vector2(availableWidth, toolbarHeight), ImGuiChildFlags.None, ImGuiWindowFlags.HorizontalScrollbar);
 
         Pinning.DrawPinning();
 

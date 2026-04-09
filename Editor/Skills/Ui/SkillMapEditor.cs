@@ -52,7 +52,7 @@ internal static class SkillMapEditor
             // ImGui.EndChild();
             //
             // ImGui.SameLine();
-            ImGui.BeginChild("Inner", new Vector2(-200, 0), false, ImGuiWindowFlags.NoMove);
+            ImGui.BeginChild("Inner", new Vector2(-200, 0), ImGuiChildFlags.None, ImGuiWindowFlags.NoMove);
             {
                 ImGui.SameLine();
 
@@ -81,8 +81,6 @@ internal static class SkillMapEditor
             }
             ImGui.EndChild();
         }
-
-        ImGui.PopStyleColor();
 
         ImGui.End();
         ImGui.PopStyleVar();

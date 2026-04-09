@@ -30,10 +30,9 @@ internal static partial class CustomComponents
 
         var backupPos = ImGui.GetCursorPos();
 
-        var size = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
-        var contentMin = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos();
-
-        var pos = new Vector2(contentMin.X, contentMin.Y + size.Y - offsetFromBottom - thickness - 1);
+        var windowPos = ImGui.GetWindowPos();
+        var windowSize = ImGui.GetWindowSize();
+        var pos = new Vector2(windowPos.X, windowPos.Y + windowSize.Y - offsetFromBottom - thickness - 1);
         ImGui.SetCursorScreenPos(pos);
 
         ImGui.PushStyleColor(ImGuiCol.Button, UiColors.BackgroundGaps.Rgba);
@@ -57,7 +56,7 @@ internal static partial class CustomComponents
                 hasBeenDragged = true;
                 offsetFromBottom =
                     (offsetFromBottom - ImGui.GetIO().MouseDelta.Y)
-                   .Clamp(0, size.Y - thickness);
+                   .Clamp(0, windowSize.Y - thickness);
             }
         }
 
@@ -107,7 +106,7 @@ internal static partial class CustomComponents
         ImGui.SetCursorPosX(0);
         var p = ImGui.GetCursorScreenPos();
 
-        //var p = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos() + new Vector2(1,1);
+        //var p = ImGui.GetCursorStartPos() + ImGui.GetWindowPos() + new Vector2(1,1);
         ImGui.GetWindowDrawList()
              .AddRectFilled(p,
                             p + new Vector2(ImGui.GetWindowSize().X, 1), UiColors.ForegroundFull.Fade(0.1f));
@@ -153,7 +152,7 @@ internal static partial class CustomComponents
 
     public static bool EmptyWindowMessage(string message, string buttonLabel = null)
     {
-        var center = (ImGui.GetWindowContentRegionMax() + ImGui.GetWindowContentRegionMin()) / 2 + ImGui.GetWindowPos();
+        var center = ImGui.GetWindowPos() + ImGui.GetWindowSize() * 0.5f;
         var lines = message.Split('\n').ToArray();
 
         var lineCount = lines.Length;

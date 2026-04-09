@@ -82,7 +82,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                 }
             }
 
-            ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(0, 3)); // keep some padding 
+            ImGui.Dummy(new Vector2(1, 3)); // top padding (was SetCursorPos+3, but ImGui 1.91 needs an item)
             _minScreenPos = ImGui.GetCursorScreenPos();
 
             var compositionSymbolChildId = compositionOp.SymbolChildId;
@@ -602,7 +602,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                 {
                     var size = new Vector2(60, 25);
                     ImGui.SetCursorScreenPos(posOnScreen + new Vector2(-size.X / 2, keyframeSize.Y - 5));
-                    ImGui.BeginChildFrame((uint)keyHash, size, ImGuiWindowFlags.NoScrollbar);
+                    ImGui.BeginChild($"##kf{keyHash}", size, ImGuiChildFlags.FrameStyle, ImGuiWindowFlags.NoScrollbar);
                     ImGui.PushFont(Fonts.FontSmall);
                     var tmp = (float)vDef.Value;
 
@@ -629,13 +629,13 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
                     //vDef.Value = tmp;
                     ImGui.PopFont();
-                    ImGui.EndChildFrame();
+                    ImGui.EndChild();
                 }
                 else if (inputUi is IntInputUi intInputUi)
                 {
                     var size = new Vector2(60, 25);
                     ImGui.SetCursorScreenPos(posOnScreen + new Vector2(-size.X / 2, keyframeSize.Y - 5));
-                    ImGui.BeginChildFrame((uint)keyHash, size, ImGuiWindowFlags.NoScrollbar);
+                    ImGui.BeginChild($"##kf{keyHash}", size, ImGuiChildFlags.FrameStyle, ImGuiWindowFlags.NoScrollbar);
                     ImGui.PushFont(Fonts.FontSmall);
                     var tmp = (int)vDef.Value;
                     var result = intInputUi.DrawEditControl(ref tmp);
@@ -661,7 +661,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
                     //vDef.Value = tmp;
                     ImGui.PopFont();
-                    ImGui.EndChildFrame();
+                    ImGui.EndChild();
                 }
             }
 

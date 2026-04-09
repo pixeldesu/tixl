@@ -151,8 +151,8 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
     {
         var modified = false;
         var keepPosition = ImGui.GetCursorPos();
-        ImGui.SetCursorPos(new Vector2(ImGui.GetWindowContentRegionMax().X - ImGui.GetFrameHeight() - ImGui.GetStyle().FramePadding.X,
-                                       ImGui.GetWindowContentRegionMin().Y));
+        ImGui.SetCursorPos(new Vector2(ImGui.GetWindowSize().X - ImGui.GetFrameHeight() - ImGui.GetStyle().FramePadding.X,
+                                       0));
 
         if (CustomComponents.IconButton(Icon.Settings2, Vector2.One * ImGui.GetFrameHeight()))
         {
@@ -161,7 +161,7 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
 
         ImGui.SetCursorPos(keepPosition);
 
-        if (ImGui.BeginPopup("customFormats", ImGuiWindowFlags.Popup))
+        if (ImGui.BeginPopup("customFormats"))
         {
             ImGui.TextUnformatted("Apply formatting presets...");
             foreach (var p in _valueSettingPresets)

@@ -54,6 +54,27 @@ Also:
 - Prefix private fields with `_`
 - Prefer slightly longer, descriptive names when clarity improves (e.g. `faceIndex` over `i`)
 
+## Line Endings (Important for Bulk Edits)
+The repo has **mixed line endings**: most `.cs` files use CRLF, but some are LF.
+There is no `.gitattributes` enforcing a single convention, and `core.autocrlf` is `false`.
+
+When writing scripts (Python, sed, etc.) to batch-rewrite many files, this is the
+single biggest source of noisy diffs. Naive read/write loops normalize everything
+to LF and produce a "every line changed" diff that buries the actual logic change.
+
+Rules for any bulk-edit script:
+1. **Read in binary mode** (Python: `open(path, 'rb')`) — do NOT use `read_text` or
+   text-mode reads, which silently strip `\r`.
+2. **Detect each file's existing line ending** before writing. If the file contains
+   `\r\n`, write it back with CRLF; otherwise LF. Per-file, not per-repo.
+3. **Write in binary mode** (`open(path, 'wb')`) with the bytes you produced — do
+   NOT pass `newline=''` to a text-mode open and expect it to preserve anything.
+4. After the script runs, sanity-check with `git diff --shortstat` before committing.
+   If the line count is suspiciously high relative to the logic change, you almost
+   certainly munged line endings — fix them in the working tree, then `commit --amend`.
+5. New files you create may use either convention; CRLF is the more common default
+   in this repo, but matching nearby files is preferred.
+
 ## UI Implementation Guidelines
 - Use `UiColor`/`UiColors` utilities instead of hard-coded float color vectors
 - Use fonts sparingly; default to `Normal` and `Small`

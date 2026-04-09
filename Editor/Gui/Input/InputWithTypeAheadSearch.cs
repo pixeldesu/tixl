@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
+using T3.Editor.App;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.SystemUi;
@@ -45,7 +46,7 @@ internal static class InputWithTypeAheadSearch
         if (isSearchResultWindowOpen)
         {
             //Log.Debug("SearchString: " + searchString);
-            if (ImGui.IsKeyPressed((ImGuiKey)Key.CursorDown, true))
+            if (ImGui.IsKeyPressed(Key.CursorDown.ToImGuiKey(), true))
             {
                 if (_lastTypeAheadResults.Count > 0)
                 {
@@ -55,7 +56,7 @@ internal static class InputWithTypeAheadSearch
                     wasSelected = true;
                 }
             }
-            else if (ImGui.IsKeyPressed((ImGuiKey)Key.CursorUp, true))
+            else if (ImGui.IsKeyPressed(Key.CursorUp.ToImGuiKey(), true))
             {
                 if (_lastTypeAheadResults.Count > 0)
                 {
@@ -68,7 +69,7 @@ internal static class InputWithTypeAheadSearch
                 }
             }
             
-            if (ImGui.IsKeyPressed((ImGuiKey)Key.Return, false))
+            if (ImGui.IsKeyPressed(Key.Return.ToImGuiKey(), false))
             {
                 if (_selectedResultIndex >= 0 && _selectedResultIndex < _lastTypeAheadResults.Count)
                 {
@@ -86,7 +87,7 @@ internal static class InputWithTypeAheadSearch
                     return true;
                 }
             }
-            if (ImGui.IsKeyPressed((ImGuiKey)Key.Esc, false))
+            if (ImGui.IsKeyPressed(Key.Esc.ToImGuiKey(), false))
             {
                 _activeInputId = 0;
                 selected = searchString;
@@ -127,7 +128,7 @@ internal static class InputWithTypeAheadSearch
         var isItemDeactivated = ImGui.IsItemDeactivated();
 
         // We defer exit to get clicks on opened popup list
-        var lostFocus = isItemDeactivated || ImGui.IsKeyDown((ImGuiKey)Key.Esc);
+        var lostFocus = isItemDeactivated || ImGui.IsKeyDown(Key.Esc.ToImGuiKey());
         selected = string.Empty;
             
         if ( ImGui.IsItemActive() || isSearchResultWindowOpen)
@@ -138,7 +139,7 @@ internal static class InputWithTypeAheadSearch
             var size = new Vector2(ImGui.GetItemRectSize().X, 320);
             ImGui.SetNextWindowPos(lastPosition);
             ImGui.SetNextWindowSize(size);
-            if (ImGui.IsItemFocused() && ImGui.IsKeyPressed((ImGuiKey)Key.Return))
+            if (ImGui.IsItemFocused() && ImGui.IsKeyPressed(Key.Return.ToImGuiKey()))
             {
                 wasSelected = true;
                 _activeInputId = 0;
@@ -192,7 +193,7 @@ internal static class InputWithTypeAheadSearch
                             
                     if (!justOpened && 
                         ( ImGui.IsMouseClicked(ImGuiMouseButton.Left) && isItemHovered 
-                        || isSelected && ImGui.IsKeyPressed((ImGuiKey)Key.Return)))
+                        || isSelected && ImGui.IsKeyPressed(Key.Return.ToImGuiKey())))
                     {
                         searchString = item;
                         wasSelected = true;

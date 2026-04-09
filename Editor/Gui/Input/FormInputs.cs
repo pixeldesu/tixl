@@ -244,7 +244,7 @@ internal static class FormInputs
                 var isSelected = value == selectedValue;
                 if (!ImGui.Selectable($"{value}", 
                                       isSelected, 
-                                      ImGuiSelectableFlags.DontClosePopups))
+                                      ImGuiSelectableFlags.NoAutoClosePopups))
                     continue;
 
                 ImGui.CloseCurrentPopup();
@@ -288,10 +288,10 @@ internal static class FormInputs
 
                 var equalityComparer = EqualityComparer<T>.Default;
                 var isSelected = equalityComparer.Equals(value, selectedValue);
-                // if (!ImGui.Selectable($"{value}", isSelected, ImGuiSelectableFlags.DontClosePopups))
+                // if (!ImGui.Selectable($"{value}", isSelected, ImGuiSelectableFlags.NoAutoClosePopups))
                 //     continue;
                 
-                if (!ImGui.Selectable(getDisplayTextFunc(value), isSelected, ImGuiSelectableFlags.DontClosePopups))
+                if (!ImGui.Selectable(getDisplayTextFunc(value), isSelected, ImGuiSelectableFlags.NoAutoClosePopups))
                     continue;                
 
                 ImGui.CloseCurrentPopup();
@@ -846,7 +846,10 @@ internal static class FormInputs
         SetCursorToParameterEdit();
     }
     
-    public static void SetCursorToParameterEdit() => ImGui.SetCursorPosX(LeftParameterPadding + ParameterSpacing);
+    public static void SetCursorToParameterEdit()
+    {
+        ImGui.SetCursorPosX(LeftParameterPadding + ParameterSpacing);
+    }
         
     public static bool DrawValueRangeControl(ref float min, ref float max, ref float scale, ref bool clampedMin, ref bool clampedMax, float defaultMin,
                                              float defaultMax, float defaultScale)

@@ -69,7 +69,7 @@ internal static class SkillProgressionUi
         
 
         var leftWidth = 240 * uiScale;
-        ImGui.BeginChild("Map", new Vector2(leftWidth, 0), false, ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("Map", new Vector2(leftWidth, 0), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         {
             _mapCanvas.DrawContent(null, out _, TopicSelection);
             if (mode == ContentModes.HubPanel && ImGui.IsWindowHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
@@ -84,14 +84,13 @@ internal static class SkillProgressionUi
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, padding);
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5);
-        ImGui.BeginChild("Right", new Vector2(-padding.X, 0), false
-                       , ImGuiWindowFlags.AlwaysUseWindowPadding 
-                         );
+        ImGui.BeginChild("Right", new Vector2(-padding.X, 0), ImGuiChildFlags.None | ImGuiChildFlags.AlwaysUseWindowPadding
+                       );
         {
             var dl = ImGui.GetWindowDrawList();
             var hoveredIndex = -1;
             
-            ImGui.BeginChild("TopContent", new Vector2(0, -HeightActionsArea), false,
+            ImGui.BeginChild("TopContent", new Vector2(0, -HeightActionsArea), ImGuiChildFlags.None,
                              ImGuiWindowFlags.NoBackground);
             {
                 if (DrawProgressHeader(topic, activeIndex, dl, out hoveredIndex))
@@ -124,7 +123,7 @@ internal static class SkillProgressionUi
 
             bool isFirst = activeIndex == 0;
 
-            if (ImGui.BeginChild("Actions2", new Vector2(0, HeightActionsArea), false,
+            if (ImGui.BeginChild("Actions2", new Vector2(0, HeightActionsArea), ImGuiChildFlags.None,
                                  ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar))
             {
                 var skipSize = CustomComponents.GetCtaButtonSize("Skip");
@@ -152,6 +151,7 @@ internal static class SkillProgressionUi
                     {
                         SkillTraining.ReplayLevel(previousLevel);
                     }
+                    ImGui.PopStyleColor(2);
                 }
 
                 ImGui.SameLine(ImGui.GetWindowWidth() - skipSize.X - actionSize.X - 20);
@@ -163,7 +163,6 @@ internal static class SkillProgressionUi
                 }
 
                 ImGui.SameLine(0, 10);
-                ImGui.PopStyleColor(2);
 
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.20f, 0.45f, 0.95f, 1f));
                 ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.25f, 0.55f, 1.00f, 1f));
@@ -187,7 +186,7 @@ internal static class SkillProgressionUi
         var dl = ImGui.GetWindowDrawList();
 
         var leftWidth = 240 * uiScale;
-        ImGui.BeginChild("Map", new Vector2(leftWidth, 0), false, ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("Map", new Vector2(leftWidth, 0), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         {
             _mapCanvas.DrawContent(null, out _, TopicSelection);
             if (mode == ContentModes.HubPanel && ImGui.IsWindowHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
@@ -206,7 +205,7 @@ internal static class SkillProgressionUi
 
         var paddingForActions = mode == ContentModes.PopUp ? HeightActionsArea : 0;
 
-        ImGui.BeginChild("Right", new Vector2(0, -paddingForActions), false, ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("Right", new Vector2(0, -paddingForActions), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         {
             FormInputs.AddVerticalSpace(20);
             ImGui.Indent(20 * T3Ui.UiScaleFactor);

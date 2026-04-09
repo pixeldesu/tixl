@@ -5,6 +5,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.SystemUi;
+using T3.Editor.App;
 using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
@@ -138,12 +139,10 @@ internal sealed class ParameterWindow : Window
         var modified = false;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
         ImGui.BeginChild("header", new Vector2(0, ImGui.GetFrameHeight() + 5),
-                         false,
-                         ImGuiWindowFlags.AlwaysAutoResize
-                         | ImGuiWindowFlags.NoScrollbar
+                         ImGuiChildFlags.AlwaysUseWindowPadding,
+                         ImGuiWindowFlags.NoScrollbar
                          | ImGuiWindowFlags.NoScrollWithMouse
-                         | ImGuiWindowFlags.NoBackground
-                         | ImGuiWindowFlags.AlwaysUseWindowPadding);
+                         | ImGuiWindowFlags.NoBackground);
         {
             ImGui.AlignTextToFramePadding();
             // Namespace and symbol
@@ -182,7 +181,7 @@ internal sealed class ParameterWindow : Window
                                                                       ref namespaceForEdit, 
                                                                       out _, 
                                                                       out _);
-                if (namespaceModified && !string.IsNullOrEmpty(namespaceForEdit) && ImGui.IsKeyPressed((ImGuiKey)Key.Return))
+                if (namespaceModified && !string.IsNullOrEmpty(namespaceForEdit) && ImGui.IsKeyPressed(Key.Return.ToImGuiKey()))
                 {
                     if (!EditableSymbolProject.ChangeSymbolNamespace(symbol, namespaceForEdit, out var reason))
                     {
@@ -198,8 +197,6 @@ internal sealed class ParameterWindow : Window
             {
                 ImGui.Text(op.Symbol.Namespace);
             }
-
-            ImGui.PopStyleColor();
 
             // Tags...
             {
@@ -382,7 +379,7 @@ internal sealed class ParameterWindow : Window
         }
         
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
-        ImGui.BeginChild("parameters", Vector2.Zero, false, ImGuiWindowFlags.AlwaysUseWindowPadding| ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("parameters", Vector2.Zero, ImGuiChildFlags.None | ImGuiChildFlags.AlwaysUseWindowPadding, ImGuiWindowFlags.NoBackground);
 
         // Scroll back up on operator change
         if (_selectionChanged)

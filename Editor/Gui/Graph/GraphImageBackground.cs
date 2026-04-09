@@ -71,8 +71,7 @@ internal sealed class GraphImageBackground
         _imageCanvas.SetViewMode(ImageOutputCanvas.Modes.Fitted);
         _imageCanvas.Update(T3Ui.EditingFlags.PreventMouseInteractions);
 
-        var windowContentRegionMin = ImGui.GetWindowContentRegionMin() + new Vector2(0, 0);
-        ImGui.SetCursorPos(windowContentRegionMin);
+        ImGui.SetCursorPos(Vector2.Zero);
 
         var instanceForOutput = _structure.GetInstanceFromIdPath(_backgroundNodePath);
 

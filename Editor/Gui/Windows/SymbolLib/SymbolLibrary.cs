@@ -130,7 +130,7 @@ internal sealed class SymbolLibrary : Window
 
         var textColor = UiColors.Text.Fade(0.8f);
         ImGui.PushStyleColor(ImGuiCol.Text, textColor.Rgba);
-        ImGui.BeginChild("scrolling", Vector2.Zero, false, ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("scrolling", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         {
             // Show filtered or full tree depending on filter/search state
             if (_libraryFiltering.AnyFilterActive)
@@ -330,7 +330,7 @@ internal sealed class SymbolLibrary : Window
             if (!isOpen && containsSelected)
             {
                 var h = ImGui.GetFontSize();
-                var x = ImGui.GetContentRegionMax().X - h;
+                var x = ImGui.GetWindowSize().X - h;
                 ImGui.SameLine(x);
 
                 var clicked = ImGui.InvisibleButton("Reveal", new Vector2(h));

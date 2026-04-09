@@ -2,6 +2,7 @@ using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Editor.App;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
@@ -82,7 +83,7 @@ internal sealed class SymbolBrowser
             var hasFocus =  ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows);
 
             var anythingActive = ImGui.IsAnyItemActive();
-            if (!hasFocus || anythingActive || !ImGui.IsKeyReleased((ImGuiKey)Key.Tab))
+            if (!hasFocus || anythingActive || !ImGui.IsKeyReleased(Key.Tab.ToImGuiKey()))
                 return;
 
             if (nodeSelection.GetSelectedChildUis().Count() != 1)
@@ -203,7 +204,7 @@ internal sealed class SymbolBrowser
         // Search input outline
         _drawList.AddRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), UiColors.Gray);
 
-        if (ImGui.IsKeyPressed((ImGuiKey)Key.Return))
+        if (ImGui.IsKeyPressed(Key.Return.ToImGuiKey()))
         {
             if (_selectedSymbolUi != null)
             {
@@ -222,7 +223,7 @@ internal sealed class SymbolBrowser
         var clickedOutside = ImGui.IsMouseClicked(ImGuiMouseButton.Left) && ImGui.IsWindowHovered();
         var shouldCancelConnectionMaker = clickedOutside
                                           || ImGui.IsMouseClicked(ImGuiMouseButton.Right)
-                                          || ImGui.IsKeyDown((ImGuiKey)Key.Esc);
+                                          || ImGui.IsKeyDown(Key.Esc.ToImGuiKey());
 
         if (shouldCancelConnectionMaker)
         {
@@ -267,16 +268,16 @@ internal sealed class SymbolBrowser
             
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundPopup.Rgba);
 
-        if (ImGui.BeginChildFrame(999, size))
+        if (ImGui.BeginChild("##results", size, ImGuiChildFlags.FrameStyle))
         {
             // if (_filter.PresetFilterString == null)
             // {
-                if (ImGui.IsKeyReleased((ImGuiKey)Key.CursorDown))
+                if (ImGui.IsKeyReleased(Key.CursorDown.ToImGuiKey()))
                 {
                     UiListHelpers.AdvanceSelectedItem(_filter.MatchingSymbolUis, ref _selectedSymbolUi, 1);
                     _selectedItemChanged = true;
                 }
-                else if (ImGui.IsKeyReleased((ImGuiKey)Key.CursorUp))
+                else if (ImGui.IsKeyReleased(Key.CursorUp.ToImGuiKey()))
                 {
                     UiListHelpers.AdvanceSelectedItem(_filter.MatchingSymbolUis, ref _selectedSymbolUi, -1);
                     _selectedItemChanged = true;
@@ -372,7 +373,7 @@ internal sealed class SymbolBrowser
             }
         }
 
-        ImGui.EndChildFrame();
+        ImGui.EndChild();
 
         ImGui.PopStyleColor();
         ImGui.PopStyleVar(2);
@@ -427,13 +428,13 @@ internal sealed class SymbolBrowser
 
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundPopup.Rgba);
         ImGui.SetCursorPos(position);
-        if (ImGui.BeginChildFrame(998, size))
+        if (ImGui.BeginChild("##presets", size, ImGuiChildFlags.FrameStyle))
         {
-            if (ImGui.IsKeyReleased((ImGuiKey)Key.CursorDown))
+            if (ImGui.IsKeyReleased(Key.CursorDown.ToImGuiKey()))
             {
                 UiListHelpers.AdvanceSelectedItem(_matchingPresets, ref _selectedPreset, 1);
             }
-            else if (ImGui.IsKeyReleased((ImGuiKey)Key.CursorUp))
+            else if (ImGui.IsKeyReleased(Key.CursorUp.ToImGuiKey()))
             {
                 UiListHelpers.AdvanceSelectedItem(_matchingPresets, ref _selectedPreset, -1);
             }
@@ -463,7 +464,7 @@ internal sealed class SymbolBrowser
             }
 
             ImGui.PopStyleVar();
-            ImGui.EndChildFrame();
+            ImGui.EndChild();
         }
         ImGui.PopStyleColor();
             
@@ -489,7 +490,7 @@ internal sealed class SymbolBrowser
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.One); // Padding between panels
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundPopup.Rgba);
 
-        if (ImGui.BeginChildFrame(998, size))
+        if (ImGui.BeginChild("##description", size, ImGuiChildFlags.FrameStyle))
         {
             if (!string.IsNullOrEmpty(_selectedSymbolUi.Description))
             {
@@ -504,7 +505,7 @@ internal sealed class SymbolBrowser
                 ListExampleOperators(examplesIds);
             }
 
-            ImGui.EndChildFrame();
+            ImGui.EndChild();
         }
 
         ImGui.PopStyleColor();

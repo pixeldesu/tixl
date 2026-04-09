@@ -88,8 +88,8 @@ internal static class TourInteraction
         ImGui.PushStyleColor(ImGuiCol.ChildBg, style.WindowBackground.Rgba);
         ImGui.PushStyleColor(ImGuiCol.Border, style.WindowBorder.Rgba);
 
-        if (ImGui.BeginChild("Task", new Vector2(500 * T3Ui.UiScaleFactor, _lastContentHeight), true,
-                             ImGuiWindowFlags.AlwaysUseWindowPadding | ImGuiWindowFlags.NoScrollbar))
+        if (ImGui.BeginChild("Task", new Vector2(500 * T3Ui.UiScaleFactor, _lastContentHeight), ImGuiChildFlags.Borders | ImGuiChildFlags.AlwaysUseWindowPadding,
+                             ImGuiWindowFlags.NoScrollbar))
         {
             // Draw task
             ImGui.SameLine(0, 4);

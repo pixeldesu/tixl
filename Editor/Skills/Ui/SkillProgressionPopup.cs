@@ -41,11 +41,11 @@ internal static class SkillProgressionPopup
         ImGui.PushStyleColor(ImGuiCol.PopupBg, Color.Mix(UiColors.BackgroundFull, UiColors.ForegroundFull, 0.06f).Rgba);
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10));
+        
         if (ImGui.BeginPopupModal("ProgressionPopup", ref IsOpen,
                                   ImGuiWindowFlags.NoResize
                                   | ImGuiWindowFlags.NoMove
                                   | ImGuiWindowFlags.NoTitleBar
-                                  | ImGuiWindowFlags.AlwaysUseWindowPadding
                                  ))
         {
             SkillProgressionUi.DrawContent(topic,

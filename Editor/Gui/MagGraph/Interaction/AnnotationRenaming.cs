@@ -1,5 +1,6 @@
 #nullable enable
 using ImGuiNET;
+using T3.Editor.App;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -101,7 +102,7 @@ internal static class AnnotationRenaming
 
         // Detect if the user clicked outside, pressed Esc, or deactivated the item
         var clickedOutside = ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !screenArea.Contains(ImGui.GetMousePos());
-        shouldClose |= ImGui.IsItemDeactivated() || ImGui.IsKeyPressed((ImGuiKey)Key.Esc) || clickedOutside;
+        shouldClose |= ImGui.IsItemDeactivated() || ImGui.IsKeyPressed(Key.Esc.ToImGuiKey()) || clickedOutside;
         if (!shouldClose)
             return;
 
@@ -110,7 +111,7 @@ internal static class AnnotationRenaming
         context.ActiveAnnotationId = Guid.Empty;
 
         // Only execute command if text changed and not cancelled
-        if (_titleBuffer != _originalTitle && !ImGui.IsKeyPressed((ImGuiKey)Key.Esc))
+        if (_titleBuffer != _originalTitle && !ImGui.IsKeyPressed(Key.Esc.ToImGuiKey()))
         {
             _changeAnnotationTextCommand.NewText = annotation.Title;
             UndoRedoStack.AddAndExecute(_changeAnnotationTextCommand);

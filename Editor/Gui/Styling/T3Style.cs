@@ -59,9 +59,9 @@ public static class T3Style
         // Tab
         style.Colors[(int)ImGuiCol.Tab] = UiColors.BackgroundTabInActive;
         style.Colors[(int)ImGuiCol.TabHovered] = UiColors.BackgroundActive.Rgba;
-        style.Colors[(int)ImGuiCol.TabActive] = UiColors.BackgroundTabActive;
-        style.Colors[(int)ImGuiCol.TabUnfocusedActive] = UiColors.BackgroundTabActive;
-        style.Colors[(int)ImGuiCol.TabUnfocused] = UiColors.BackgroundTabInActive;
+        style.Colors[(int)ImGuiCol.TabSelected] = UiColors.BackgroundTabActive;
+        style.Colors[(int)ImGuiCol.TabDimmedSelected] = UiColors.BackgroundTabActive;
+        style.Colors[(int)ImGuiCol.TabDimmed] = UiColors.BackgroundTabInActive;
         // Title
         style.Colors[(int)ImGuiCol.TitleBgActive] = UiColors.BackgroundGaps;
         style.Colors[(int)ImGuiCol.TitleBg] = UiColors.BackgroundGaps;
@@ -73,6 +73,9 @@ public static class T3Style
         // others...
         style.Colors[(int)ImGuiCol.DragDropTarget] = Color.Transparent;
         
+        // Editor code relies on this being zero: it uses ImGui.GetWindowSize()/GetWindowPos()
+        // directly as the inner content rect (the original ImGui.GetWindowContentRegionMin/Max
+        // helpers were removed in 1.91). If this is ever changed, audit those call sites.
         style.WindowPadding = Vector2.Zero;
         style.FramePadding = new Vector2(7, 4);
         style.ItemSpacing = new Vector2(1, 1.49f);

@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
-using System.Windows.Forms;
 using ImGuiNET;
 using SharpDX.D3DCompiler;
 using SharpDX.Direct3D11;
@@ -69,10 +69,24 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
             SetPerFrameImGuiData(1f / 60f);
 
-            ImGui.GetIO().BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
-            ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable;
-            SetKeyMappings();
+            var io = ImGui.GetIO();
+            io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
+            io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
+            // ImGui 1.91 ships an error-recovery system that turns stack imbalances
+            // (Push/Pop, Begin/End, ID stack, etc.) into recoverable, logged warnings
+            // instead of native asserts. Enable it so we can find offending windows
+            // through the log instead of via SEHException stack traces.
+            io.ConfigErrorRecovery = true;
+            io.ConfigErrorRecoveryEnableDebugLog = true;
+#if DEBUG
+            // Hard-fail on imgui stack imbalances in debug builds so the offending
+            // call site shows up in the debugger. Release builds keep the recoverable
+            // warning bar instead of crashing on end-user installs.
+            io.ConfigDebugIsDebuggerPresent  = true;
+            io.ConfigErrorRecoveryEnableAssert = true;
+#endif
+            
             // restore previous context
             if (previousContext != IntPtr.Zero)
             {
@@ -83,33 +97,6 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         imguiContext = _imguiContext;
     }
 
-    private static void SetKeyMappings()
-    {
-        // Note: this mapping between the windows key enumeration and imgui system-agnostic ImGuiKey might be incomplete.
-        var io = ImGui.GetIO();
-        io.KeyMap[(int)ImGuiKey.Tab] = (int)Keys.Tab;
-        io.KeyMap[(int)ImGuiKey.LeftArrow] = (int)Keys.Left;
-        io.KeyMap[(int)ImGuiKey.RightArrow] = (int)Keys.Right;
-        io.KeyMap[(int)ImGuiKey.UpArrow] = (int)Keys.Up;
-        io.KeyMap[(int)ImGuiKey.DownArrow] = (int)Keys.Down;
-        io.KeyMap[(int)ImGuiKey.PageUp] = (int)Keys.PageUp;
-        io.KeyMap[(int)ImGuiKey.PageDown] = (int)Keys.PageDown;
-        io.KeyMap[(int)ImGuiKey.Home] = (int)Keys.Home;
-        io.KeyMap[(int)ImGuiKey.End] = (int)Keys.End;
-        io.KeyMap[(int)ImGuiKey.Delete] = (int)Keys.Delete;
-        io.KeyMap[(int)ImGuiKey.Backspace] = (int)Keys.Back;
-        io.KeyMap[(int)ImGuiKey.Enter] = (int)Keys.Enter;
-        io.KeyMap[(int)ImGuiKey.Escape] = (int)Keys.Escape;
-
-        // These shortcuts are relevant for imgui's implementation of copy/paste interactions
-        // within edit controls.
-        io.KeyMap[(int)ImGuiKey.A] = (int)Keys.A;
-        io.KeyMap[(int)ImGuiKey.C] = (int)Keys.C;
-        io.KeyMap[(int)ImGuiKey.V] = (int)Keys.V;
-        io.KeyMap[(int)ImGuiKey.X] = (int)Keys.X;
-        io.KeyMap[(int)ImGuiKey.Y] = (int)Keys.Y;
-        io.KeyMap[(int)ImGuiKey.Z] = (int)Keys.Z;
-    }
     #endregion
 
     #region Rendering
@@ -194,11 +181,28 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             ProgramWindows.Main.PrepareRenderingFrame();
 
             // Clear the main window buffer for next frame
-            T3Ui.ProcessFrame();
-            ProgramWindows.RefreshViewport();
+#if !DEBUG
+            try
+            {
+#endif
+                T3Ui.ProcessFrame();
+                ProgramWindows.RefreshViewport();
 
-            ImGui.Render();
-            RenderDrawData(ImGui.GetDrawData());
+                ImGui.Render();
+                RenderDrawData(ImGui.GetDrawData());
+#if !DEBUG
+            }
+            catch (SEHException e)
+            {
+                // A native ImGui assertion fired (e.g. SetCursorPos extent check,
+                // invalid BeginChild flags, empty-stack pop). In release builds this
+                // prevents the app from terminating on end-user machines. The frame
+                // is incomplete; call EndFrame so the next NewFrame doesn't assert
+                // on "NewFrame called without Render".
+                Log.Error($"ImGui native assertion failed (frame skipped): {e.Message}");
+                try { ImGui.EndFrame(); } catch { /* best-effort cleanup */ }
+            }
+#endif
         }
 
         T3Metrics.UiRenderingCompleted();

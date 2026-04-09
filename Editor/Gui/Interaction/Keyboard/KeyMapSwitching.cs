@@ -95,35 +95,47 @@ internal static class KeyMapSwitching
         KeyMaps.Add(_factoryKeymap);
         Directory.CreateDirectory(KeyMapFolder);
 
+        // Load from both default and user folders. User files with the same
+        // name take precedence over shipped defaults — but defaults are NOT
+        // copied into the user folder until the user explicitly saves.
+        var userFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var filepath in Directory.EnumerateFiles(KeyMapFolder))
+            userFiles.Add(Path.GetFileName(filepath));
+
         if (Directory.Exists(DefaultKeyMapFolder))
         {
-            // copy default KeyBindings if not present
-            foreach (var keyMap in Directory.EnumerateFiles(DefaultKeyMapFolder))
+            foreach (var filepath in Directory.EnumerateFiles(DefaultKeyMapFolder))
             {
-                var targetPath = Path.Combine(KeyMapFolder, Path.GetFileName(keyMap));
-                if (!File.Exists(targetPath))
-                    File.Copy(keyMap, targetPath);
+                if (userFiles.Contains(Path.GetFileName(filepath)))
+                    continue; // user override exists
+
+                LoadKeyMapFile(filepath);
             }
         }
 
         foreach (var filepath in Directory.EnumerateFiles(KeyMapFolder))
         {
-            try
-            {
-                var t = JsonUtils.TryLoadingJson<KeyMap>(filepath);
-                if (t == null)
-                {
-                    Log.Debug($"Failed to load Keymap {filepath}");
-                    continue;
-                }
+            LoadKeyMapFile(filepath);
+        }
+    }
 
-                t.UpdateShortcutLabels();
-                KeyMaps.Add(t);
-            }
-            catch (Exception e)
+    private static void LoadKeyMapFile(string filepath)
+    {
+        try
+        {
+            var t = JsonUtils.TryLoadingJson<KeyMap>(filepath);
+            if (t == null)
             {
-                Log.Error($"Failed to load {filepath} : {e.Message}");
+                Log.Debug($"Failed to load Keymap {filepath}");
+                return;
             }
+
+            t.UpdateShortcutLabels();
+            KeyMaps.Add(t);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Failed to load {filepath} : {e.Message}");
         }
     }
 

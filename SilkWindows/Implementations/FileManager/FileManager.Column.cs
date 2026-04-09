@@ -31,7 +31,7 @@ public sealed partial class FileManager
                 ImGui.TableSetupColumn(column.Id, columnFlags);
                 ImGui.TableSetColumnIndex(index);
                 
-                ImGui.BeginChild(directoryDrawer.Path, new Vector2(0, 0), true, windowFlags);
+                ImGui.BeginChild(directoryDrawer.Path, new Vector2(0, 0), ImGuiChildFlags.Borders, windowFlags);
                 
                 if (_dragScrollingColumn == column)
                 {

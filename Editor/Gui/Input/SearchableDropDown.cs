@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using T3.Editor.App;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.SystemUi;
@@ -44,7 +45,7 @@ public static class SearchableDropDown
             return false;
         }
 
-        if (ImGui.IsKeyPressed((ImGuiKey)Key.CursorDown, true))
+        if (ImGui.IsKeyPressed(Key.CursorDown.ToImGuiKey(), true))
         {
             if (_filtedCount > 0)
             {
@@ -53,7 +54,7 @@ public static class SearchableDropDown
                 _scrollNeedsUpdate = true;
             }
         }
-        else if (ImGui.IsKeyPressed((ImGuiKey)Key.CursorUp, true))
+        else if (ImGui.IsKeyPressed(Key.CursorUp.ToImGuiKey(), true))
         {
             if (_filtedCount > 0)
             {
@@ -80,7 +81,7 @@ public static class SearchableDropDown
         }
 
         // We defer exit to get clicks on opened popup list
-        var lostFocus =  ImGui.IsKeyDown((ImGuiKey)Key.Esc);
+        var lostFocus =  ImGui.IsKeyDown(Key.Esc.ToImGuiKey());
         
         ImGui.SetNextWindowPos(new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y));
         ImGui.SetNextWindowSize(new Vector2(ImGui.GetItemRectSize().X, 320));
@@ -95,7 +96,10 @@ public static class SearchableDropDown
             //_lastTypeAheadResults.Clear();
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.Gray.Rgba);
 
-            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsWindowHovered(ImGuiHoveredFlags.RectOnly))
+            // ImGuiHoveredFlags.RectOnly contains AllowWhenOverlappedByItem/ByWindow which 1.91
+            // forbids for IsWindowHovered. Spell out the window-level valid flags.
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup
+                                                                                      | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem))
             {
                 _activeInputId = 0;
                 ImGui.CloseCurrentPopup();
@@ -138,7 +142,7 @@ public static class SearchableDropDown
                 if (result is ItemResults.Visible or ItemResults.Activated)
                     visibleIndex++;
 
-                if (result == ItemResults.Activated || isCurrentIndex && ImGui.IsKeyPressed((ImGuiKey)Key.Return))
+                if (result == ItemResults.Activated || isCurrentIndex && ImGui.IsKeyPressed(Key.Return.ToImGuiKey()))
                 {
                     wasChanged = true;
                     selectedIndex = processedIndex;
@@ -169,7 +173,7 @@ public static class SearchableDropDown
     //         
     //     if (isSearchResultWindowOpen)
     //     {
-    //         if (ImGui.IsKeyPressed((ImGuiKey)Key.CursorDown, true))
+    //         if (ImGui.IsKeyPressed(Key.CursorDown.ToImGuiKey(), true))
     //         {
     //             if (_filtedCount > 0)
     //             {
@@ -177,7 +181,7 @@ public static class SearchableDropDown
     //                 _selectedResultIndex %= _filtedCount;
     //             }
     //         }
-    //         else if (ImGui.IsKeyPressed((ImGuiKey)Key.CursorUp, true))
+    //         else if (ImGui.IsKeyPressed(Key.CursorUp.ToImGuiKey(), true))
     //         {
     //             if (_filtedCount > 0)
     //             {
@@ -207,7 +211,7 @@ public static class SearchableDropDown
     //     var isItemDeactivated = ImGui.IsItemDeactivated();
     //         
     //     // We defer exit to get clicks on opened popup list
-    //     var lostFocus = isItemDeactivated || ImGui.IsKeyDown((ImGuiKey)Key.Esc);
+    //     var lostFocus = isItemDeactivated || ImGui.IsKeyDown(Key.Esc.ToImGuiKey());
     //         
     //     if ( ImGui.IsItemActive() || isSearchResultWindowOpen)
     //     {
@@ -263,7 +267,7 @@ public static class SearchableDropDown
     //                 // ImGui.Selectable(item, isSelected);
     //                 // ImGui.PopStyleColor();
     //                 //     
-    //                 // if (ImGui.IsItemClicked() || (isSelected && ImGui.IsKeyPressed((ImGuiKey)Key.Return)))
+    //                 // if (ImGui.IsItemClicked() || (isSelected && ImGui.IsKeyPressed(Key.Return.ToImGuiKey())))
     //                 // {
     //                 //     text = item;
     //                 //     wasChanged = true;

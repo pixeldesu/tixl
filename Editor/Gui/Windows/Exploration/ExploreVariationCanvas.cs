@@ -153,9 +153,8 @@ internal sealed class ExploreVariationCanvas : ScalableCanvas
 
     private bool IsCellVisible(GridCell gridCell)
     {
-        var contentRegion = new ImRect(ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos(),
-                                       ImGui.GetWindowContentRegionMax() + ImGui.GetWindowPos());
-
+        var windowPos = ImGui.GetWindowPos();
+        var contentRegion = new ImRect(windowPos, windowPos + ImGui.GetWindowSize());
         contentRegion.Expand(_thumbnailSize * Scale);
 
         var rectOnScreen = GetScreenRectForCell(gridCell);
@@ -205,9 +204,8 @@ internal sealed class ExploreVariationCanvas : ScalableCanvas
 
     private void SetGridFocusToWindowCenter()
     {
-        var contentRegion = new ImRect(ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos(),
-                                       ImGui.GetWindowContentRegionMax() + ImGui.GetWindowPos());
-        var centerInCanvas = InverseTransformPositionFloat(contentRegion.GetCenter());
+        var center = ImGui.GetWindowPos() + ImGui.GetWindowSize() * 0.5f;
+        var centerInCanvas = InverseTransformPositionFloat(center);
         _gridFocusIndex.X = (int)(centerInCanvas.X / _thumbnailSize.X);
         _gridFocusIndex.Y = (int)(centerInCanvas.Y / _thumbnailSize.Y);
     }

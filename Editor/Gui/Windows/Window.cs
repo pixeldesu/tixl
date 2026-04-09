@@ -72,8 +72,8 @@ internal abstract class Window
 
             // Draw child to prevent imgui window dragging
             {
-                ImGui.BeginChild("inner", ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin(),
-                                 true,
+                ImGui.BeginChild("inner", ImGui.GetContentRegionAvail(),
+                                 ImGuiChildFlags.Borders,
                                  ImGuiWindowFlags.NoMove | preventMouseScrolling | WindowFlags);
 
                 var idBefore = ImGui.GetID(0);
@@ -88,9 +88,11 @@ internal abstract class Window
             }
 
             ImGui.PopStyleVar(); // WindowPadding
-
-            ImGui.End();
         }
+
+        // End must be called unconditionally after Begin, even when Begin
+        // returns false (collapsed/hidden). ImGui 1.91 enforces this.
+        ImGui.End();
 
         if (!Config.Visible)
         {

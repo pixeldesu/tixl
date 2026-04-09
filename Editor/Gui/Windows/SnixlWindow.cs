@@ -40,7 +40,7 @@ internal sealed class SnixlWindow : Window
         const float updateInterval = 0.15f; // Snake movement interval (seconds)
         const float cellPadding = 2f; // Padding inside each cell for visuals
 
-        ImGui.BeginChild("##snakeContent", Vector2.Zero, false, ImGuiWindowFlags.NoScrollbar);
+        ImGui.BeginChild("##snakeContent", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar);
 
         // Calculate grid and cell sizes based on available window space
         var availableSpace = ImGui.GetContentRegionAvail();

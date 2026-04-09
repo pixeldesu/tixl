@@ -55,7 +55,7 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
         ImGui.BeginGroup();
         {
             _context.ClipSelection.UpdateForComposition(compositionOp);
-            ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(0, 3)); // keep some padding 
+            ImGui.Dummy(new Vector2(1, 3)); // top padding (was SetCursorPos+3, but ImGui 1.91 needs an item)
             _minScreenPos = ImGui.GetCursorScreenPos();
 
             DrawAllLayers(compositionOp);

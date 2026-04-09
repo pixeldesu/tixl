@@ -449,7 +449,7 @@ internal sealed class ScreenManagerWindow : Window
 
         /** Child for interactive buttons **/
         ImGui.SetCursorScreenPos(canvasPos + new Vector2(centerOffsetX, 0));
-        ImGui.BeginChild("Editor screen selection", neededArea, false, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar);
+        ImGui.BeginChild("Editor screen selection", neededArea, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar);
         var buttonSize = new Vector2(16, 16) * T3Ui.UiScaleFactor;
 
         for (var i = 0; i < screens.Length; i++)

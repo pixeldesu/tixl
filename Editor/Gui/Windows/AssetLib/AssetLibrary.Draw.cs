@@ -59,7 +59,7 @@ internal sealed partial class AssetLibrary
             DrawAssetToolsPopup();
         }
 
-        ImGui.BeginChild("scrolling", Vector2.Zero, false, ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("scrolling", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         {
             ImGui.PushStyleVar(ImGuiStyleVar.IndentSpacing, 10);
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0));
@@ -223,7 +223,7 @@ internal sealed partial class AssetLibrary
                 if (ContainsTargetFile(folder))
                 {
                     var h = ImGui.GetFontSize();
-                    var x = ImGui.GetContentRegionMax().X - h;
+                    var x = ImGui.GetWindowSize().X - h;
                     ImGui.SameLine(x);
 
                     var clicked = ImGui.InvisibleButton("Reveal", new Vector2(h));

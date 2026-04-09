@@ -83,7 +83,10 @@ internal sealed class CreateFromTemplateDialog : ModalDialog
                     ImGui.PopStyleColor();
                     ImGui.PopFont();
                         
-                    ImGui.SetCursorScreenPos(keepCursor + new Vector2(0,2));
+                    var __extPos = keepCursor + new Vector2(0,2);
+                    ImGui.SetCursorScreenPos(__extPos);
+                    ImGui.Dummy(Vector2.Zero);                // ImGui 1.91 SetCursorPos extent check
+                    ImGui.SetCursorScreenPos(__extPos);
                     ImGui.PopID();
                 }
 
@@ -96,7 +99,7 @@ internal sealed class CreateFromTemplateDialog : ModalDialog
             ImGui.SameLine();
             //ImGui.PushStyleVar(ImGuiStyleVar., new Vector2(20,20));
                 
-            ImGui.BeginChild("options", new Vector2(-20, 0), false, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar);
+            ImGui.BeginChild("options", new Vector2(-20, 0), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar);
             {
                 ImGui.Dummy(new Vector2(20,10));
                     

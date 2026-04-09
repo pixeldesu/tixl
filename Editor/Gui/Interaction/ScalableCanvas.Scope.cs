@@ -49,7 +49,7 @@ public partial class ScalableCanvas
     // Todo: merge into GetScopeForCanvasArea
     internal void SetScopeToCanvasArea(ImRect areaOnCanvas, bool flipY = false, float paddingX = 0, float paddingY = 0)
     {
-        WindowSize = ImGui.GetContentRegionMax() - ImGui.GetWindowContentRegionMin();
+        WindowSize = ImGui.GetWindowSize();
 
         var areaSize = areaOnCanvas.GetSize();
         if (areaSize.X == 0)
@@ -94,7 +94,7 @@ public partial class ScalableCanvas
 
     internal void SetVerticalScopeToCanvasArea(ImRect area, bool flipY = false, ScalableCanvas? parent = null)
     {
-        WindowSize = ImGui.GetContentRegionMax() - ImGui.GetWindowContentRegionMin();
+        WindowSize = ImGui.GetWindowSize();
         var sizeY = area.GetSize().Y;
         if (MathF.Abs(area.GetSize().Y) < 0.0001f)
         {

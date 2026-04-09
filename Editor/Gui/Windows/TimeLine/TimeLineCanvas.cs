@@ -82,7 +82,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
 
             HandleDeferredActions();
 
-            ImGui.BeginChild(ImGuiTitle, new Vector2(0, -30), true,
+            ImGui.BeginChild(ImGuiTitle, new Vector2(0, -30), ImGuiChildFlags.Borders,
                              ImGuiWindowFlags.NoMove
                              | ImGuiWindowFlags.NoBackground
                              | ImGuiWindowFlags.NoScrollWithMouse);
@@ -244,7 +244,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         if (Playback == null)
             return;
 
-        var max = ImGui.GetContentRegionMax();
+        var max = ImGui.GetWindowSize();
         var clampedSize = max;
         clampedSize.Y = Math.Min(TimeLineDragHeight, max.Y - 1);
 

@@ -45,6 +45,45 @@ public static class UserData
     /// <summary>
     /// Returns the content of the settings file if it exists. Otherwise, initialize the file with content of default.
     /// </summary>
+    /// <summary>
+    /// Loads user data from the user folder, falling back to the defaults folder.
+    /// Does NOT copy the default into the user folder — use this for read-only loads
+    /// like applying a layout on F1.
+    /// </summary>
+    public static bool TryLoading(string relativeFilePath, out string fileText)
+    {
+        var filePath = GetFilePath(relativeFilePath, UserDataLocation.User);
+        if (File.Exists(filePath))
+        {
+            try
+            {
+                fileText = File.ReadAllText(filePath);
+                return true;
+            }
+            catch
+            {
+                Log.Info($"User data file {filePath} could not be loaded.");
+            }
+        }
+
+        var defaultsFilePath = GetFilePath(relativeFilePath, UserDataLocation.Defaults);
+        if (File.Exists(defaultsFilePath))
+        {
+            try
+            {
+                fileText = File.ReadAllText(defaultsFilePath);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Info($"User data file {defaultsFilePath} could not be loaded. Error: {e}");
+            }
+        }
+
+        fileText = string.Empty;
+        return false;
+    }
+
     public static bool TryLoadingOrWriteDefaults(string relativeFilePath, out string fileText)
     {
         var filePath = GetFilePath(relativeFilePath, UserDataLocation.User);

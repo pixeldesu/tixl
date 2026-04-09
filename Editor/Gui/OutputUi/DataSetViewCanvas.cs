@@ -33,7 +33,7 @@ internal sealed class DataSetViewCanvas
         void DrawCanvas()
         {
             var currentTime = Playback.RunTimeInSecs;
-            ImGui.BeginChild("Scrollable", Vector2.Zero, false, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground);
+            ImGui.BeginChild("Scrollable", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground);
 
             var isRangeSelected = Math.Abs(_selectRangeStart - _selectRangeEnd) > 0.001;
             var areChannelsSelected = _selectedChannels.Count > 0;
@@ -453,8 +453,8 @@ internal sealed class DataSetViewCanvas
                     using (new ChildWindowScope(channel.Path.Last(),
                                                 new Vector2(ImGui.GetWindowSize().X - 200, layerHeight),
                                                 ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav |
-                                                ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoBringToFrontOnFocus |
-                                                ImGuiWindowFlags.AlwaysAutoResize, Color.Transparent))
+                                                ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoBringToFrontOnFocus,
+                                                Color.Transparent))
                     {
                         var dl2 = ImGui.GetWindowDrawList();
 
@@ -632,7 +632,6 @@ internal sealed class DataSetViewCanvas
             // Draw current time
             var xTime = _canvas.TransformX((float)currentTime);
             dl.AddRectFilled(new Vector2(xTime, min.Y), new Vector2(xTime + 1, max.Y), UiColors.WidgetActiveLine);
-            dl.PopClipRect();
             ImGui.EndChild();
             ImGui.SetCursorPos(Vector2.Zero);
         }

@@ -49,7 +49,7 @@ internal sealed class StatusErrorLine : ILogWriter
             //     logMessage = DX11ShaderCompiler.ExtractMeaningfulShaderErrorMessage(logMessage);
             // }
             
-            var availableSpace = ImGui.GetWindowContentRegionMax().X;
+            var availableSpace = ImGui.GetWindowSize().X;
             ImGui.SetCursorPosX(availableSpace - width);
 
             ImGui.TextColored(color, firstLine);

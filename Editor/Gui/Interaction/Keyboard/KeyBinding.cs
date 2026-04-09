@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using ImGuiNET;
 using Newtonsoft.Json;
+using T3.Editor.App;
 using T3.Serialization;
 
 namespace T3.Editor.Gui.Interaction.Keyboard;
@@ -46,13 +47,13 @@ internal sealed class KeyBinding
             return false;
 
         if ((_flags & KeyActionHandling.Flags.KeyHoldOnly) != 0)
-            return ImGui.IsKeyDown((ImGuiKey)KeyCombination.Key);
+            return ImGui.IsKeyDown(KeyCombination.Key.ToImGuiKey());
 
         if ((_flags & KeyActionHandling.Flags.KeyPressOnly) != 0)
-            return ImGui.IsKeyPressed((ImGuiKey)KeyCombination.Key, false);
+            return ImGui.IsKeyPressed(KeyCombination.Key.ToImGuiKey(), false);
 
         // Default behavior (works for both press and hold)
-        return ImGui.IsKeyPressed((ImGuiKey)KeyCombination.Key, true);
+        return ImGui.IsKeyPressed(KeyCombination.Key.ToImGuiKey(), true);
     }
 
     public KeyBinding Clone()

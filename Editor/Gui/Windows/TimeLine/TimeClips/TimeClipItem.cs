@@ -111,7 +111,7 @@ internal static class TimeClipItem
         // Draw stretch indicators
         if (isSelected && timeRemapped && attr.LayerContext.ClipSelection.Count == 1)
         {
-            var verticalOffset = ImGui.GetContentRegionMax().Y + ImGui.GetWindowPos().Y - position.Y - LayersArea.LayerHeight;
+            var verticalOffset = ImGui.GetWindowPos().Y + ImGui.GetWindowSize().Y - position.Y - LayersArea.LayerHeight;
             var horizontalOffset = attr.LayerContext.TimeCanvas.TransformDirection(new Vector2(timeClip.SourceRange.Start - timeClip.TimeRange.Start, 0)).X;
             var startPosition = position + new Vector2(0, LayersArea.LayerHeight);
             attr.DrawList.AddBezierCubic(startPosition,

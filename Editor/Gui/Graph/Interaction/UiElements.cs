@@ -57,7 +57,7 @@ internal sealed class UiElements
         ImGui.SetCursorPos(localPos);
         var widgetPos = ImGui.GetCursorScreenPos();
 
-        if (ImGui.BeginChild("##minimap", widgetSize, false,
+        if (ImGui.BeginChild("##minimap", widgetSize, ImGuiChildFlags.None,
                              ImGuiWindowFlags.NoScrollbar
                              | ImGuiWindowFlags.NoMove
                              | ImGuiWindowFlags.NoScrollWithMouse
@@ -176,11 +176,13 @@ internal sealed class UiElements
         if (!UserSettings.Config.ShowToolbar)
             return;
 
-        ImGui.SetCursorPos(
-                           new Vector2(
-                                       ImGui.GetWindowContentRegionMin().X+1,
-                                       ImGui.GetWindowContentRegionMax().Y - TimeControls.ControlSize.Y-1));
-        ImGui.BeginChild("TimeControls", Vector2.Zero, false, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
+        ImGui.SetCursorPos(new Vector2(1,
+                                       ImGui.GetWindowSize().Y - TimeControls.ControlSize.Y - 1));
+        // ImGui 1.91 sets an internal IsSetPos flag on SetCursorPos and asserts in End()
+        // if no item is submitted afterwards. Dummy(0,0) submits an empty item which both
+        // clears the flag and validates the extent without visually moving anything.
+        ImGui.Dummy(Vector2.Zero);
+        ImGui.BeginChild("TimeControls", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
         {
             var icon = components.TimeLineCanvas.FoldingHeight.UsingCustomTimelineHeight ? Icon.ChevronDown : Icon.ChevronUp;
             if (CustomComponents.IconButton(icon, TimeControls.ControlSize, CustomComponents.ButtonStates.Dimmed))
@@ -194,7 +196,10 @@ internal sealed class UiElements
             ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
             TimeControls.DrawTimeControls(components.TimeLineCanvas, components.CompositionInstance);
             ImGui.PopStyleVar();
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 10);
+            // Use SameLine spacing instead of SetCursorPosX. SetCursorPosX flags the window
+            // as having a manual cursor move, and ImGui 1.91 then asserts at EndChild if the
+            // next code path does not submit an item.
+            ImGui.SameLine(0, 10);
 
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(5, 5));
             components.GraphImageBackground.DrawToolbarItems();

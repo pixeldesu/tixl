@@ -34,7 +34,7 @@ internal static class OutputPicking
 
         ImGui.SetNextWindowPos(ImGui.GetMousePos() + new Vector2(-10, -5), ImGuiCond.Appearing);
 
-        if (ImGui.BeginPopup("pickOutput", ImGuiWindowFlags.Popup))
+        if (ImGui.BeginPopup("pickOutput"))
         {
             CustomComponents.HintLabel("Drag output...");
             WindowContentExtend.ExtendToLastItem();

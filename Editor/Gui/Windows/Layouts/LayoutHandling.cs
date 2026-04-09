@@ -91,15 +91,44 @@ internal static class LayoutHandling
         var index = (int)layoutId;
 
         var relativePath = Path.Combine(LayoutSubfolder, GetLayoutFilename(index));
-        if (!UserData.TryLoadingOrWriteDefaults(relativePath, out var jsonBlob))
+        if (!UserData.TryLoading(relativePath, out var jsonBlob))
             return;
 
         var serializer = JsonSerializer.Create();
-        var fileTextReader = new StringReader(jsonBlob);
-        if (serializer.Deserialize(fileTextReader, typeof(Layout)) is not Layout layout)
+        if (serializer.Deserialize(new StringReader(jsonBlob), typeof(Layout)) is not Layout layout)
         {
             Log.Error("Can't load layout");
             return;
+        }
+
+        // Reset stale layouts saved against an older ImGui version. ImGui's ini
+        // serialization format is not stable across versions, and dock-node entries
+        // from a previous version are silently dropped, leaving windows undocked.
+        if (!IsLayoutCompatibleWithCurrentImGui(layout))
+        {
+            var legacyTag = string.IsNullOrEmpty(layout.ImGuiVersion) ? "<missing>" : layout.ImGuiVersion;
+            Log.Warning($"Layout {index} was saved with ImGui {legacyTag}; minimum supported is {MinSupportedImGuiVersion} (running {ImGui.GetVersion()}). Replacing with shipped default.");
+
+            var userFilePath = Path.Combine(LayoutFolder, GetLayoutFilename(index));
+            try
+            {
+                if (File.Exists(userFilePath))
+                    File.Delete(userFilePath);
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"Could not remove outdated layout file '{userFilePath}': {e.Message}");
+            }
+
+            if (!UserData.TryLoading(relativePath, out jsonBlob))
+                return;
+
+            if (serializer.Deserialize(new StringReader(jsonBlob), typeof(Layout)) is not Layout reloaded)
+            {
+                Log.Error("Can't load default layout");
+                return;
+            }
+            layout = reloaded;
         }
 
         var switchingBackFromFocusMode = layoutId != Layouts.FocusMode && FocusMode;
@@ -199,6 +228,7 @@ internal static class LayoutHandling
                          {
                              WindowConfigs = WindowManager.GetAllWindows().Select(window => window.Config).ToList(),
                              ImGuiSettings = ImGui.SaveIniSettingsToMemory(),
+                             ImGuiVersion = ImGui.GetVersion(),
                          };
 
         serializer.Serialize(file, layout);
@@ -266,6 +296,35 @@ internal static class LayoutHandling
     {
         public List<Window.WindowConfig> WindowConfigs = [];
         public string? ImGuiSettings;
+
+        /// <summary>
+        /// ImGui version (from <see cref="ImGui.GetVersion"/>) the layout was saved with.
+        /// Missing tag implies a pre-1.90 layout whose docking section is no longer parseable.
+        /// </summary>
+        public string? ImGuiVersion;
+    }
+
+    /// <summary>
+    /// Lowest ImGui version whose ini/docking serialization is still readable by the
+    /// currently bundled ImGui.NET. Bump this whenever upstream ImGui makes a breaking
+    /// change to the settings format that we cannot migrate in place.
+    /// </summary>
+    private static readonly Version MinSupportedImGuiVersion = new(1, 91, 6);
+
+    private static bool IsLayoutCompatibleWithCurrentImGui(Layout layout)
+    {
+        if (string.IsNullOrEmpty(layout.ImGuiVersion))
+            return false;
+        if (!TryParseImGuiVersion(layout.ImGuiVersion, out var saved))
+            return false;
+        return saved >= MinSupportedImGuiVersion;
+    }
+
+    private static bool TryParseImGuiVersion(string raw, out Version version)
+    {
+        // ImGui.GetVersion() returns strings like "1.90.9" or "1.91.0 WIP".
+        var token = raw.Split(' ', '-')[0];
+        return Version.TryParse(token, out version!);
     }
 
     private const string LayoutFileNameFormat = "layout{0}.json";
