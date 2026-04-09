@@ -91,7 +91,7 @@ internal static class LayoutHandling
         var index = (int)layoutId;
 
         var relativePath = Path.Combine(LayoutSubfolder, GetLayoutFilename(index));
-        if (!UserData.TryLoadingOrWriteDefaults(relativePath, out var jsonBlob))
+        if (!UserData.TryLoading(relativePath, out var jsonBlob))
             return;
 
         var serializer = JsonSerializer.Create();
@@ -120,7 +120,7 @@ internal static class LayoutHandling
                 Log.Warning($"Could not remove outdated layout file '{userFilePath}': {e.Message}");
             }
 
-            if (!UserData.TryLoadingOrWriteDefaults(relativePath, out jsonBlob))
+            if (!UserData.TryLoading(relativePath, out jsonBlob))
                 return;
 
             if (serializer.Deserialize(new StringReader(jsonBlob), typeof(Layout)) is not Layout reloaded)

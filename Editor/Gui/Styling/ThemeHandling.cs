@@ -88,31 +88,43 @@ public static class ThemeHandling
         Directory.CreateDirectory(ThemeFolder);
         Directory.CreateDirectory(DefaultThemeFolder);
 
-        // copy default themes if not present
-        foreach (var theme in Directory.EnumerateFiles(DefaultThemeFolder))
+        // Load from both default and user folders. User files with the same
+        // name take precedence over shipped defaults — but defaults are NOT
+        // copied into the user folder until the user explicitly saves.
+        var userFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var filepath in Directory.EnumerateFiles(ThemeFolder))
+            userFiles.Add(Path.GetFileName(filepath));
+
+        foreach (var filepath in Directory.EnumerateFiles(DefaultThemeFolder))
         {
-            var targetPath = Path.Combine(ThemeFolder, Path.GetFileName(theme));
-            if(!File.Exists(targetPath))
-                File.Copy(theme, targetPath);
+            if (userFiles.Contains(Path.GetFileName(filepath)))
+                continue; // user override exists
+
+            LoadThemeFile(filepath);
         }
 
         foreach (var filepath in Directory.EnumerateFiles(ThemeFolder))
         {
-            try
-            {
-                var t = JsonUtils.TryLoadingJson<ColorTheme>(filepath);
-                if (t == null)
-                {
-                    Log.Debug($"Failed to load theme {filepath}");
-                    continue;
-                }
+            LoadThemeFile(filepath);
+        }
+    }
 
-                Themes.Add(t);
-            }
-            catch (Exception e)
+    private static void LoadThemeFile(string filepath)
+    {
+        try
+        {
+            var t = JsonUtils.TryLoadingJson<ColorTheme>(filepath);
+            if (t == null)
             {
-                Log.Error($"Failed to load {filepath} : {e.Message}");
+                Log.Debug($"Failed to load theme {filepath}");
+                return;
             }
+
+            Themes.Add(t);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Failed to load {filepath} : {e.Message}");
         }
     }
 
