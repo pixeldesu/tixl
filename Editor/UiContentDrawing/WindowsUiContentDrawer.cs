@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using ImGuiNET;
 using SharpDX.D3DCompiler;
@@ -180,11 +181,28 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             ProgramWindows.Main.PrepareRenderingFrame();
 
             // Clear the main window buffer for next frame
-            T3Ui.ProcessFrame();
-            ProgramWindows.RefreshViewport();
+#if !DEBUG
+            try
+            {
+#endif
+                T3Ui.ProcessFrame();
+                ProgramWindows.RefreshViewport();
 
-            ImGui.Render();
-            RenderDrawData(ImGui.GetDrawData());
+                ImGui.Render();
+                RenderDrawData(ImGui.GetDrawData());
+#if !DEBUG
+            }
+            catch (SEHException e)
+            {
+                // A native ImGui assertion fired (e.g. SetCursorPos extent check,
+                // invalid BeginChild flags, empty-stack pop). In release builds this
+                // prevents the app from terminating on end-user machines. The frame
+                // is incomplete; call EndFrame so the next NewFrame doesn't assert
+                // on "NewFrame called without Render".
+                Log.Error($"ImGui native assertion failed (frame skipped): {e.Message}");
+                try { ImGui.EndFrame(); } catch { /* best-effort cleanup */ }
+            }
+#endif
         }
 
         T3Metrics.UiRenderingCompleted();
