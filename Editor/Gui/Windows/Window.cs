@@ -88,9 +88,11 @@ internal abstract class Window
             }
 
             ImGui.PopStyleVar(); // WindowPadding
-
-            ImGui.End();
         }
+
+        // End must be called unconditionally after Begin, even when Begin
+        // returns false (collapsed/hidden). ImGui 1.91 enforces this.
+        ImGui.End();
 
         if (!Config.Visible)
         {
