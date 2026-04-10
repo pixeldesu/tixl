@@ -179,7 +179,12 @@ internal sealed partial class MagGraphView
         // ImGUI element for selection
         ImGui.SetCursorScreenPos(pMin);
         ImGui.PushID(item.Id.GetHashCode());
-        ImGui.InvisibleButton("##op", pMax - pMin);
+        // ImGui 1.91 asserts on zero-sized InvisibleButton. Guard against
+        // nodes that haven't been laid out yet or are fully collapsed.
+        var buttonSize = pMax - pMin;
+        if (buttonSize.X < 1f) buttonSize.X = 1f;
+        if (buttonSize.Y < 1f) buttonSize.Y = 1f;
+        ImGui.InvisibleButton("##op", buttonSize);
         var isItemHovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup
                                                 | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 
@@ -1123,11 +1128,13 @@ internal sealed partial class MagGraphView
                                    UiColors.StatusAttention);
 
         ImGui.SetCursorScreenPos(c - Vector2.One * s2 / 2);
-        ImGui.InvisibleButton("warningArea", new Vector2(s2, s2));
+        ImGui.PushID(inputLine.InputUi.InputDefinition.Id.GetHashCode());
+        ImGui.InvisibleButton("##missingInput", new Vector2(s2, s2));
         if (ImGui.IsItemHovered())
         {
             CustomComponents.TooltipForLastItem("Requires " + inputLine.InputUi.InputDefinition.Name);
         }
+        ImGui.PopID();
     }
 
     private void DrawMultiInputIndicator(MagGraphItem item, Guid slotId, int multiInputIndex, ImDrawListPtr drawList, Vector2 inputPosOnCanvas, Color color,

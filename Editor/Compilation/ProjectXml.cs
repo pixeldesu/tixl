@@ -269,7 +269,7 @@ internal static partial class ProjectXml
     public const string TargetFramework = "net" + NetVersion;
     private const string TargetWindowsFramework = TargetFramework + "-windows";
     private const string TargetMacOSFramework = TargetFramework + "-macos";
-    private const string TargetLinuxFramework = TargetFramework + "net9.0-linux";
+    private const string TargetLinuxFramework = TargetFramework + "-linux";
 
     public static bool FrameworkIsCurrent(string framework)
     {
@@ -286,7 +286,7 @@ internal static partial class ProjectXml
     {
         if (_netVersionRegex.IsMatch(framework))
         {
-            return _netVersionRegex.Replace(framework, NetVersion);
+            return _netVersionRegex.Replace(framework, "net" + NetVersion + "-");
         }
 
         return TargetFramework;
