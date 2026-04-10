@@ -28,12 +28,5 @@ To get started read the [documentation](https://github.com/tixl3d/tixl/wiki) or 
 
 If you have questions or feedback, please join us on Discord: https://discord.gg/YmSyQdeH3S 
 
-## Developer Orientation
-- Architecture and task navigation: [`SOLUTION_OVERVIEW.md`](SOLUTION_OVERVIEW.md)
-- Contribution and coding guidance: [`AGENT_INSTRUCTIONS.md`](AGENT_INSTRUCTIONS.md)
-- Copilot default instructions: [`.github/copilot-instructions.md`](.github/copilot-instructions.md)
-
-
-
 
 
