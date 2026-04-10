@@ -179,7 +179,12 @@ internal sealed partial class MagGraphView
         // ImGUI element for selection
         ImGui.SetCursorScreenPos(pMin);
         ImGui.PushID(item.Id.GetHashCode());
-        ImGui.InvisibleButton("##op", pMax - pMin);
+        // ImGui 1.91 asserts on zero-sized InvisibleButton. Guard against
+        // nodes that haven't been laid out yet or are fully collapsed.
+        var buttonSize = pMax - pMin;
+        if (buttonSize.X < 1f) buttonSize.X = 1f;
+        if (buttonSize.Y < 1f) buttonSize.Y = 1f;
+        ImGui.InvisibleButton("##op", buttonSize);
         var isItemHovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup
                                                 | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 
