@@ -1,50 +1,36 @@
-# Building a TiXL3 Installer
+# Building a TiXL Installer
 
-## Preface
+We use [Inno Setup](https://jrsoftware.org/isinfo.php) to generate a `.exe` installer that includes all dependencies and installs the Windows Graphics Tools.
 
-We’re using [Inno Setup](https://jrsoftware.org/isinfo.php) to generate a feature-complete `.exe` installer that includes all dependencies and installs the Windows Graphic Tools. Although not as generic as other solutions like [WiX](https://wixtoolset.org/), it was simple to set up, works out of the box, and gets the job done. In the long run, a CI/CD solution for other platforms would be ideal.
+## Quick Build (One Click)
 
-## Setup
+1. Install [Inno Setup](https://jrsoftware.org/isdl.php).
+2. Open `Installer/installer.iss` in Inno Setup.
+3. Click the Play button.
 
-### Build Project
+This automatically runs `build-release.ps1` which publishes the Player and builds the full solution in Release mode before packaging the installer. The output is created at `Installer/Output/`.
 
-1. Clone `git@github.com:tixl3d/tixl.git` and switch to the `main` branch.
-2. Open the  solution `t3.sln` in Rider or Visual Studio.
-3. Make sure you're in Release mode.
-4. Rebuild the Player project first.
-5. Publish the Player as a standalone folder with the following settings:
+## Manual Build (Step by Step)
 
-   * Target path: `Player/bin/ReleasePublished`
-   * Configuration: `Release | Any CPU`
-   * Target Framework: `.NET 9.0 (Windows)`
-   * Deployment mode: `Self-contained`
-   * Target Runtime: `win-x64`
-   * Disable: `Enable ReadyToRun Compilation`, `Trim unused code`, and `Produce single file`
-6. Ensure the new folder `Player/bin/ReleasePublished` exists and is approximately 200 MB in size.
-7. Rebuild the solution. The result should be a valid, feature-complete build in `Editor/bin/Release/net9.0-windows/`. The build script will copy the published Player to the `Player/*` folder so it can be used later when exporting executables.
+If you need to build without Inno Setup, or want to run steps individually:
 
-### Download Dependencies
-
-The installer will look for the dependencies listed in `installer.iss`. As of writing, these are:
-
-* [dotnet-sdk-9.0.203-win-x64.exe](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-9.0.203-windows-x64-installer)
-* [VC\_redist.x64.exe](https://aka.ms/vs/17/release/vc_redist.x64.exe)
-
-Download these files into the `Installer\dependencies\downloads\` folder so you end up with this structure:
-
-```
-Editor/bin/Release/net9.0-windows/
-
-Installer/dependencies/
-Installer/dependencies/downloads/dotnet-sdk-9.0.203-win-x64.exe
-Installer/dependencies/downloads/VC_redist.x64.exe
+```powershell
+# From the repository root:
+pwsh Installer/build-release.ps1
 ```
 
-### Download and Install Inno Setup
+This runs:
+1. `dotnet restore`
+2. `dotnet publish` for the Player (self-contained, win-x64) to `Player/bin/ReleasePublished/`
+3. `dotnet build -c Release` for the full solution (Editor post-build copies the published Player into its output)
 
-1. Download and install Inno Setup from [here](https://jrsoftware.org/isdl.php).
-2. The TiXL solution includes an `Installer/` folder containing `installer.iss`.
-3. Open `installer.iss` in Inno Setup (e.g., by double-clicking).
-4. Click the blue "Play" button to start the build process and wait a few minutes.
-5. The installer will run for testing.
-6. The output artifact will be created at `Installer/Output/`.
+The result is a complete build in `Editor/bin/Release/net9.0-windows/`.
+
+## Dependencies
+
+The build script automatically downloads these into `Installer/dependencies/downloads/` if not already present:
+
+* [.NET SDK 9.0.203](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-9.0.203-windows-x64-installer)
+* [Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+
+The installer bundles them and installs them on the user's machine if needed.
