@@ -1128,11 +1128,13 @@ internal sealed partial class MagGraphView
                                    UiColors.StatusAttention);
 
         ImGui.SetCursorScreenPos(c - Vector2.One * s2 / 2);
-        ImGui.InvisibleButton("warningArea", new Vector2(s2, s2));
+        ImGui.PushID(inputLine.InputUi.InputDefinition.Id.GetHashCode());
+        ImGui.InvisibleButton("##missingInput", new Vector2(s2, s2));
         if (ImGui.IsItemHovered())
         {
             CustomComponents.TooltipForLastItem("Requires " + inputLine.InputUi.InputDefinition.Name);
         }
+        ImGui.PopID();
     }
 
     private void DrawMultiInputIndicator(MagGraphItem item, Guid slotId, int multiInputIndex, ImDrawListPtr drawList, Vector2 inputPosOnCanvas, Color color,
