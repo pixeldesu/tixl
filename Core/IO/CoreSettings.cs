@@ -25,7 +25,6 @@ public sealed class CoreSettings : Settings<CoreSettings.ConfigData>
         public bool LogAssemblyVersionMismatches = false;
 
         public string LimitMidiDeviceCapture = null;
-        public bool EnableMidiSnapshotIndication = false;
         public WindowMode DefaultWindowMode = WindowMode.Fullscreen;
         public int DefaultOscPort = 8000;
 
