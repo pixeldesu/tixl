@@ -1,5 +1,4 @@
 #nullable enable
-using System.Diagnostics;
 using System.IO;
 using T3.Core.Animation;
 using T3.Core.Audio;

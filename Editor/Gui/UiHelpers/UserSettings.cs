@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using T3.Core.Animation;
 using T3.Core.IO;
-using T3.Core.Logging;
 using T3.Core.Settings;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.Windows;

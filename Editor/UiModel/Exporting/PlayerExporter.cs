@@ -1,7 +1,6 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using T3.Core.Animation;
 using T3.Core.Compilation;
 using T3.Core.DataTypes;
 using T3.Core.IO;

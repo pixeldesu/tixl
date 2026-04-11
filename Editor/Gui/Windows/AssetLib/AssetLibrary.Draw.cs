@@ -2,7 +2,6 @@
 using System.IO;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
-using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;

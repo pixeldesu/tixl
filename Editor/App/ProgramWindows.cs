@@ -4,11 +4,10 @@ using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
-using T3.Core.IO;
 using T3.Core.Resource;
 using T3.Core.Settings;
 using T3.Core.SystemUi;
-using T3.Editor.Gui; // for ReleaseMode
+// for ReleaseMode
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using Device = SharpDX.Direct3D11.Device;

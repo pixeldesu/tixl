@@ -1,7 +1,6 @@
 using System.IO;
 using ImGuiNET;
 using Operators.Utils;
-using T3.Core.Animation;
 using T3.Core.IO;
 using T3.Core.Settings;
 using T3.Core.Utils;

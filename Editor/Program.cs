@@ -7,7 +7,6 @@ using System.IO;
 using System.Reflection;
 using T3.Core.Compilation;
 using T3.Core.IO;
-using T3.Core.Logging;
 using T3.Core.Resource;
 using T3.Core.Resource.ShaderCompiling;
 using T3.Core.SystemUi;
@@ -28,7 +27,6 @@ using T3.Editor.UiContentDrawing;
 using T3.Editor.UiModel.Helpers;
 using T3.MsForms;
 using T3.SystemUi;
-using T3.Core.Audio;
 using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
 namespace T3.Editor;

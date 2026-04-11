@@ -1,7 +1,6 @@
 #nullable enable
 using System.Threading.Tasks;
 using ImGuiNET;
-using T3.Core.Resource;
 using T3.Core.Stats;
 using T3.Core.SystemUi;
 using T3.Core.Utils;

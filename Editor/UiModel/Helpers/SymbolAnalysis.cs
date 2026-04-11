@@ -1,6 +1,5 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Settings;
