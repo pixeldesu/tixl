@@ -380,11 +380,11 @@ public static class AudioMixerManager
         }
         else
         {
-            // Always restore the current ProjectSettings volume (user may have changed it while muted)
+            // Always restore the current CoreSettings volume (user may have changed it while muted)
             float definedVolume = 1.0f;
             try
             {
-                definedVolume = IO.ProjectSettings.Config.GlobalPlaybackVolume;
+                definedVolume = IO.CoreSettings.Config.GlobalPlaybackVolume;
             }
             catch
             {
@@ -412,11 +412,11 @@ public static class AudioMixerManager
         }
         else
         {
-            // Always restore the current ProjectSettings volume (user may have changed it while muted)
+            // Always restore the current CoreSettings volume (user may have changed it while muted)
             float definedVolume = 1.0f;
             try
             {
-                definedVolume = IO.ProjectSettings.Config.OperatorPlaybackVolume;
+                definedVolume = IO.CoreSettings.Config.OperatorPlaybackVolume;
             }
             catch
             {

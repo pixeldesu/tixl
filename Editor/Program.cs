@@ -150,7 +150,7 @@ internal static class Program
         UserSettings.InitializeGatedLogging();
         
         // ReSharper disable once UnusedVariable
-        var projectSettings = new ProjectSettings(saveOnQuit: true);
+        var projectSettings = new CoreSettings(saveOnQuit: true);
 
         if (UserSettings.Config.ProjectDirectories.Count == 0)
         {

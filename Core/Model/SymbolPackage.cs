@@ -262,7 +262,7 @@ public abstract partial class SymbolPackage : IResourcePackage
                              .Where(symbolReadResult => symbolReadResult.Result.Symbol is not null)
                              .ToArray();
 
-            if (ProjectSettings.Config.LogCompilationDetails)
+            if (CoreSettings.Config.LogCompilationDetails)
                 Log.Debug($"{AssemblyInformation.Name}: Registering loaded symbols...");
 
             foreach (var readSymbolResult in symbolsRead)

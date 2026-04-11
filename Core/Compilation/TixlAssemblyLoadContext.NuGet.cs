@@ -128,7 +128,7 @@ internal sealed partial class TixlAssemblyLoadContext
             }
         }
 
-        if(ProjectSettings.Config.LogAssemblyLoadingDetails)
+        if(CoreSettings.Config.LogAssemblyLoadingDetails)
             Log.Error($"{Name}: Could not find nuget assembly '{asmName}'.");
         
         return null;

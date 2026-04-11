@@ -169,19 +169,19 @@ internal static class TimeControls
         var playback = Playback.Current;
 
         // Settings
-        PlaybackUtils.FindPlaybackSettingsForInstance(composition, out var compositionWithSettings, out var settings);
+        PlaybackUtils.FindProjectSettingsForInstance(composition, out var compositionWithSettings, out var settings);
         var opHasSettings = compositionWithSettings == composition;
 
         
-        // if (CustomComponents.IconButton(ProjectSettings.Config.AudioMuted ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
+        // if (CustomComponents.IconButton(CoreSettings.Config.AudioMuted ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
         //                                 ControlSize,
-        //                                 ProjectSettings.Config.AudioMuted
+        //                                 CoreSettings.Config.AudioMuted
         //                                     ? CustomComponents.ButtonStates.NeedsAttention
         //                                     : CustomComponents.ButtonStates.Dimmed
         //                                ))
         // {
-        //     ProjectSettings.Config.AudioMuted = !ProjectSettings.Config.AudioMuted;
-        //     AudioEngine.SetMute(ProjectSettings.Config.AudioMuted);
+        //     CoreSettings.Config.AudioMuted = !CoreSettings.Config.AudioMuted;
+        //     AudioEngine.SetMute(CoreSettings.Config.AudioMuted);
         // }
         
         if (CustomComponents.IconButton(Icon.Settings, ControlSize, opHasSettings
@@ -243,7 +243,7 @@ internal static class TimeControls
         ImGui.PopStyleColor();
 
         if(ImGui.IsItemHovered())
-            CustomComponents.TooltipForLastItem($"Current playtime at {settings.Bpm:0.0} BPM.", "Click mode button to toggle between timeline formats.");
+            CustomComponents.TooltipForLastItem($"Current playtime at {settings.Playback.Bpm:0.0} BPM.", "Click mode button to toggle between timeline formats.");
 
         ImGui.SameLine();
 
@@ -382,7 +382,7 @@ internal static class TimeControls
             ImGui.SameLine();
         }
 
-        if (settings.Syncing == PlaybackSettings.SyncModes.Tapping)
+        if (settings.Playback.Syncing == ProjectSettings.SyncModes.Tapping)
         {
             var bpm = BeatTiming.Bpm;
             if (SingleValueEdit.Draw(ref bpm, new Vector2(StandardWidth, ControlSize.Y), min: 1, max: 360, clampMin: true, clampMax: true, scale: 0.01f, format: "{0:0.0 BPM}") ==
@@ -572,15 +572,15 @@ internal static class TimeControls
         }
 
         // ToggleAudio
-        if (CustomComponents.IconButton(ProjectSettings.Config.SoundtrackMute ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
+        if (CustomComponents.IconButton(CoreSettings.Config.SoundtrackMute ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
                                         ControlSize,
-                                        ProjectSettings.Config.SoundtrackMute
+                                        CoreSettings.Config.SoundtrackMute
                                             ? CustomComponents.ButtonStates.NeedsAttention
                                             : CustomComponents.ButtonStates.Dimmed
                                        ))
         {
-            ProjectSettings.Config.SoundtrackMute = !ProjectSettings.Config.SoundtrackMute;
-            AudioEngine.SetSoundtrackMute(ProjectSettings.Config.SoundtrackMute);
+            CoreSettings.Config.SoundtrackMute = !CoreSettings.Config.SoundtrackMute;
+            AudioEngine.SetSoundtrackMute(CoreSettings.Config.SoundtrackMute);
         }
 
         // ToggleHover

@@ -68,15 +68,15 @@ internal static partial class Program
         var previousSpeed = playback.PlaybackSpeed;
         var originalTime = playback.TimeInSecs;
         var wasWindowVisible = _renderForm?.Visible ?? true;
-        var previousSoundtrackMute = ProjectSettings.Config.SoundtrackMute;
-        var previousGlobalMute = ProjectSettings.Config.GlobalMute;
+        var previousSoundtrackMute = CoreSettings.Config.SoundtrackMute;
+        var previousGlobalMute = CoreSettings.Config.GlobalMute;
         var hideDisplayDuringPreload = true;
         var muteAudioDuringPreload = true;
         const double subFrameWarmOffsetInSecs = 1.0 / 60.0;
 
         if (muteAudioDuringPreload)
         {
-            ProjectSettings.Config.SoundtrackMute = true;
+            CoreSettings.Config.SoundtrackMute = true;
             AudioEngine.SetSoundtrackMute(true);
             AudioEngine.SetGlobalMute(true);
         }
@@ -129,7 +129,7 @@ internal static partial class Program
             if (muteAudioDuringPreload)
             {
                 AudioEngine.SetGlobalMute(previousGlobalMute);
-                ProjectSettings.Config.SoundtrackMute = previousSoundtrackMute;
+                CoreSettings.Config.SoundtrackMute = previousSoundtrackMute;
                 AudioEngine.SetSoundtrackMute(previousSoundtrackMute);
             }
 

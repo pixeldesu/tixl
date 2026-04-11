@@ -292,7 +292,7 @@ public sealed partial class Symbol
         OutputDefinitions.Clear();
         OutputDefinitions.AddRange(newSymbol.OutputDefinitions);
         Animator = newSymbol.Animator;
-        PlaybackSettings = newSymbol.PlaybackSettings;
+        ProjectSettings = newSymbol.ProjectSettings;
         
         // todo: ugly - the other one replaced this value with itself when it was created
         ApplyInstanceType(InstanceType);

@@ -19,7 +19,7 @@ public class OscDataRecording : OscConnectionManager.IOscConsumer, IDisposable
     public OscDataRecording(DataSet dataSet)
     {
         _dataSet = dataSet;
-        _port = ProjectSettings.Config.DefaultOscPort;
+        _port = CoreSettings.Config.DefaultOscPort;
 
         if (_port is < 0 or > 65535)
         {

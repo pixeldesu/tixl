@@ -91,7 +91,7 @@ internal static class UiConfig
         UserSettings.Config.ShowMainMenu = true;
         UserSettings.Config.ShowTitleAndDescription = true;
         UserSettings.Config.ShowToolbar = true;
-        if (Playback.Current.Settings != null && Playback.Current.Settings.Syncing == PlaybackSettings.SyncModes.Timeline)
+        if (Playback.Current.Settings != null && Playback.Current.Settings.Playback.Syncing == ProjectSettings.SyncModes.Timeline)
         {
             UserSettings.Config.ShowTimeline = true;
         }

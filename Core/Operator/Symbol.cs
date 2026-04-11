@@ -52,7 +52,7 @@ public sealed partial class Symbol : IDisposable, IResource
     public string Name => InstanceType?.Name;
     public string Namespace => InstanceType.Namespace ?? SymbolPackage.AssemblyInformation.Name;
     public Animator Animator { get; private set; } = new();
-    public PlaybackSettings PlaybackSettings { get; set; } = new();
+    public ProjectSettings ProjectSettings { get; set; } = new();
 
     public SymbolPackage SymbolPackage { get; set; }
     IResourcePackage IResource.OwningPackage => SymbolPackage;

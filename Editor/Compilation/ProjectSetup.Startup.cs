@@ -89,7 +89,7 @@ internal static partial class ProjectSetup
 
         // Initialize custom UIs
 
-        if (ProjectSettings.Config.LogAssemblyLoadingDetails)
+        if (CoreSettings.Config.LogAssemblyLoadingDetails)
         {
             foreach (var package in SymbolPackage.AllPackages)
             {

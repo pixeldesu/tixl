@@ -190,8 +190,8 @@ public static class AudioRendering
         // Process FFT data to compute frequency bands, peaks, and attacks for AudioReaction
         // Use the same gain/decay factors from playback settings as used during normal playback
         var settings = Playback.Current.Settings;
-        float gainFactor = settings?.AudioGainFactor ?? 1f;
-        float decayFactor = settings?.AudioDecayFactor ?? 0.9f;
+        float gainFactor = settings?.Playback.AudioGainFactor ?? 1f;
+        float decayFactor = settings?.Playback.AudioDecayFactor ?? 0.9f;
         AudioAnalysis.ProcessUpdate(gainFactor, decayFactor);
 
         return mixBuffer;
@@ -220,8 +220,8 @@ public static class AudioRendering
                 
                 // Apply volume: clip.Volume * SoundtrackPlaybackVolume * GlobalPlaybackVolume
                 float effectiveVolume = handle.Clip.Volume 
-                                        * ProjectSettings.Config.SoundtrackPlaybackVolume
-                                        * ProjectSettings.Config.GlobalPlaybackVolume;
+                                        * CoreSettings.Config.SoundtrackPlaybackVolume
+                                        * CoreSettings.Config.GlobalPlaybackVolume;
                 Bass.ChannelSetAttribute(clipStream.StreamHandle, ChannelAttribute.Volume, effectiveVolume);
                 
                 // Unpause for this frame

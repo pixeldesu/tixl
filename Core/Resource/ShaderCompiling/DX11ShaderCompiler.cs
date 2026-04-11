@@ -39,7 +39,7 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
             flags |= ShaderFlags.Debug;
             #endif
 
-            if (ProjectSettings.Config.SkipOptimization)
+            if (CoreSettings.Config.SkipOptimization)
             {
                 flags |= ShaderFlags.SkipOptimization;
             }

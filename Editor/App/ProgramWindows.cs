@@ -195,7 +195,7 @@ internal static class ProgramWindows
             // Create Device and SwapChain with the selected adapter
             var deviceCreationFlags = DeviceCreationFlags.BgraSupport;
 
-            if (ProjectSettings.Config.EnableDirectXDebug)
+            if (CoreSettings.Config.EnableDirectXDebug)
                 deviceCreationFlags |= DeviceCreationFlags.Debug;
             
             Log.Debug("Creating Device...");

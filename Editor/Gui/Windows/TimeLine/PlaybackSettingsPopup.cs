@@ -23,10 +23,10 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// </summary>
 /// <remarks>
 /// Controlling the primary soundtrack is finicky:
-/// - "Add soundtrack" adds a <see cref="AudioClipResourceHandle"/> with empty filepath. 
+/// - "Add soundtrack" adds a <see cref="AudioClipResourceHandle"/> with empty filepath.
 /// - When modifying the path we use to resolve the path (i.e. verify if file exists) before setting the filepath.
 /// - If valid and set, <see cref="AudioEngine"/> will then load them in CompleteFrame.
-/// 
+///
 /// </remarks>
 internal static class PlaybackSettingsPopup
 {
@@ -60,10 +60,9 @@ internal static class PlaybackSettingsPopup
 
         FormInputs.SetIndentToLeft();
 
-        PlaybackUtils.FindPlaybackSettingsForInstance(composition, out var compositionWithSettings, out var settings);
-        //var compositionSettings = compWithSoundtrack == composition ? composition.Symbol.PlaybackSettings : null;
+        PlaybackUtils.FindProjectSettingsForInstance(composition, out var compositionWithSettings, out var settings);
 
-        // Main toggle with composition name 
+        // Main toggle with composition name
         var isEnabledForCurrent = compositionWithSettings == composition && settings is { Enabled: true };
         var modified = false;
 
@@ -72,11 +71,11 @@ internal static class PlaybackSettingsPopup
             modified = true;
             if (isEnabledForCurrent)
             {
-                settings = composition.Symbol.PlaybackSettings;
+                settings = composition.Symbol.ProjectSettings;
                 if (settings == null)
                 {
-                    settings = new PlaybackSettings();
-                    composition.Symbol.PlaybackSettings = settings;
+                    settings = new ProjectSettings();
+                    composition.Symbol.ProjectSettings = settings;
                 }
 
                 compositionWithSettings = composition;
@@ -123,27 +122,28 @@ internal static class PlaybackSettingsPopup
 
         FormInputs.SetIndentToParameters();
 
+        var playback = settings.Playback;
 
-        if (FormInputs.AddSegmentedButtonWithLabel(ref settings.AudioSource, "Audio Source"))
+        if (FormInputs.AddSegmentedButtonWithLabel(ref playback.AudioSource, "Audio Source"))
         {
             modified = true;
             UpdatePlaybackAndTimeline(settings);
         }
 
         FormInputs.AddVerticalSpace();
-            
+
         ImGui.Separator();
 
-        switch (settings.AudioSource)
+        switch (playback.AudioSource)
         {
-            case PlaybackSettings.AudioSources.ProjectSoundTrack:
+            case ProjectSettings.AudioSources.ProjectSoundTrack:
             {
                 if (!settings.TryGetMainSoundtrack(compositionWithSettings, out var soundtrackHandle))
                 {
                     if (ImGui.Button("Add soundtrack to composition"))
                     {
                         modified = true;
-                        settings.AudioClips.Add(new SoundtrackClipDefinition()
+                        playback.AudioClips.Add(new SoundtrackClipDefinition()
                                                     {
                                                         IsSoundtrack = true,
                                                     });
@@ -174,12 +174,12 @@ internal static class PlaybackSettingsPopup
                         }
                     }
 
-                    var editResult = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, 
+                    var editResult = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File,
                                                                        AllFilesAudioFilesMp3WavOggMp3WavOgg,
                                                                        ref _tempSoundtrackFilepathForEdit,
                                                                        showAssetFolderToggle:false);
-                
-                
+
+
                     var filepathModified = (editResult & InputEditStateFlags.Modified) != 0;
                     if (filepathModified)
                     {
@@ -195,7 +195,7 @@ internal static class PlaybackSettingsPopup
                             _warningMessage = string.Empty;
                         }
                     }
-                
+
                     FormInputs.ApplyIndent();
                     if (ImGui.Button("Reload"))
                     {
@@ -208,7 +208,7 @@ internal static class PlaybackSettingsPopup
                     ImGui.SameLine();
                     if (ImGui.Button("Remove"))
                     {
-                        settings.AudioClips.Remove(soundtrackHandle.Clip);
+                        playback.AudioClips.Remove(soundtrackHandle.Clip);
                         modified = true;
                     }
 
@@ -224,7 +224,7 @@ internal static class PlaybackSettingsPopup
                                             120))
                     {
                         Playback.Current.Bpm = soundtrackHandle.Clip.Bpm;
-                        settings.Bpm = soundtrackHandle.Clip.Bpm;
+                        playback.Bpm = soundtrackHandle.Clip.Bpm;
                         modified = true;
                     }
 
@@ -246,26 +246,26 @@ internal static class PlaybackSettingsPopup
                     FormInputs.AddEnumDropdown(ref UserSettings.Config.TimeDisplayMode, "Display Timeline in");
 
                     if (FormInputs.AddFloat("Resync Threshold",
-                                            ref ProjectSettings.Config.AudioResyncThreshold,
+                                            ref CoreSettings.Config.AudioResyncThreshold,
                                             0.001f,
                                             0.1f,
                                             0.001f,
                                             true, true,
                                             "If audio playbacks drifts too far from the animation playback it will be resynced. If the threshold for this is too low you will encounter audio glitches. If the threshold is too large you will lose precision. A normal range is between 0.02s and 0.05s.",
-                                            ProjectSettings.Defaults.AudioResyncThreshold))
+                                            CoreSettings.Defaults.AudioResyncThreshold))
 
                     {
                         modified = true;
                     }
 
-                    modified |= FormInputs.AddFloat("Audio Decay", ref settings.AudioDecayFactor,
+                    modified |= FormInputs.AddFloat("Audio Decay", ref playback.AudioDecayFactor,
                                                     0.001f,
                                                     1f,
                                                     0.01f,
                                                     true, true,
                                                     "The decay factors controls the impact of [AudioReaction] when AttackMode. Good values strongly depend on style, loudness and variation of input signal.",
                                                     0.9f);
-                    
+
                     if (filepathModified)
                     {
                         composition.Symbol.GetSymbolUi().FlagAsModified();
@@ -277,17 +277,17 @@ internal static class PlaybackSettingsPopup
 
                 break;
             }
-            case PlaybackSettings.AudioSources.ExternalDevice:
+            case ProjectSettings.AudioSources.ExternalDevice:
             {
                 FormInputs.AddVerticalSpace();
 
-                if (FormInputs.AddSegmentedButtonWithLabel(ref settings.Syncing, "Sync Mode"))
+                if (FormInputs.AddSegmentedButtonWithLabel(ref playback.Syncing, "Sync Mode"))
                 {
                     UpdatePlaybackAndTimeline(settings);
                     modified = true;
                 }
 
-                if (settings.Syncing == PlaybackSettings.SyncModes.Tapping)
+                if (playback.Syncing == ProjectSettings.SyncModes.Tapping)
                 {
                     FormInputs.SetIndentToParameters();
                     FormInputs.AddHint("""
@@ -297,7 +297,7 @@ internal static class PlaybackSettingsPopup
 
 
                     modified |= FormInputs.AddCheckBox("Enable audio beat lock",
-                                                       ref settings.EnableAudioBeatLocking,
+                                                       ref playback.EnableAudioBeatLocking,
                                                        """
                                                        If enabled, the editor will look for transient bass, hihats and snares and attempt to look the playback onto the incoming audio signal.
                                                        To use this, start by tapping the base beat (e.g. with X) then tap the beginning of the bar with (e.g. with X).
@@ -308,10 +308,10 @@ internal static class PlaybackSettingsPopup
                     FormInputs.AddVerticalSpace();
                 }
 
-                if (!settings.EnableAudioBeatLocking)
+                if (!playback.EnableAudioBeatLocking)
                 {
                     modified |= FormInputs.AddFloat("BPM",
-                                                    ref settings.Bpm,
+                                                    ref playback.Bpm,
                                                     0,
                                                     1000,
                                                     0.02f,
@@ -325,30 +325,24 @@ internal static class PlaybackSettingsPopup
 
                 FormInputs.SetIndentToParameters();
                 modified |= FormInputs.AddFloat("Beat Sync Offset (sec)",
-                                                ref settings.BeatLockAudioOffsetSec,
-                                                -1f, 1f, 0.001f, 
+                                                ref playback.BeatLockAudioOffsetSec,
+                                                -1f, 1f, 0.001f,
                                                 true, true,
                                                 """
-                                                When using beat lock through audio analysis, you can slightly offset the phase. 
+                                                When using beat lock through audio analysis, you can slightly offset the phase.
 
                                                 This might be useful to tighten the sync between audio and video, e.g. if the visual output is delayed by video-processing devices.
                                                 """,
                                                 0);
 
-                
+
                 FormInputs.AddVerticalSpace();
 
-                // var isInitialized = playback is BeatTimingPlayback;
-                // if (!isInitialized)
-                // {
-                //     playback = new BeatTimingPlayback();
-                // }
-
-                modified |= FormInputs.AddFloat("Audio Gain", ref settings.AudioGainFactor , 0.01f, 100, 0.01f, true, true,
+                modified |= FormInputs.AddFloat("Audio Gain", ref playback.AudioGainFactor , 0.01f, 100, 0.01f, true, true,
                                                 "Can be used to adjust the input signal (e.g. in live situation where the input level might vary.",
                                                 1);
 
-                modified |= FormInputs.AddFloat("Audio Decay", ref settings.AudioDecayFactor,
+                modified |= FormInputs.AddFloat("Audio Decay", ref playback.AudioDecayFactor,
                                                 0.001f,
                                                 1f,
                                                 0.01f,
@@ -357,27 +351,27 @@ internal static class PlaybackSettingsPopup
                                                 0.9f);
 
                 // Input meter - aligned to match form input fields (with tooltip + reset button space like Audio Gain)
-                var level = settings.AudioGainFactor * WasapiAudioInput.DecayingAudioLevel * 0.03f;
+                var level = playback.AudioGainFactor * WasapiAudioInput.DecayingAudioLevel * 0.03f;
                 var normalizedLevel = level / 644f;
                 FormInputs.DrawInputLabel("Input Level");
                 var inputSize = FormInputs.GetAvailableInputSize(" ", true, true); // Pass tooltip + hasReset to account for 2 icon spaces
                 var cursorScreenPos = ImGui.GetCursorScreenPos();
                 AudioLevelMeter.DrawAbsoluteWithinBounds("", normalizedLevel, ref _smoothedLevel, 2f, cursorScreenPos.X, cursorScreenPos.X + inputSize.X);
-                
+
                 FormInputs.DrawInputLabel("Input Device");
                 ImGui.BeginGroup();
 
-                if (ImGui.BeginCombo("##SelectDevice", settings.AudioInputDeviceName, ImGuiComboFlags.HeightLarge))
+                if (ImGui.BeginCombo("##SelectDevice", playback.AudioInputDeviceName, ImGuiComboFlags.HeightLarge))
                 {
                     foreach (var d in WasapiAudioInput.InputDevices)
                     {
-                        var isSelected = d.DeviceInfo.Name == settings.AudioInputDeviceName;
+                        var isSelected = d.DeviceInfo.Name == playback.AudioInputDeviceName;
                         if (ImGui.Selectable($"{d.DeviceInfo.Name}", isSelected, ImGuiSelectableFlags.NoAutoClosePopups))
                         {
                             Bass.Configure(Configuration.UpdateThreads, false);
-                            settings.AudioInputDeviceName = d.DeviceInfo.Name;
+                            playback.AudioInputDeviceName = d.DeviceInfo.Name;
                             modified = true;
-                            ProjectSettings.Save();
+                            CoreSettings.Save();
                             //WasapiAudioInput.StartInputCapture(d);
                             T3.Core.Audio.AudioEngine.OnAudioDeviceChanged(); // <-- Ensure audio engine resets on device change
                         }
@@ -405,15 +399,15 @@ internal static class PlaybackSettingsPopup
                     }
                     ImGui.EndCombo();
                 }
-                
-                if (!string.IsNullOrEmpty(settings.AudioInputDeviceName)
-                    &&settings.AudioInputDeviceName != WasapiAudioInput.ActiveInputDeviceName)
+
+                if (!string.IsNullOrEmpty(playback.AudioInputDeviceName)
+                    &&playback.AudioInputDeviceName != WasapiAudioInput.ActiveInputDeviceName)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
-                    ImGui.TextUnformatted(settings.AudioInputDeviceName + " (NOT FOUND)");
+                    ImGui.TextUnformatted(playback.AudioInputDeviceName + " (NOT FOUND)");
                     ImGui.PopStyleColor();
                 }
-                
+
                 ImGui.EndGroup();
                 break;
             }
@@ -424,27 +418,28 @@ internal static class PlaybackSettingsPopup
         return modified;
     }
 
-    private static void UpdatePlaybackAndTimeline(PlaybackSettings settings)
+    private static void UpdatePlaybackAndTimeline(ProjectSettings settings)
     {
-        if (settings.AudioSource == PlaybackSettings.AudioSources.ProjectSoundTrack)
+        var playback = settings.Playback;
+        if (playback.AudioSource == ProjectSettings.AudioSources.ProjectSoundTrack)
         {
             Playback.Current = T3Ui.DefaultTimelinePlayback;
-                
-            if (settings.AudioClips.Count > 0)
+
+            if (playback.AudioClips.Count > 0)
             {
                 // Don't call Bass.Free() directly - this destroys all operator streams!
                 // Instead, ensure the mixer is properly initialized
                 // AudioMixerManager handles BASS initialization internally
-                Playback.Current.Bpm = settings.AudioClips[0].Bpm;
+                Playback.Current.Bpm = playback.AudioClips[0].Bpm;
                 if (Playback.Current.Settings != null)
-                    Playback.Current.Settings.Syncing = PlaybackSettings.SyncModes.Timeline;
+                    Playback.Current.Settings.Playback.Syncing = ProjectSettings.SyncModes.Timeline;
             }
 
             UserSettings.Config.ShowTimeline = true;
         }
         else
         {
-            if (settings.Syncing == PlaybackSettings.SyncModes.Tapping)
+            if (playback.Syncing == ProjectSettings.SyncModes.Tapping)
             {
                 Playback.Current = T3Ui.DefaultBeatTimingPlayback;
                 UserSettings.Config.ShowTimeline = false;
@@ -468,7 +463,7 @@ internal static class PlaybackSettingsPopup
             Log.Error("Can't detected BPM-rate from empty undefined audio-clip filename");
             return;
         }
-            
+
         var matchBpmPattern = new Regex(@"(\d+\.?\d*)bpm");
         var result = matchBpmPattern.Match(audioClip.FilePath);
         if (!result.Success)

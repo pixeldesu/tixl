@@ -1,16 +1,17 @@
-﻿using System;
+using System;
 
 namespace T3.Core.IO;
 
 /// <summary>
-/// Saves view layout and currently open node 
+/// Global application settings shared across Core, Editor and Player.
+/// Saved to projectSettings.json in the settings directory.
 /// </summary>
-public sealed class ProjectSettings : Settings<ProjectSettings.ConfigData>
+public sealed class CoreSettings : Settings<CoreSettings.ConfigData>
 {
-    public ProjectSettings(bool saveOnQuit) : base("projectSettings.json", saveOnQuit)
+    public CoreSettings(bool saveOnQuit) : base("projectSettings.json", saveOnQuit)
     {
     }
-        
+
     public sealed class ConfigData
     {
         public bool TimeClipSuspending = true;
@@ -20,19 +21,19 @@ public sealed class ProjectSettings : Settings<ProjectSettings.ConfigData>
 
         public bool SkipOptimization;
         public bool EnableDirectXDebug;
-        
+
         public bool LogAssemblyVersionMismatches = false;
-            
-        public string LimitMidiDeviceCapture = null; 
+
+        public string LimitMidiDeviceCapture = null;
         public bool EnableMidiSnapshotIndication = false;
         public WindowMode DefaultWindowMode = WindowMode.Fullscreen;
         public int DefaultOscPort = 8000;
-        
+
         // Logging
         public bool LogCompilationDetails = false;
         public bool LogAssemblyLoadingDetails = false;
         public bool LogFileEvents = false;
-        
+
         // Profiling
         public bool EnableBeatSyncProfiling = false;
 
@@ -47,6 +48,6 @@ public sealed class ProjectSettings : Settings<ProjectSettings.ConfigData>
 }
 
 [Serializable]
-public record ExportSettings(Guid OperatorId, string ApplicationTitle, WindowMode WindowMode, ProjectSettings.ConfigData ConfigData, string Author, Guid BuildId, string EditorVersion);
-    
+public record ExportSettings(Guid OperatorId, string ApplicationTitle, WindowMode WindowMode, CoreSettings.ConfigData ConfigData, string Author, Guid BuildId, string EditorVersion);
+
 public enum WindowMode { Windowed, Fullscreen }

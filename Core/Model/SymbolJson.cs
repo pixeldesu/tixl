@@ -27,7 +27,7 @@ public static class SymbolJson
         WriteSymbolInputs(symbol.InputDefinitions, writer);
         WriteSymbolChildren(symbol.Children.Values.OrderBy(x => x.Id), writer);
         WriteConnections(symbol.Connections, writer);
-        symbol.PlaybackSettings?.WriteToJson(writer);
+        symbol.ProjectSettings?.WriteToJson(writer);
         symbol.Animator.Write(writer);
 
         writer.WriteEndObject();
@@ -357,7 +357,7 @@ public static class SymbolJson
             }
         }
 
-        symbol.PlaybackSettings = PlaybackSettings.ReadFromJson(jToken);
+        symbol.ProjectSettings = ProjectSettings.ReadFromJson(jToken);
 
         var animatorJsonData = (JArray?)jToken[JsonKeys.Animator];
         return new SymbolReadResult(symbol, childrenJsons, animatorJsonData);

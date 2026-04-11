@@ -191,13 +191,13 @@ internal sealed class SoundtrackClipStream
         // Set volume on the stream
         Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Volume, 
                                  clip.Volume 
-                                 * ProjectSettings.Config.SoundtrackPlaybackVolume
-                                 * ProjectSettings.Config.GlobalPlaybackVolume
-                                 * (ProjectSettings.Config.SoundtrackMute ? 0f:1f)
-                                 * (ProjectSettings.Config.GlobalMute ? 0f:1f));
+                                 * CoreSettings.Config.SoundtrackPlaybackVolume
+                                 * CoreSettings.Config.GlobalPlaybackVolume
+                                 * (CoreSettings.Config.SoundtrackMute ? 0f:1f)
+                                 * (CoreSettings.Config.GlobalMute ? 0f:1f));
         
         // We may not fall behind or skip ahead in playback
-        var maxSoundDelta = ProjectSettings.Config.AudioResyncThreshold * Math.Abs(playback.PlaybackSpeed);
+        var maxSoundDelta = CoreSettings.Config.AudioResyncThreshold * Math.Abs(playback.PlaybackSpeed);
         if (Math.Abs(soundDelta) <= maxSoundDelta)
             return;
 
