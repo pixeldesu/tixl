@@ -31,7 +31,7 @@ internal static partial class Program
         }
 
         var currentPlayback = Playback.Current;
-        if (ProjectSettings.Current.Export.EnablePlaybackControlWithKeyboard)
+        if (CompositionSettings.Current.Export.EnablePlaybackControlWithKeyboard)
         {
             switch (keyArgs.KeyCode)
             {

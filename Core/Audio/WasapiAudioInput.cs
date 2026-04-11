@@ -34,12 +34,12 @@ public static class WasapiAudioInput
     /// <item>Initializes capture for the specified input device</item>
     /// </list>
     /// </remarks>
-    public static void StartFrame(ProjectSettings settings)
+    public static void StartFrame(CompositionSettings settings)
     {
         if (settings == null)
             return;
                     
-        if (settings.Playback.AudioSource != ProjectSettings.AudioSources.ExternalDevice)
+        if (settings.Playback.AudioSource != CompositionSettings.AudioSources.ExternalDevice)
         {
             if (!string.IsNullOrEmpty(ActiveInputDeviceName))
             {

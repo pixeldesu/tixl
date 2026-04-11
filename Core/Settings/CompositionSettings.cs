@@ -15,26 +15,24 @@ namespace T3.Core.Settings;
 /// Per-symbol project settings including playback configuration (soundtrack, BPM, audio input).
 /// Stored in .t3 files. Found via breadcrumb traversal up the graph hierarchy.
 /// </summary>
-public sealed class ProjectSettings
+public sealed class CompositionSettings
 {
     /// <summary>
     /// Provides default values when no project settings are active.
     /// </summary>
-    public static ProjectSettings Defaults { get; } = new();
+    public static CompositionSettings Defaults { get; } = new();
 
     /// <summary>
     /// Returns the active project settings from the current playback, falling back to defaults.
     /// This is the primary access path for project-level configuration.
     /// </summary>
-    public static ProjectSettings Current => Animation.Playback.Current?.Settings ?? Defaults;
+    public static CompositionSettings Current => Animation.Playback.Current?.Settings ?? Defaults;
 
     public bool Enabled { get; set; }
 
     public PlaybackConfig Playback { get; init; } = new();
     public AudioMixConfig Audio { get; init; } = new();
     public ExportConfig Export { get; init; } = new();
-    public IoConfig Io { get; init; } = new();
-    public PerformanceConfig Performance { get; init; } = new();
 
     public bool TryGetMainSoundtrack(IResourceConsumer? instance, [NotNullWhen(true)] out AudioClipResourceHandle? soundtrack)
     {
@@ -88,19 +86,6 @@ public sealed class ProjectSettings
     {
         public WindowMode DefaultWindowMode = WindowMode.Fullscreen;
         public bool EnablePlaybackControlWithKeyboard = true;
-    }
-
-    public sealed class IoConfig
-    {
-        public int DefaultOscPort = 8000;
-    }
-
-    public sealed class PerformanceConfig
-    {
-        public bool TimeClipSuspending = true;
-        public bool SkipOptimization;
-        public bool EnableDirectXDebug;
-        public bool EnableBeatSyncProfiling = false;
     }
 
     public sealed class PlaybackConfig
@@ -181,30 +166,12 @@ public sealed class ProjectSettings
             }
             writer.WriteEndObject();
 
-            // IO section
-            writer.WritePropertyName("Io");
-            writer.WriteStartObject();
-            {
-                writer.WriteValue(nameof(IoConfig.DefaultOscPort), Io.DefaultOscPort);
-            }
-            writer.WriteEndObject();
-
-            // Performance section
-            writer.WritePropertyName("Performance");
-            writer.WriteStartObject();
-            {
-                writer.WriteValue(nameof(PerformanceConfig.TimeClipSuspending), Performance.TimeClipSuspending);
-                writer.WriteValue(nameof(PerformanceConfig.SkipOptimization), Performance.SkipOptimization);
-                writer.WriteValue(nameof(PerformanceConfig.EnableDirectXDebug), Performance.EnableDirectXDebug);
-                writer.WriteValue(nameof(PerformanceConfig.EnableBeatSyncProfiling), Performance.EnableBeatSyncProfiling);
-            }
-            writer.WriteEndObject();
         }
 
         writer.WriteEndObject();
     }
 
-    internal static ProjectSettings? ReadFromJson(JToken symbolToken)
+    internal static CompositionSettings? ReadFromJson(JToken symbolToken)
     {
         // Try new format first, then fall back to legacy "PlaybackSettings" key
         var jSettingsToken = symbolToken["ProjectSettings"] ?? symbolToken["PlaybackSettings"];
@@ -224,16 +191,14 @@ public sealed class ProjectSettings
         return ReadLegacyFormat(symbolToken, settingsToken);
     }
 
-    private static ProjectSettings ReadNewFormat(JObject settingsToken, JObject playbackToken)
+    private static CompositionSettings ReadNewFormat(JObject settingsToken, JObject playbackToken)
     {
         var clips = GetClips(playbackToken).ToList();
         var audioToken = settingsToken["Audio"] as JObject;
         var exportToken = settingsToken["Export"] as JObject;
         var debugToken = settingsToken["Debug"] as JObject; // legacy compat
-        var ioToken = settingsToken["Io"] as JObject;
-        var performanceToken = settingsToken["Performance"] as JObject;
 
-        var settings = new ProjectSettings
+        var settings = new CompositionSettings
                        {
                            Enabled = JsonUtils.ReadValueSafe(settingsToken, nameof(Enabled), false),
                            Playback = new PlaybackConfig
@@ -265,18 +230,16 @@ public sealed class ProjectSettings
                                      EnablePlaybackControlWithKeyboard = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.EnablePlaybackControlWithKeyboard), Defaults.Export.EnablePlaybackControlWithKeyboard),
                                  }
                                : new ExportConfig(),
-                           Io = ReadIoConfig(ioToken, debugToken),
-                           Performance = ReadPerformanceConfig(performanceToken, debugToken),
                        };
 
         return settings;
     }
 
-    private static ProjectSettings ReadLegacyFormat(JToken symbolToken, JObject settingsToken)
+    private static CompositionSettings ReadLegacyFormat(JToken symbolToken, JObject settingsToken)
     {
         var clips = GetClips(symbolToken).ToList(); // Support legacy json format with clips at symbol root
 
-        var settings = new ProjectSettings
+        var settings = new CompositionSettings
                        {
                            Enabled = JsonUtils.ReadValueSafe(settingsToken, nameof(Enabled), false),
                            Playback = new PlaybackConfig
@@ -306,35 +269,6 @@ public sealed class ProjectSettings
         }
 
         return settings;
-    }
-
-    /// <summary>Reads IoConfig from "Io" section, falling back to legacy "Debug" section.</summary>
-    private static IoConfig ReadIoConfig(JObject? ioToken, JObject? debugToken)
-    {
-        var source = ioToken ?? debugToken;
-        if (source == null)
-            return new IoConfig();
-
-        return new IoConfig
-               {
-                   DefaultOscPort = JsonUtils.ReadValueSafe(source, nameof(IoConfig.DefaultOscPort), Defaults.Io.DefaultOscPort),
-               };
-    }
-
-    /// <summary>Reads PerformanceConfig from "Performance" section, falling back to legacy "Debug" section.</summary>
-    private static PerformanceConfig ReadPerformanceConfig(JObject? performanceToken, JObject? debugToken)
-    {
-        var source = performanceToken ?? debugToken;
-        if (source == null)
-            return new PerformanceConfig();
-
-        return new PerformanceConfig
-               {
-                   TimeClipSuspending = JsonUtils.ReadValueSafe(source, nameof(PerformanceConfig.TimeClipSuspending), Defaults.Performance.TimeClipSuspending),
-                   SkipOptimization = JsonUtils.ReadValueSafe(source, nameof(PerformanceConfig.SkipOptimization), Defaults.Performance.SkipOptimization),
-                   EnableDirectXDebug = JsonUtils.ReadValueSafe(source, nameof(PerformanceConfig.EnableDirectXDebug), Defaults.Performance.EnableDirectXDebug),
-                   EnableBeatSyncProfiling = JsonUtils.ReadValueSafe(source, nameof(PerformanceConfig.EnableBeatSyncProfiling), Defaults.Performance.EnableBeatSyncProfiling),
-               };
     }
 
     private static IEnumerable<SoundtrackClipDefinition> GetClips(JToken token)

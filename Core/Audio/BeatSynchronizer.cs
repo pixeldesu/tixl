@@ -112,7 +112,7 @@ public static class BeatSynchronizer
             if (!TryDetectAndQueueOnsetStrength(band, currentBassOnsetStrength, currentTimeMs, out var onset))
                 continue;
 
-            if (ProjectSettings.Current.Performance.EnableBeatSyncProfiling)
+            if (CoreSettings.Config.EnableBeatSyncProfiling)
             {
                 DebugDataRecording.KeepTraceData("BPM/OnSet/" + band.Type, onset.Amplitude);
             }
@@ -177,7 +177,7 @@ public static class BeatSynchronizer
 
         var bpmCorrection = (proportionalBpmAdjustment * currentPhaseErrorNormalized);
 
-        if (ProjectSettings.Current.Performance.EnableBeatSyncProfiling)
+        if (CoreSettings.Config.EnableBeatSyncProfiling)
         {
             DebugDataRecording.KeepTraceData("BPM/barProgress", _barTime % 1);
             DebugDataRecording.KeepTraceData("BPM/current", _currentBpm);

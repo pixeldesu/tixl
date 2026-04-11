@@ -244,9 +244,9 @@ internal sealed partial class SettingsWindow : Window
                                                       UserSettings.Defaults.MiddleMouseButtonZooms);
 
                     changed |= FormInputs.AddCheckBox("Suspend invalidation of inactive time clips",
-                                                      ref ProjectSettings.Current.Performance.TimeClipSuspending,
+                                                      ref CoreSettings.Config.TimeClipSuspending,
                                                       "An experimental optimization that avoids dirty flag evaluation of graph behind inactive TimeClips. This is only relevant for very complex projects and multiple parts separated by timelines.",
-                                                      ProjectSettings.Defaults.Performance.TimeClipSuspending);
+                                                      CoreSettings.Defaults.TimeClipSuspending);
 
                     changed |= FormInputs.AddCheckBox("Warn before Lib modifications",
                                                       ref UserSettings.Config.WarnBeforeLibEdit,
@@ -335,7 +335,31 @@ internal sealed partial class SettingsWindow : Window
                                                                      During development or if loading freezes during startup it might be useful for disable this settings.
                                                                      """,
                                                                      UserSettings.Config.LoadMultiThreaded);
-                    
+
+                    FormInputs.AddSectionSubHeader("Performance");
+                    FormInputs.SetIndentToLeft();
+
+                    projectSettingsChanged |= FormInputs.AddCheckBox("Skip Shader Optimization",
+                                                                     ref CoreSettings.Config.SkipOptimization,
+                                                                     "Makes working with shader graphs easier by skipping HLSL optimization.",
+                                                                     CoreSettings.Defaults.SkipOptimization);
+
+                    projectSettingsChanged |= FormInputs.AddCheckBox("Enable DirectX Debug Mode",
+                                                                     ref CoreSettings.Config.EnableDirectXDebug,
+                                                                     """
+                                                                     Adds debug information to shaders and buffers for tools like RenderDoc.
+                                                                     Can impact rendering performance. Requires a restart.
+                                                                     """,
+                                                                     CoreSettings.Defaults.EnableDirectXDebug);
+
+                    FormInputs.AddSectionSubHeader("OSC");
+                    FormInputs.SetIndentToLeft();
+
+                    projectSettingsChanged |= FormInputs.AddInt("Default Port", ref CoreSettings.Config.DefaultOscPort,
+                                                                0, 65535, 1,
+                                                                "If a valid port is set, Tooll will listen for OSC messages on this port by default.\nChanging the port requires a restart.",
+                                                                CoreSettings.Defaults.DefaultOscPort);
+
                     FormInputs.SetIndentToParameters();
 
                     break;
@@ -444,6 +468,12 @@ internal sealed partial class SettingsWindow : Window
                         Log.Gated.AudioEnabled = UserSettings.Config.LogAudioDetails;
                         changed = true;
                     }
+                    changed |= FormInputs.AddCheckBox("Profile Beat Syncing",
+                        ref CoreSettings.Config.EnableBeatSyncProfiling,
+                        "Logs beat sync timing to IO Window.",
+                        CoreSettings.Defaults.EnableBeatSyncProfiling);
+                    FormInputs.AddVerticalSpace();
+
                     changed |= FormInputs.AddCheckBox("Log Asset File Events",
                         ref CoreSettings.Config.LogFileEvents,
                         "Logs events related to changing and updating assets files.",

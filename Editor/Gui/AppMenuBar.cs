@@ -267,11 +267,6 @@ internal static class AppMenuBar
                 //_importDialog.ShowNextFrame();
             }
 
-            ImGui.Separator();
-            if (ImGui.MenuItem("Disable Keyboard ShortCuts", UserActions.Save.ListShortcuts(), !UserSettings.Config.EnableKeyboardShortCuts))
-            {
-                UserSettings.Config.EnableKeyboardShortCuts = !UserSettings.Config.EnableKeyboardShortCuts;
-            }
             
             ImGui.Separator();
 
@@ -361,9 +356,9 @@ internal static class AppMenuBar
 
             WindowManager.SettingsWindow.DrawMenuItemToggle();
             {
-                var hasSettings = ProjectView.Focused?.CompositionInstance?.Symbol.ProjectSettings is { Enabled: true };
+                var hasSettings = ProjectView.Focused?.CompositionInstance?.Symbol.CompositionSettings is { Enabled: true };
                 var window = WindowManager.ProjectSettingsWindow;
-                if (ImGui.MenuItem("Project Settings", "", hasSettings))
+                if (ImGui.MenuItem("Composition Settings", "", hasSettings))
                 {
                     window.Config.Visible = !window.Config.Visible;
                 }

@@ -30,7 +30,7 @@ public static class SymbolJson
         WriteSymbolInputs(symbol.InputDefinitions, writer);
         WriteSymbolChildren(symbol.Children.Values.OrderBy(x => x.Id), writer);
         WriteConnections(symbol.Connections, writer);
-        symbol.ProjectSettings?.WriteToJson(writer);
+        symbol.CompositionSettings?.WriteToJson(writer);
         symbol.Animator.Write(writer);
 
         writer.WriteEndObject();
@@ -364,7 +364,7 @@ public static class SymbolJson
             }
         }
 
-        symbol.ProjectSettings = ProjectSettings.ReadFromJson(jToken);
+        symbol.CompositionSettings = CompositionSettings.ReadFromJson(jToken);
 
         var animatorJsonData = (JArray?)jToken[JsonKeys.Animator];
         return new SymbolReadResult(symbol, childrenJsons, animatorJsonData);
@@ -394,7 +394,7 @@ public static class SymbolJson
         internal const string Inputs = "Inputs";
         internal const string Children = "Children";
         internal const string Connections = "Connections";
-        // ProjectSettings is written by ProjectSettings.WriteToJson()
+        // SymbolSettings is written by SymbolSettings.WriteToJson()
         internal const string Animator = "Animator";
 
         // Connection fields

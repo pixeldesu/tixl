@@ -375,11 +375,13 @@ internal sealed partial class ProjectView
             // }
         }
 
+        // Save output window state before clearing focus — pinning state
+        // is now persisted in OutputWindowState and restored on project reopen
         foreach (var window in OutputWindow.OutputWindowInstances)
         {
             if (window is OutputWindow outputWindow)
             {
-                outputWindow.Pinning.Unpin();
+                outputWindow.SaveStateToProject();
             }
         }
 

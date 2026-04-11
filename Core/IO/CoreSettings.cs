@@ -26,6 +26,15 @@ public sealed class CoreSettings : Settings<CoreSettings.ConfigData>
         // Audio
         public bool AppMute = false;
         public float AppVolume = 1;
+
+        // IO
+        public int DefaultOscPort = 8000;
+
+        // Performance
+        public bool TimeClipSuspending = true;
+        public bool SkipOptimization;
+        public bool EnableDirectXDebug;
+        public bool EnableBeatSyncProfiling = false;
     }
 }
 

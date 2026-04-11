@@ -255,6 +255,12 @@ public sealed partial class SymbolUi : ISelectionContainer
     /// </summary>
     internal Gui.Windows.RenderExport.RenderSettings? RenderSettings { get; set; }
 
+    /// <summary>
+    /// Per-symbol output window states (one per OutputWindow instance).
+    /// Serialized to .t3ui files.
+    /// </summary>
+    internal List<Gui.Windows.Output.OutputWindowState>? OutputWindowStates { get; set; }
+
     [Flags]
     internal enum SymbolTags
     {

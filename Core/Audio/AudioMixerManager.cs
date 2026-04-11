@@ -417,7 +417,7 @@ public static class AudioMixerManager
             float definedVolume = 1.0f;
             try
             {
-                definedVolume = ProjectSettings.Current.Audio.OperatorVolume;
+                definedVolume = CompositionSettings.Current.Audio.OperatorVolume;
             }
             catch
             {

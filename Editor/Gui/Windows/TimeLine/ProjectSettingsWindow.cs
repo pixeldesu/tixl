@@ -33,7 +33,7 @@ internal sealed class ProjectSettingsWindow : Window
 {
     internal ProjectSettingsWindow()
     {
-        Config.Title = "Project Settings";
+        Config.Title = "Composition Settings";
     }
 
     internal override List<Window> GetInstances() => [];
@@ -48,7 +48,7 @@ internal sealed class ProjectSettingsWindow : Window
             return;
         }
 
-        PlaybackUtils.FindProjectSettingsForInstance(composition, out var compositionWithSettings,
+        PlaybackUtils.FindCompositionSettingsForInstance(composition, out var compositionWithSettings,
             out var settings);
 
         var isEnabledForCurrent = compositionWithSettings == composition && settings is {Enabled: true};
@@ -62,11 +62,11 @@ internal sealed class ProjectSettingsWindow : Window
             {
                 if (isEnabledForCurrent)
                 {
-                    settings = composition.Symbol.ProjectSettings;
+                    settings = composition.Symbol.CompositionSettings;
                     if (settings == null)
                     {
-                        settings = new ProjectSettings();
-                        composition.Symbol.ProjectSettings = settings;
+                        settings = new CompositionSettings();
+                        composition.Symbol.CompositionSettings = settings;
                     }
 
                     compositionWithSettings = composition;
@@ -123,14 +123,12 @@ internal sealed class ProjectSettingsWindow : Window
     {
         Playback,
         Audio,
-        Io,
         Executable,
-        Performance,
     }
 
     private static Categories _activeCategory;
 
-    private void DrawSettingsPanels(Instance composition, ProjectSettings settings,
+    private void DrawSettingsPanels(Instance composition, CompositionSettings settings,
         Instance? compositionWithSettings)
     {
         ImGui.BeginChild("categories", new Vector2(120 * T3Ui.UiScaleFactor, -1),
@@ -160,12 +158,6 @@ internal sealed class ProjectSettingsWindow : Window
                 case Categories.Executable:
                     modified |= DrawRenderingSettings(settings);
                     break;
-                case Categories.Io:
-                    modified |= DrawIoSettings(settings);
-                    break;
-                case Categories.Performance:
-                    modified |= DrawPerformanceSettings(settings);
-                    break;
             }
 
             if (modified)
@@ -178,11 +170,11 @@ internal sealed class ProjectSettingsWindow : Window
 
     #region Category panels
 
-    private static bool DrawAudioSettings(ProjectSettings settings)
+    private static bool DrawAudioSettings(CompositionSettings settings)
     {
         var modified = false;
         var audio = settings.Audio;
-        var defaults = ProjectSettings.Defaults.Audio;
+        var defaults = CompositionSettings.Defaults.Audio;
 
         FormInputs.AddSectionHeader("Audio Mix");
 
@@ -218,11 +210,11 @@ internal sealed class ProjectSettingsWindow : Window
         return modified;
     }
 
-    private static bool DrawRenderingSettings(ProjectSettings settings)
+    private static bool DrawRenderingSettings(CompositionSettings settings)
     {
         var modified = false;
         var export = settings.Export;
-        var defaults = ProjectSettings.Defaults.Export;
+        var defaults = CompositionSettings.Defaults.Export;
 
         FormInputs.AddSectionHeader("Export");
         CustomComponents.HelpText("These settings apply when exporting as executable.");
@@ -241,62 +233,12 @@ internal sealed class ProjectSettingsWindow : Window
         return modified;
     }
 
-    private static bool DrawIoSettings(ProjectSettings settings)
-    {
-        var modified = false;
-        var io = settings.Io;
-        var defaults = ProjectSettings.Defaults.Io;
-
-        FormInputs.AddSectionHeader("OSC");
-        CustomComponents.HelpText(
-            "Tooll listens for OSC messages on the default port.\nYou can also use the OscInput operator for other ports.");
-        FormInputs.AddVerticalSpace();
-
-        modified |= FormInputs.AddInt("Default Port", ref io.DefaultOscPort,
-            0, 65535, 1,
-            "If a valid port is set, Tooll will listen for OSC messages on this port by default.\nChanging the port requires a restart.",
-            defaults.DefaultOscPort);
-
-        return modified;
-    }
-
-    private static bool DrawPerformanceSettings(ProjectSettings settings)
-    {
-        var modified = false;
-        var perf = settings.Performance;
-        var defaults = ProjectSettings.Defaults.Performance;
-
-        FormInputs.AddSectionHeader("Performance");
-        FormInputs.AddVerticalSpace();
-
-        modified |= FormInputs.AddCheckBox("Suspend inactive time clips",
-            ref perf.TimeClipSuspending,
-            "Avoids dirty flag evaluation of the graph behind inactive TimeClips. Only relevant for complex projects with multiple timeline parts.",
-            defaults.TimeClipSuspending);
-
-        modified |= FormInputs.AddCheckBox("Skip Shader Optimization",
-            ref perf.SkipOptimization,
-            "Makes working with shader graphs easier by skipping HLSL optimization.",
-            defaults.SkipOptimization);
-
-        modified |= FormInputs.AddCheckBox("Enable DirectX Debug Mode",
-            ref perf.EnableDirectXDebug,
-            "Adds debug information to shaders and buffers for tools like RenderDoc.\nCan impact rendering performance. Requires a restart.",
-            defaults.EnableDirectXDebug);
-
-        modified |= FormInputs.AddCheckBox("Profile Beat Syncing",
-            ref perf.EnableBeatSyncProfiling,
-            "Logs beat sync timing to IO Window.",
-            defaults.EnableBeatSyncProfiling);
-
-        return modified;
-    }
 
     #endregion
 
     #region Playback settings
 
-    private static bool DrawPlaybackSettings(Instance composition, ProjectSettings settings,
+    private static bool DrawPlaybackSettings(Instance composition, CompositionSettings settings,
         Instance? compositionWithSettings)
     {
         var modified = false;
@@ -317,7 +259,7 @@ internal sealed class ProjectSettingsWindow : Window
 
         switch (playback.AudioSource)
         {
-            case ProjectSettings.AudioSources.ProjectSoundTrack:
+            case CompositionSettings.AudioSources.ProjectSoundTrack:
             {
                 if (!settings.TryGetMainSoundtrack(compositionWithSettings, out var soundtrackHandle))
                 {
@@ -434,7 +376,7 @@ internal sealed class ProjectSettingsWindow : Window
 
                 break;
             }
-            case ProjectSettings.AudioSources.ExternalDevice:
+            case CompositionSettings.AudioSources.ExternalDevice:
             {
                 FormInputs.AddVerticalSpace();
 
@@ -444,7 +386,7 @@ internal sealed class ProjectSettingsWindow : Window
                     modified = true;
                 }
 
-                if (playback.Syncing == ProjectSettings.SyncModes.Tapping)
+                if (playback.Syncing == CompositionSettings.SyncModes.Tapping)
                 {
                     FormInputs.SetIndentToParameters();
                     FormInputs.AddHint("""
@@ -578,10 +520,10 @@ internal sealed class ProjectSettingsWindow : Window
 
     #region Helpers
 
-    private static void UpdatePlaybackAndTimeline(ProjectSettings settings)
+    private static void UpdatePlaybackAndTimeline(CompositionSettings settings)
     {
         var playback = settings.Playback;
-        if (playback.AudioSource == ProjectSettings.AudioSources.ProjectSoundTrack)
+        if (playback.AudioSource == CompositionSettings.AudioSources.ProjectSoundTrack)
         {
             Playback.Current = T3Ui.DefaultTimelinePlayback;
 
@@ -589,14 +531,14 @@ internal sealed class ProjectSettingsWindow : Window
             {
                 Playback.Current.Bpm = playback.AudioClips[0].Bpm;
                 if (Playback.Current.Settings != null)
-                    Playback.Current.Settings.Playback.Syncing = ProjectSettings.SyncModes.Timeline;
+                    Playback.Current.Settings.Playback.Syncing = CompositionSettings.SyncModes.Timeline;
             }
 
             UserSettings.Config.ShowTimeline = true;
         }
         else
         {
-            if (playback.Syncing == ProjectSettings.SyncModes.Tapping)
+            if (playback.Syncing == CompositionSettings.SyncModes.Tapping)
             {
                 Playback.Current = T3Ui.DefaultBeatTimingPlayback;
                 UserSettings.Config.ShowTimeline = false;

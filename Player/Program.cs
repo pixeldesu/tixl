@@ -205,7 +205,7 @@ internal static partial class Program
             }
 
             Log.Debug($"Try to load playback settings for {demoSymbol}");
-            var playbackSettings = demoSymbol.ProjectSettings;
+            var playbackSettings = demoSymbol.CompositionSettings;
             if (playbackSettings != null)
             {
                 Log.Debug("Playback settings: " + JsonConvert.SerializeObject(
@@ -239,7 +239,7 @@ internal static partial class Program
             _resolution = new Int2(_resolvedOptions.Width, _resolvedOptions.Height);
 
             // Init wasapi input if required
-            if (playbackSettings is { Playback.AudioSource: ProjectSettings.AudioSources.ProjectSoundTrack }
+            if (playbackSettings is { Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack }
                 && playbackSettings.TryGetMainSoundtrack(_project, out _soundtrackHandle))
             {
                 //var soundtrack = _soundtrackHandle.Value;

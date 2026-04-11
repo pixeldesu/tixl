@@ -170,7 +170,7 @@ internal static class TimeControls
         var playback = Playback.Current;
 
         // Settings
-        PlaybackUtils.FindProjectSettingsForInstance(composition, out var compositionWithSettings, out var settings);
+        PlaybackUtils.FindCompositionSettingsForInstance(composition, out var compositionWithSettings, out var settings);
         var opHasSettings = compositionWithSettings == composition;
 
         
@@ -377,7 +377,7 @@ internal static class TimeControls
             ImGui.SameLine();
         }
 
-        if (settings.Playback.Syncing == ProjectSettings.SyncModes.Tapping)
+        if (settings.Playback.Syncing == CompositionSettings.SyncModes.Tapping)
         {
             var bpm = BeatTiming.Bpm;
             if (SingleValueEdit.Draw(ref bpm, new Vector2(StandardWidth, ControlSize.Y), min: 1, max: 360, clampMin: true, clampMax: true, scale: 0.01f, format: "{0:0.0 BPM}") ==

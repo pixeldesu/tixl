@@ -6,6 +6,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Editor.Gui.OutputUi;
+using T3.Editor.Gui.Windows.Output;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Selection;
 using T3.Serialization;
@@ -657,14 +658,17 @@ internal static class SymbolUiJson
 
     private static void WriteSettings(SymbolUi symbolUi, JsonTextWriter writer)
     {
-        if (symbolUi.RenderSettings == null)
+        var hasRenderSettings = symbolUi.RenderSettings != null;
+        var hasOutputWindowStates = symbolUi.OutputWindowStates is { Count: > 0 };
+
+        if (!hasRenderSettings && !hasOutputWindowStates)
             return;
 
         writer.WritePropertyName("Settings");
         writer.WriteStartObject();
         {
             symbolUi.RenderSettings?.WriteToJson(writer);
-            // Future: editorState, outputWindows, etc.
+            OutputWindowState.WriteAllToJson(writer, symbolUi.OutputWindowStates);
         }
         writer.WriteEndObject();
     }
@@ -676,7 +680,7 @@ internal static class SymbolUiJson
             return;
 
         symbolUi.RenderSettings = Gui.Windows.RenderExport.RenderSettings.ReadFromJson(settingsToken);
-        // Future: editorState, outputWindows, etc.
+        symbolUi.OutputWindowStates = OutputWindowState.ReadAllFromJson(settingsToken);
     }
 
     #endregion

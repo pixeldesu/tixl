@@ -54,7 +54,7 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
     {
         if ((context.LocalTime < TimeClip.TimeRange.Start) || (context.LocalTime >= TimeClip.TimeRange.End))
         {
-            LastUpdateStatus = ProjectSettings.Current.Performance.TimeClipSuspending ? UpdateStates.Suspended : UpdateStates.Active;
+            LastUpdateStatus = CoreSettings.Config.TimeClipSuspending ? UpdateStates.Suspended : UpdateStates.Active;
             return;
         }
 

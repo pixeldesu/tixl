@@ -18,11 +18,11 @@ public static class PlaybackUtils
 
     internal static void UpdatePlaybackAndSyncing()
     {
-        var settings = FindProjectSettings(out var audioComposition);
+        var settings = FindCompositionSettings(out var audioComposition);
 
         WasapiAudioInput.StartFrame(settings);
 
-        if (settings.Playback.AudioSource == ProjectSettings.AudioSources.ProjectSoundTrack)
+        if (settings.Playback.AudioSource == CompositionSettings.AudioSources.ProjectSoundTrack)
         {
             if (settings.TryGetMainSoundtrack(audioComposition, out var soundtrack))
             {
@@ -30,12 +30,12 @@ public static class PlaybackUtils
             }
         }
 
-        if (settings.Playback.AudioSource == ProjectSettings.AudioSources.ExternalDevice
-            && settings.Playback.Syncing == ProjectSettings.SyncModes.Tapping)
+        if (settings.Playback.AudioSource == CompositionSettings.AudioSources.ExternalDevice
+            && settings.Playback.Syncing == CompositionSettings.SyncModes.Tapping)
         {
             Playback.Current = T3Ui.DefaultBeatTimingPlayback;
 
-            if (Playback.Current.Settings is { Playback.Syncing: ProjectSettings.SyncModes.Tapping })
+            if (Playback.Current.Settings is { Playback.Syncing: CompositionSettings.SyncModes.Tapping })
             {
                 if (TapProvider != null)
                 {
@@ -76,18 +76,18 @@ public static class PlaybackUtils
         Playback.Current.Settings = settings;
     }
 
-    private static ProjectSettings FindProjectSettings(out IResourceConsumer? owner)
+    private static CompositionSettings FindCompositionSettings(out IResourceConsumer? owner)
     {
         var composition = ProjectView.Focused?.CompositionInstance;
 
-        if (composition != null && FindProjectSettingsForInstance(composition, out var instance, out var settings))
+        if (composition != null && FindCompositionSettingsForInstance(composition, out var instance, out var settings))
         {
             owner = instance;
             return settings;
         }
 
         owner = null;
-        return _defaultProjectSettings;
+        return _defaultCompositionSettings;
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ public static class PlaybackUtils
     internal static bool TryFindingSoundtrack([NotNullWhen(true)] out AudioClipResourceHandle? soundtrack,
                                               out IResourceConsumer? composition)
     {
-        var settings = FindProjectSettings(out composition);
+        var settings = FindCompositionSettings(out composition);
         if (composition != null)
             return settings.TryGetMainSoundtrack(composition, out soundtrack);
 
@@ -108,19 +108,19 @@ public static class PlaybackUtils
     /// Try to find project settings for an instance by walking up the parent chain.
     /// </summary>
     /// <returns>false if falling back to default settings</returns>
-    internal static bool FindProjectSettingsForInstance(Instance startInstance, out Instance? instanceWithSettings, out ProjectSettings settings)
+    internal static bool FindCompositionSettingsForInstance(Instance startInstance, out Instance? instanceWithSettings, out CompositionSettings settings)
     {
         instanceWithSettings = startInstance;
         while (true)
         {
             if (instanceWithSettings == null)
             {
-                settings = _defaultProjectSettings;
+                settings = _defaultCompositionSettings;
                 instanceWithSettings = null;
                 return false;
             }
 
-            settings = instanceWithSettings.Symbol.ProjectSettings;
+            settings = instanceWithSettings.Symbol.CompositionSettings;
             if (settings != null && settings.Enabled)
             {
                 return true;
@@ -130,14 +130,14 @@ public static class PlaybackUtils
         }
     }
 
-    private static readonly ProjectSettings _defaultProjectSettings = new()
+    private static readonly CompositionSettings _defaultCompositionSettings = new()
                                                                       {
                                                                           Enabled = false,
-                                                                          Playback = new ProjectSettings.PlaybackConfig
+                                                                          Playback = new CompositionSettings.PlaybackConfig
                                                                                      {
                                                                                          Bpm = 120,
-                                                                                         AudioSource = ProjectSettings.AudioSources.ProjectSoundTrack,
-                                                                                         Syncing = ProjectSettings.SyncModes.Timeline,
+                                                                                         AudioSource = CompositionSettings.AudioSources.ProjectSoundTrack,
+                                                                                         Syncing = CompositionSettings.SyncModes.Timeline,
                                                                                          AudioInputDeviceName = string.Empty,
                                                                                          AudioGainFactor = 1,
                                                                                          AudioDecayFactor = 1,

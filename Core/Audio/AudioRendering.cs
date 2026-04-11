@@ -221,7 +221,7 @@ public static class AudioRendering
                 
                 // Apply volume: clip.Volume * SoundtrackVolume * AppVolume
                 float effectiveVolume = handle.Clip.Volume
-                                        * ProjectSettings.Current.Audio.SoundtrackVolume
+                                        * CompositionSettings.Current.Audio.SoundtrackVolume
                                         * CoreSettings.Config.AppVolume;
                 Bass.ChannelSetAttribute(clipStream.StreamHandle, ChannelAttribute.Volume, effectiveVolume);
                 

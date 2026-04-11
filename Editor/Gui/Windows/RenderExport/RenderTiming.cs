@@ -115,7 +115,7 @@ internal static class RenderTiming
             return;
         }
 
-        PlaybackUtils.FindProjectSettingsForInstance(composition, out var instanceWithSettings, out var projectSettings);
+        PlaybackUtils.FindCompositionSettingsForInstance(composition, out var instanceWithSettings, out var projectSettings);
 
         // change global settings before calculating times
         Playback.Current.Bpm = projectSettings.Playback.Bpm;

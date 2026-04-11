@@ -11,7 +11,7 @@ internal static partial class WindowManager
     {
         foreach (var window in _windows)
         {
-            // Settings and ProjectSettings windows are shown in the TiXL menu
+            // Settings and SymbolSettings windows are shown in the TiXL menu
             if (window == SettingsWindow || window == ProjectSettingsWindow)
                 continue;
 

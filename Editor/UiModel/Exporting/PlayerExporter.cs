@@ -349,7 +349,7 @@ internal static partial class PlayerExporter
     private static bool TryFindSoundtrack(Instance instance, Symbol symbol,
                                           [NotNullWhen(true)] out string? address)
     {
-        var playbackSettings = symbol.ProjectSettings;
+        var playbackSettings = symbol.CompositionSettings;
         if (playbackSettings == null)
         {
             Log.Warning($"Project {symbol} has no playback settings");
@@ -454,7 +454,7 @@ internal static partial class PlayerExporter
         // Update project settings
         var exportSettings = new ExportSettings(OperatorId: symbol.Id,
                                                 ApplicationTitle: symbol.Name,
-                                                WindowMode: ProjectSettings.Current.Export.DefaultWindowMode,
+                                                WindowMode: CompositionSettings.Current.Export.DefaultWindowMode,
                                                 ConfigData: CoreSettings.Config,
                                                 Author: symbol.SymbolPackage.AssemblyInformation?.Name ?? string.Empty, // todo - actual author name
                                                 BuildId: Guid.NewGuid(),

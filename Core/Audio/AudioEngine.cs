@@ -181,7 +181,7 @@ public static class AudioEngine
         // Skip during export - GetFullMixDownBuffer handles FFT processing during export
         // to ensure consistent behavior between soundtrack and external audio modes
         if (!playback.IsRenderingToFile && 
-            playback.Settings is { Enabled: true, Playback.AudioSource: ProjectSettings.AudioSources.ProjectSoundTrack })
+            playback.Settings is { Enabled: true, Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack })
             AudioAnalysis.ProcessUpdate(playback.Settings.Playback.AudioGainFactor, playback.Settings.Playback.AudioDecayFactor);
 
         StopStaleOperators();
@@ -306,7 +306,7 @@ public static class AudioEngine
     /// <param name="context">The analysis context to write data into</param>
     internal static void UpdateFftBufferFromSoundtrack(Playback playback, AudioAnalysisContext context)
     {
-        if (playback.Settings is not { Playback.AudioSource: ProjectSettings.AudioSources.ProjectSoundTrack })
+        if (playback.Settings is not { Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack })
             return;
 
         // During export, the GlobalMixer is paused and empty, so FFT/waveform data
@@ -1320,7 +1320,7 @@ public static class AudioEngine
     public static void SetOperatorMute(bool mute)
     {
         AudioMixerManager.SetOperatorMute(mute);
-        ProjectSettings.Current.Audio.OperatorMute = mute;
+        CompositionSettings.Current.Audio.OperatorMute = mute;
     }
 
     #endregion

@@ -190,7 +190,7 @@ internal sealed class SoundtrackClipStream
         var soundDelta = (currentPosInSec - localTargetTimeInSecs) * playback.PlaybackSpeed;
 
         // Set volume on the stream
-        var audio = ProjectSettings.Current.Audio;
+        var audio = CompositionSettings.Current.Audio;
         Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Volume,
                                  clip.Volume
                                  * audio.SoundtrackVolume

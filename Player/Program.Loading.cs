@@ -68,7 +68,7 @@ internal static partial class Program
         var previousSpeed = playback.PlaybackSpeed;
         var originalTime = playback.TimeInSecs;
         var wasWindowVisible = _renderForm?.Visible ?? true;
-        var audio = ProjectSettings.Current.Audio;
+        var audio = CompositionSettings.Current.Audio;
         var previousSoundtrackMute = audio.SoundtrackMute;
         var previousGlobalMute = CoreSettings.Config.AppMute;
         var hideDisplayDuringPreload = true;

@@ -29,7 +29,7 @@ public class Playback
     }
 
     public static Playback Current { get; set; }
-    public ProjectSettings Settings { get; set; }
+    public CompositionSettings Settings { get; set; }
 
     /// <summary>
     /// The absolute current time as controlled by the timeline interaction in bars.

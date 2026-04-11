@@ -36,8 +36,8 @@ internal sealed partial class SettingsWindow
             "Mute all audio output at the global mixer level.");
         AudioEngine.SetGlobalMute(CoreSettings.Config.AppMute);
         
-        var audio = ProjectSettings.Current.Audio;
-        var audioDefaults = ProjectSettings.Defaults.Audio;
+        var audio = CompositionSettings.Current.Audio;
+        var audioDefaults = CompositionSettings.Defaults.Audio;
 
         changed |= DrawMixerSection(
             "Operator Mixer",
