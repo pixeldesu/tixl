@@ -23,17 +23,17 @@ internal sealed partial class SettingsWindow
         FormInputs.AddVerticalSpace();
         
         changed |= DrawMixerSection(
-            "Global Mixer",
-            ref CoreSettings.Config.GlobalPlaybackVolume,
+            "Editor Mixer",
+            ref CoreSettings.Config.EditorVolume,
             0.0f, 1.0f,
-            CoreSettings.Defaults.GlobalPlaybackVolume,
+            CoreSettings.Defaults.EditorVolume,
             "Affects all audio output at the global mixer level.",
             AudioMixerManager.GetGlobalMixerLevel(),
             ref _smoothedGlobalLevel,
-            ref CoreSettings.Config.GlobalMute,
-            CoreSettings.Defaults.GlobalMute,
+            ref CoreSettings.Config.EditorMute,
+            CoreSettings.Defaults.EditorMute,
             "Mute all audio output at the global mixer level.");
-        AudioEngine.SetGlobalMute(CoreSettings.Config.GlobalMute);
+        AudioEngine.SetGlobalMute(CoreSettings.Config.EditorMute);
         
         changed |= DrawMixerSection(
             "Operator Mixer",

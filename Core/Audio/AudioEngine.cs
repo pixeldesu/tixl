@@ -292,7 +292,7 @@ public static class AudioEngine
     /// <summary>
     /// Gets a value indicating whether global audio is currently muted.
     /// </summary>
-    public static bool IsGlobalMuted => CoreSettings.Config.GlobalMute;
+    public static bool IsGlobalMuted => CoreSettings.Config.EditorMute;
 
     internal static void UpdateFftBufferFromSoundtrack(Playback playback)
     {
@@ -1291,7 +1291,7 @@ public static class AudioEngine
     /// <param name="volume">The volume level (0.0 to 1.0).</param>
     public static void SetGlobalVolume(float volume)
     {
-        CoreSettings.Config.GlobalPlaybackVolume = volume;
+        CoreSettings.Config.EditorVolume = volume;
         AudioMixerManager.SetGlobalVolume(volume);
     }
 
@@ -1300,7 +1300,7 @@ public static class AudioEngine
     /// </summary>
     public static void InitializeGlobalVolumeFromSettings()
     {
-        AudioMixerManager.SetGlobalVolume(CoreSettings.Config.GlobalPlaybackVolume);
+        AudioMixerManager.SetGlobalVolume(CoreSettings.Config.EditorVolume);
     }
 
     /// <summary>
@@ -1310,7 +1310,7 @@ public static class AudioEngine
     public static void SetGlobalMute(bool mute)
     {
         AudioMixerManager.SetGlobalMute(mute);
-        CoreSettings.Config.GlobalMute = mute;
+        CoreSettings.Config.EditorMute = mute;
     }
 
     /// <summary>

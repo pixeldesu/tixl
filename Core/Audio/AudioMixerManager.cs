@@ -384,7 +384,7 @@ public static class AudioMixerManager
             float definedVolume = 1.0f;
             try
             {
-                definedVolume = IO.CoreSettings.Config.GlobalPlaybackVolume;
+                definedVolume = IO.CoreSettings.Config.EditorVolume;
             }
             catch
             {

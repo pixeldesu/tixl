@@ -37,8 +37,8 @@ public sealed class CoreSettings : Settings<CoreSettings.ConfigData>
         public bool EnableBeatSyncProfiling = false;
 
         // Audio
-        public bool GlobalMute = false;
-        public float GlobalPlaybackVolume = 1;
+        public bool EditorMute = false;
+        public float EditorVolume = 1;
         public bool SoundtrackMute = false;
         public float SoundtrackPlaybackVolume = 0.5f;
         public bool OperatorMute = false;

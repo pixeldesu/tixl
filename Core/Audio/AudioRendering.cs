@@ -218,10 +218,10 @@ public static class AudioRendering
                 long targetBytes = Bass.ChannelSeconds2Bytes(clipStream.StreamHandle, timeInClip);
                 Bass.ChannelSetPosition(clipStream.StreamHandle, targetBytes);
                 
-                // Apply volume: clip.Volume * SoundtrackPlaybackVolume * GlobalPlaybackVolume
+                // Apply volume: clip.Volume * SoundtrackPlaybackVolume * EditorVolume
                 float effectiveVolume = handle.Clip.Volume 
                                         * CoreSettings.Config.SoundtrackPlaybackVolume
-                                        * CoreSettings.Config.GlobalPlaybackVolume;
+                                        * CoreSettings.Config.EditorVolume;
                 Bass.ChannelSetAttribute(clipStream.StreamHandle, ChannelAttribute.Volume, effectiveVolume);
                 
                 // Unpause for this frame

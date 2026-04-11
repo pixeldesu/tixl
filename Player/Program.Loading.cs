@@ -69,7 +69,7 @@ internal static partial class Program
         var originalTime = playback.TimeInSecs;
         var wasWindowVisible = _renderForm?.Visible ?? true;
         var previousSoundtrackMute = CoreSettings.Config.SoundtrackMute;
-        var previousGlobalMute = CoreSettings.Config.GlobalMute;
+        var previousGlobalMute = CoreSettings.Config.EditorMute;
         var hideDisplayDuringPreload = true;
         var muteAudioDuringPreload = true;
         const double subFrameWarmOffsetInSecs = 1.0 / 60.0;
