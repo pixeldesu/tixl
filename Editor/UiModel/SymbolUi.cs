@@ -249,6 +249,12 @@ public sealed partial class SymbolUi : ISelectionContainer
     internal string Description { get; set; } = string.Empty;
     internal SymbolTags Tags { get; set; }
 
+    /// <summary>
+    /// Per-symbol render export configuration. Null if no render settings have been configured.
+    /// Serialized to .t3ui files.
+    /// </summary>
+    internal Gui.Windows.RenderExport.RenderSettings? RenderSettings { get; set; }
+
     [Flags]
     internal enum SymbolTags
     {

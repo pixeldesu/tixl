@@ -7,6 +7,8 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Core.Utils;
 using T3.Core.Animation;
 using T3.Core.SystemUi;
+using T3.Editor.UiModel;
+using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.RenderExport;
 
@@ -19,10 +21,64 @@ internal sealed class RenderWindow : Window
 
     protected override void DrawContent()
     {
+        SyncSettingsFromProject();
         FormInputs.AddVerticalSpace(15);
         DrawTimeSetup();
         DrawInnerContent();
+        SyncSettingsToProject();
     }
+
+    /// <summary>
+    /// On composition change, loads render settings from the symbol's .t3ui.
+    /// Falls back to legacy UserSettings paths for migration.
+    /// </summary>
+    private void SyncSettingsFromProject()
+    {
+        var symbolUi = ProjectView.Focused?.CompositionInstance?.Symbol.GetSymbolUi();
+        if (symbolUi == null)
+            return;
+
+        var symbolId = symbolUi.Symbol.Id;
+        if (symbolId == _lastSyncedSymbolId)
+            return;
+
+        _lastSyncedSymbolId = symbolId;
+
+        if (symbolUi.RenderSettings != null)
+        {
+            RenderSettings.ForNextExport.CopyFrom(symbolUi.RenderSettings);
+        }
+        else
+        {
+            // One-time migration from UserSettings (preserves counter state like render-v07.mp4)
+            #pragma warning disable CS0612 // Obsolete
+            var legacy = UserSettings.Config;
+            if (!string.IsNullOrEmpty(legacy.RenderVideoFilePath))
+                RenderSettings.ForNextExport.VideoFilePath = legacy.RenderVideoFilePath;
+            if (!string.IsNullOrEmpty(legacy.RenderSequenceFilePath))
+                RenderSettings.ForNextExport.SequenceFilePath = legacy.RenderSequenceFilePath;
+            if (!string.IsNullOrEmpty(legacy.RenderSequenceFileName))
+                RenderSettings.ForNextExport.SequenceFileName = legacy.RenderSequenceFileName;
+            if (!string.IsNullOrEmpty(legacy.RenderSequencePrefix))
+                RenderSettings.ForNextExport.SequencePrefix = legacy.RenderSequencePrefix;
+            #pragma warning restore CS0612
+        }
+    }
+
+    /// <summary>
+    /// Assigns ForNextExport to the symbol's .t3ui.
+    /// TODO: Flag as modified only when settings actually changed (requires modified |= pattern in draw methods).
+    /// </summary>
+    private static void SyncSettingsToProject()
+    {
+        var symbolUi = ProjectView.Focused?.CompositionInstance?.Symbol.GetSymbolUi();
+        if (symbolUi == null)
+            return;
+
+        symbolUi.RenderSettings = RenderSettings.ForNextExport;
+    }
+
+    private Guid _lastSyncedSymbolId;
 
     private void DrawInnerContent()
     {
@@ -236,7 +292,7 @@ internal sealed class RenderWindow : Window
         CustomComponents.TooltipForLastItem(matchingQuality.Description);
 
         // Path
-        var currentPath = UserSettings.Config.RenderVideoFilePath ?? "./Render/render-v01.mp4";
+        var currentPath = RenderSettings.ForNextExport.VideoFilePath ?? "./Render/render-v01.mp4";
         var directory = Path.GetDirectoryName(currentPath) ?? "./Render";
         var filename = Path.GetFileName(currentPath) ?? "render-v01.mp4";
 
@@ -249,7 +305,7 @@ internal sealed class RenderWindow : Window
         }
 
         if (!filename.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)) filename += ".mp4";
-        UserSettings.Config.RenderVideoFilePath = Path.Combine(directory, filename);
+        RenderSettings.ForNextExport.VideoFilePath = Path.Combine(directory, filename);
 
         FormInputs.AddCheckBox("Auto-increment version", ref RenderSettings.ForNextExport.AutoIncrementVersionNumber);
         if (RenderSettings.ForNextExport.AutoIncrementVersionNumber)
@@ -257,7 +313,7 @@ internal sealed class RenderWindow : Window
             var nextTargetPath = GetCachedTargetFilePath(RenderSettings.RenderModes.Video);
             var nextVersion = RenderPaths.GetVersionString(nextTargetPath);
             
-            if (RenderPaths.IsFilenameIncrementable(UserSettings.Config.RenderVideoFilePath))
+            if (RenderPaths.IsFilenameIncrementable(RenderSettings.ForNextExport.VideoFilePath))
             {
                 FormInputs.AddHint($"Next version will be '{nextVersion}'");
             }
@@ -272,39 +328,38 @@ internal sealed class RenderWindow : Window
 
     private void DrawImageSequenceSettings()
     {
-        var userConfig = UserSettings.Config;
         var settings = RenderSettings.ForNextExport;
-        
-        FormInputs.AddFilePicker("Main Folder", ref userConfig.RenderSequenceFilePath!, ".\\ImageSequence ", null, "Save folder.", FileOperations.FilePickerTypes.Folder);
 
-        if (FormInputs.AddStringInput("Subfolder", ref userConfig.RenderSequenceFileName))
+        FormInputs.AddFilePicker("Main Folder", ref settings.SequenceFilePath!, ".\\ImageSequence ", null, "Save folder.", FileOperations.FilePickerTypes.Folder);
+
+        if (FormInputs.AddStringInput("Subfolder", ref settings.SequenceFileName))
         {
-            userConfig.RenderSequenceFileName = (userConfig.RenderSequenceFileName ?? string.Empty).Trim();
+            settings.SequenceFileName = (settings.SequenceFileName ?? string.Empty).Trim();
         }
 
-        if (FormInputs.AddStringInput("Filename Prefix", ref userConfig.RenderSequencePrefix))
+        if (FormInputs.AddStringInput("Filename Prefix", ref settings.SequencePrefix))
         {
-            userConfig.RenderSequencePrefix = (userConfig.RenderSequencePrefix ?? string.Empty).Trim();
+            settings.SequencePrefix = (settings.SequencePrefix ?? string.Empty).Trim();
         }
 
         FormInputs.AddEnumDropdown(ref settings.FileFormat, "Format");
 
         FormInputs.AddCheckBox("Create subfolder", ref settings.CreateSubFolder);
         FormInputs.AddCheckBox("Auto-increment version", ref settings.AutoIncrementSubFolder);
-        
+
         if (settings.AutoIncrementSubFolder)
         {
             var nextTargetPath = GetCachedTargetFilePath(RenderSettings.RenderModes.ImageSequence);
-            
-            // If we are creating subfolders, the 'prefix' part of the path (the last component) 
+
+            // If we are creating subfolders, the 'prefix' part of the path (the last component)
             // is NOT the versioned part. The version is in the directory name.
             if (settings.CreateSubFolder)
             {
                 nextTargetPath = Path.GetDirectoryName(nextTargetPath) ?? nextTargetPath;
             }
-            
+
             var nextVersion = RenderPaths.GetVersionString(nextTargetPath);
-            var targetToIncrement = settings.CreateSubFolder ? userConfig.RenderSequenceFileName : userConfig.RenderSequencePrefix;
+            var targetToIncrement = settings.CreateSubFolder ? settings.SequenceFileName : settings.SequencePrefix;
             
             if (RenderPaths.IsFilenameIncrementable(targetToIncrement))
             {
@@ -433,7 +488,7 @@ internal sealed class RenderWindow : Window
 
         if (RenderSettings.ForNextExport.RenderMode == RenderSettings.RenderModes.Video)
         {
-            var currentPath = UserSettings.Config.RenderVideoFilePath ?? string.Empty;
+            var currentPath = RenderSettings.ForNextExport.VideoFilePath ?? string.Empty;
             var filename = Path.GetFileNameWithoutExtension(currentPath);
             if (string.IsNullOrWhiteSpace(filename) || filename == ".")
             {
@@ -443,13 +498,13 @@ internal sealed class RenderWindow : Window
         }
         else
         {
-            if (RenderSettings.ForNextExport.CreateSubFolder && string.IsNullOrWhiteSpace(UserSettings.Config.RenderSequenceFileName))
+            if (RenderSettings.ForNextExport.CreateSubFolder && string.IsNullOrWhiteSpace(RenderSettings.ForNextExport.SequenceFileName))
             {
                 errorMessage = "Subfolder name cannot be empty.";
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(UserSettings.Config.RenderSequencePrefix))
+            if (string.IsNullOrWhiteSpace(RenderSettings.ForNextExport.SequencePrefix))
             {
                 errorMessage = "Filename prefix cannot be empty.";
                 return false;

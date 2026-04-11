@@ -35,6 +35,7 @@ internal static class SymbolUiJson
             WriteAnnotations(symbolUi, writer);
             WriteLinks(symbolUi, writer);
             WriteTourPoints(symbolUi, writer);
+            WriteSettings(symbolUi, writer);
             writer.WriteEndObject();
         }
         catch (Exception e)
@@ -367,6 +368,8 @@ internal static class SymbolUiJson
         if (tagsEntry?.Value<int>() != null)
             symbolUi.Tags = (SymbolUi.SymbolTags)tagsEntry.Value<int>();
 
+        ReadSettings(mainObject, symbolUi);
+
         return true;
     }
 
@@ -629,6 +632,34 @@ internal static class SymbolUiJson
         public const string SymbolTags = nameof(SymbolTags);
         public const string TourPoints = nameof(TourPoints);
     }
+
+    #region Settings
+
+    private static void WriteSettings(SymbolUi symbolUi, JsonTextWriter writer)
+    {
+        if (symbolUi.RenderSettings == null)
+            return;
+
+        writer.WritePropertyName("Settings");
+        writer.WriteStartObject();
+        {
+            symbolUi.RenderSettings?.WriteToJson(writer);
+            // Future: editorState, outputWindows, etc.
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void ReadSettings(JToken mainObject, SymbolUi symbolUi)
+    {
+        var settingsToken = mainObject["Settings"];
+        if (settingsToken == null)
+            return;
+
+        symbolUi.RenderSettings = Gui.Windows.RenderExport.RenderSettings.ReadFromJson(settingsToken);
+        // Future: editorState, outputWindows, etc.
+    }
+
+    #endregion
 
     private static readonly Func<JToken, object> _jsonToVector2 = JsonToTypeValueConverters.Entries[typeof(Vector2)];
     private static readonly Func<JToken, object> _jsonToVector4 = JsonToTypeValueConverters.Entries[typeof(Vector4)];

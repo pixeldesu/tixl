@@ -30,7 +30,7 @@ internal static partial class RenderPaths
         var settings = RenderSettings.ForNextExport;
         if (mode == RenderSettings.RenderModes.Video)
         {
-            var targetPath = ResolveProjectRelativePath(UserSettings.Config.RenderVideoFilePath ?? string.Empty);
+            var targetPath = ResolveProjectRelativePath(RenderSettings.ForNextExport.VideoFilePath ?? string.Empty);
             if (settings.AutoIncrementVersionNumber)
             {
                 if (!IsFilenameIncrementable(targetPath))
@@ -46,9 +46,9 @@ internal static partial class RenderPaths
             return targetPath;
         }
 
-        var folder = ResolveProjectRelativePath(UserSettings.Config.RenderSequenceFilePath ?? string.Empty);
-        var subFolder = UserSettings.Config.RenderSequenceFileName ?? "v01";
-        var prefix = UserSettings.Config.RenderSequencePrefix ?? "render";
+        var folder = ResolveProjectRelativePath(RenderSettings.ForNextExport.SequenceFilePath ?? string.Empty);
+        var subFolder = RenderSettings.ForNextExport.SequenceFileName ?? "v01";
+        var prefix = RenderSettings.ForNextExport.SequencePrefix ?? "render";
         
         if (settings.AutoIncrementSubFolder)
         {
@@ -164,18 +164,17 @@ internal static partial class RenderPaths
 
     public static bool IsFilenameIncrementable(string? path = null)
     {
-        var filename = Path.GetFileName(path ?? UserSettings.Config.RenderVideoFilePath);
+        var filename = Path.GetFileName(path ?? RenderSettings.ForNextExport.VideoFilePath);
         return !string.IsNullOrEmpty(filename) && _matchFileVersionPattern.Match(filename).Success;
     }
 
-    public static void TryIncrementVideoFileNameInUserSettings()
+    public static void TryIncrementVideoFileName()
     {
-        var path = UserSettings.Config.RenderVideoFilePath;
+        var path = RenderSettings.ForNextExport.VideoFilePath;
         if (string.IsNullOrEmpty(path) || !IsFilenameIncrementable(path))
             return;
 
-        UserSettings.Config.RenderVideoFilePath = GetNextIncrementedPath(path);
-        UserSettings.Save();
+        RenderSettings.ForNextExport.VideoFilePath = GetNextIncrementedPath(path);
     }
 
     public static string GetVersionString(string? path)

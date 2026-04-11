@@ -1,1 +1,2 @@
 - [Hot code reload](feedback_hot_reload.md) — save files and user hot-reloads; don't build while Editor is running
+- JSON keys in .t3 and .t3ui files use PascalCase (uppercase first letter), e.g. `"Settings"`, `"RenderExport"`, `"PlaybackSettings"`

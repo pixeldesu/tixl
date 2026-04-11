@@ -147,11 +147,17 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public float SpaceMouseRotationSpeedFactor = 1f;
         public float SpaceMouseMoveSpeedFactor = 1f;
         public float SpaceMouseDamping = 0.5f;
-        // Rendering (controlled from render windows)
-        public string RenderVideoFilePath = "./Render/render-v01.mp4";
-        public string RenderSequenceFilePath = "./ImageSequence/";
-        public string RenderSequenceFileName = "v01";
-        public string RenderSequencePrefix = "render";
+
+        // Migration-only: these load from existing userSettings.json to preserve
+        // the user's last render path counters. Not written back.
+        [Obsolete("Migrated to per-symbol RenderSettings in .t3ui")]
+        public string? RenderVideoFilePath;
+        [Obsolete("Migrated to per-symbol RenderSettings in .t3ui")]
+        public string? RenderSequenceFilePath;
+        [Obsolete("Migrated to per-symbol RenderSettings in .t3ui")]
+        public string? RenderSequenceFileName;
+        [Obsolete("Migrated to per-symbol RenderSettings in .t3ui")]
+        public string? RenderSequencePrefix;
 
         // Profiling and debugging
         public bool LoadMultiThreaded = true;

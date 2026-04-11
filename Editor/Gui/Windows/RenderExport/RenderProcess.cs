@@ -300,20 +300,18 @@ internal static class RenderProcess
         {
             if (settings.RenderMode == RenderSettings.RenderModes.Video && settings.AutoIncrementVersionNumber)
             {
-                RenderPaths.TryIncrementVideoFileNameInUserSettings();
+                RenderPaths.TryIncrementVideoFileName();
             }
             else if (settings.RenderMode == RenderSettings.RenderModes.ImageSequence && settings.AutoIncrementSubFolder)
             {
                 if (settings.CreateSubFolder)
                 {
-                    UserSettings.Config.RenderSequenceFileName = RenderPaths.GetNextIncrementedPath(UserSettings.Config.RenderSequenceFileName);
+                    RenderSettings.ForNextExport.SequenceFileName = RenderPaths.GetNextIncrementedPath(RenderSettings.ForNextExport.SequenceFileName);
                 }
                 else
                 {
-                    UserSettings.Config.RenderSequencePrefix = RenderPaths.GetNextIncrementedPath(UserSettings.Config.RenderSequencePrefix);
+                    RenderSettings.ForNextExport.SequencePrefix = RenderPaths.GetNextIncrementedPath(RenderSettings.ForNextExport.SequencePrefix);
                 }
-
-                UserSettings.Save();
             }
         }
 
@@ -486,7 +484,7 @@ internal static class RenderProcess
 
     private static string GetSequenceFilePath()
     {
-        var prefix = RenderPaths.SanitizeFilename(UserSettings.Config.RenderSequencePrefix);
+        var prefix = RenderPaths.SanitizeFilename(RenderSettings.ForNextExport.SequencePrefix);
         return Path.Combine(_activeExportSession!.TargetDirectory,
                             $"{prefix}_{_activeExportSession.FrameIndex:0000}.{_activeExportSession.Settings.FileFormat.ToString().ToLower()}");
     }
