@@ -11,6 +11,7 @@ using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.RenderExport.MF;
+using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.RenderExport;
@@ -298,9 +299,11 @@ internal static class RenderProcess
 
         if (savingSuccessful)
         {
+            var incremented = false;
             if (settings.RenderMode == RenderSettings.RenderModes.Video && settings.AutoIncrementVersionNumber)
             {
                 RenderPaths.TryIncrementVideoFileName();
+                incremented = true;
             }
             else if (settings.RenderMode == RenderSettings.RenderModes.ImageSequence && settings.AutoIncrementSubFolder)
             {
@@ -312,6 +315,12 @@ internal static class RenderProcess
                 {
                     RenderSettings.ForNextExport.SequencePrefix = RenderPaths.GetNextIncrementedPath(RenderSettings.ForNextExport.SequencePrefix);
                 }
+                incremented = true;
+            }
+
+            if (incremented)
+            {
+                ProjectView.Focused?.CompositionInstance?.Symbol.GetSymbolUi()?.FlagAsModified();
             }
         }
 
