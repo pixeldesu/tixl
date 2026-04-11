@@ -67,6 +67,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public float UiScaleFactor = 1;
         public bool FullScreen = false;
         public int WindowLayoutIndex = 0;
+        public bool SaveWindowLayoutsWithProjects = true;
         public bool EnableIdleMotion = true;
         public bool SuspendRenderingWhenHidden = true;
 

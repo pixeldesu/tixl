@@ -660,8 +660,10 @@ internal static class SymbolUiJson
     {
         var hasRenderSettings = symbolUi.RenderSettings != null;
         var hasOutputWindowStates = symbolUi.OutputWindowStates is { Count: > 0 };
+        var hasTimelineState = symbolUi.TimelineState != null;
+        var hasWindowLayout = !string.IsNullOrEmpty(symbolUi.WindowLayout);
 
-        if (!hasRenderSettings && !hasOutputWindowStates)
+        if (!hasRenderSettings && !hasOutputWindowStates && !hasTimelineState && !hasWindowLayout)
             return;
 
         writer.WritePropertyName("Settings");
@@ -669,6 +671,27 @@ internal static class SymbolUiJson
         {
             symbolUi.RenderSettings?.WriteToJson(writer);
             OutputWindowState.WriteAllToJson(writer, symbolUi.OutputWindowStates);
+            symbolUi.TimelineState?.WriteToJson(writer);
+
+            if (hasWindowLayout)
+            {
+                writer.WritePropertyName("WindowLayout");
+                writer.WriteValue(symbolUi.WindowLayout);
+                writer.WritePropertyName("WindowLayoutImGuiVersion");
+                writer.WriteValue(symbolUi.WindowLayoutImGuiVersion);
+            }
+
+            if (symbolUi.WindowVisibility is { Count: > 0 })
+            {
+                writer.WritePropertyName("WindowVisibility");
+                writer.WriteStartObject();
+                foreach (var (title, visible) in symbolUi.WindowVisibility)
+                {
+                    writer.WritePropertyName(title);
+                    writer.WriteValue(visible);
+                }
+                writer.WriteEndObject();
+            }
         }
         writer.WriteEndObject();
     }
@@ -681,6 +704,19 @@ internal static class SymbolUiJson
 
         symbolUi.RenderSettings = Gui.Windows.RenderExport.RenderSettings.ReadFromJson(settingsToken);
         symbolUi.OutputWindowStates = OutputWindowState.ReadAllFromJson(settingsToken);
+        symbolUi.TimelineState = Gui.Windows.TimeLine.TimelineState.ReadFromJson(settingsToken);
+        symbolUi.WindowLayout = settingsToken["WindowLayout"]?.Value<string>();
+        symbolUi.WindowLayoutImGuiVersion = settingsToken["WindowLayoutImGuiVersion"]?.Value<string>();
+
+        var visibilityToken = settingsToken["WindowVisibility"] as JObject;
+        if (visibilityToken != null)
+        {
+            symbolUi.WindowVisibility = new Dictionary<string, bool>();
+            foreach (var prop in visibilityToken.Properties())
+            {
+                symbolUi.WindowVisibility[prop.Name] = prop.Value.Value<bool>();
+            }
+        }
     }
 
     #endregion

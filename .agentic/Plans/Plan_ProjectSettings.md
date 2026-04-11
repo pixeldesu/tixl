@@ -1,79 +1,96 @@
-# Project Settings Refactoring
+# Settings Refactoring
 
-## Completed Work
+## Completed Work (previous sessions)
 
-### Commit 1: Renamed global `ProjectSettings` → `CoreSettings`
-- Class `ProjectSettings` in `Core\IO` renamed to `CoreSettings`
-- Keeps `projectSettings.json` as the file name for backward compat
-- `ExportSettings` record now references `CoreSettings.ConfigData`
-- All ~30+ consumer files updated
+### Commit 1–6: Foundation
+- Renamed global `ProjectSettings` → `CoreSettings` (keeps `projectSettings.json` filename)
+- Renamed per-symbol `PlaybackSettings` → `ProjectSettings` (now `CompositionSettings`)
+- Popup → proper Window, file format versioning, render export settings in `.t3ui`
+- RenderWindow modified tracking, post-render auto-increment
 
-### Commit 2: Renamed per-symbol `PlaybackSettings` → `ProjectSettings`
-- `Core\Operator\PlaybackSettings` → `Core\Operator\ProjectSettings`
-- Fields restructured into `PlaybackConfig` sub-class: `settings.Bpm` → `settings.Playback.Bpm`
-- `Symbol.PlaybackSettings` → `Symbol.ProjectSettings`
-- Backward-compatible JSON reading: tries `"ProjectSettings"` key first, falls back to `"PlaybackSettings"`
-- New format writes nested `"Playback"` sub-object
+### CoreSettings Cleanup
+- Renamed `GlobalMute`/`GlobalPlaybackVolume` → `AppMute`/`AppVolume`
+- Moved project-specific fields into per-symbol sub-classes (Audio, Export)
+- Added `CompositionSettings.Current` static accessor
+- Moved settings classes to `T3.Core.Settings` namespace (`Core/Settings/` directory)
+- Moved `FileLocations` and `UserData` to `T3.Core.Settings` namespace
 
-### Commit 3: Renamed popup + updated plan
-- `PlaybackSettingsPopup` → `ProjectSettingsPopup` (class, ID, file)
-- `DrawPlaybackSettings()` → `Draw()`
-- UI title changed to "Project Settings"
+### RenderSettings Refactoring
+- Removed `ForNextExport` intermediary — `RenderSettings.Current` reads/writes directly from `SymbolUi.RenderSettings`
+- Fixed clone bug on composition switch (was sharing reference, now clones)
+- Legacy migration preserved for backward compat (runs once per composition, persists immediately)
+- Wired up defaults for FPS, Bitrate, MotionBlur, AutoIncrement, ExportAudio, FileFormat, ResolutionFactor
+- Fixed `AddInt` reset button never highlighting (missing `isDefault` check)
+- OutputWindow uses `RenderProcess.GetActiveOrRequestedSettings()` during export (not `Current`)
 
-### Commit 4: Added render export settings to .t3ui
-- `RenderSettings` class now has `WriteToJson`/`ReadFromJson` using Newtonsoft auto-serialization
-- Render path fields (`VideoFilePath`, `SequenceFilePath`, etc.) moved from `UserSettings` to `RenderSettings`
-- `SymbolUi.RenderSettings` property stores per-symbol render config
-- Serialized under `"Settings" > "RenderExport"` in .t3ui (PascalCase keys)
-- `RenderWindow` syncs settings from/to `SymbolUi.RenderSettings` on composition change
-- Legacy migration: reads old render paths from UserSettings on first load
-- `RenderExportConfig` class was created then deleted — `RenderSettings` handles serialization directly
+### Naming Cleanup
+- `ProjectSettings` → `SymbolSettings` → `CompositionSettings` (class + all consumers)
+- `Symbol.ProjectSettings` → `Symbol.CompositionSettings`
+- IO and Performance configs moved back to `CoreSettings` (app-level, not per-composition)
+- JSON key `"ProjectSettings"` preserved in `.t3` for backward compat
 
-### Commit 5: RenderWindow modified tracking
-- All draw methods (`DrawTimeSetup`, `DrawInnerContent`, `DrawVideoSettings`, `DrawImageSequenceSettings`, `DrawResolutionPopoverCompact`) return `bool`
-- `modified |=` pattern flows through to `SyncSettingsToProject(modified)` which calls `FlagAsModified()` only when needed
-- Post-render auto-increment in `RenderProcess` also flags as modified
+### Composition Settings Window
+- Converted from popup to proper dockable `Window` (class `ProjectSettingsWindow`)
+- Categories: Playback, Audio, Executable
+- App menu shows "Composition Settings" with checkmark when focused op defines settings
+- Timeline gear icon toggles window visibility
+- Audio toggle in toolbar toggles `AppMute` (app-wide) instead of per-project SoundtrackMute
 
-### Commit 6: File format versioning
-- New `Core\Model\SymbolFormatVersion.cs` with `Current = 1`, change log, and `WarnIfNewer()`
-- Both .t3 and .t3ui write `"FormatVersion": 1` and `"TixlVersion": "x.y.z"` at the top
-- On load, warns if file format is newer than what the editor supports
-- Works automatically for copy/paste (uses same serialization path)
-- `JsonKeys` in both `SymbolJson.cs` and `SymbolUiJson.cs` reordered to match serialization order
+### Editor State Persistence
 
-### CoreSettings Cleanup (this session)
-- **Renamed** `GlobalMute`/`GlobalPlaybackVolume` → `AppMute`/`AppVolume` in CoreSettings
-- **Moved** project-specific fields from `CoreSettings` into `ProjectSettings` sub-classes:
-  - `AudioMixConfig`: SoundtrackMute, SoundtrackVolume, OperatorMute, OperatorVolume, AudioResyncThreshold
-  - `ExportConfig`: DefaultWindowMode, EnablePlaybackControlWithKeyboard
-  - `IoConfig`: DefaultOscPort
-  - `PerformanceConfig`: TimeClipSuspending, SkipOptimization, EnableDirectXDebug, EnableBeatSyncProfiling
-- **Added** `ProjectSettings.Current` static accessor (reads from `Playback.Current?.Settings ?? Defaults`)
-- **Moved** `ProjectSettings` to `T3.Core.Settings` namespace (new `Core/Settings/` directory)
-- **Moved** `FileLocations` and `UserData` to `T3.Core.Settings` namespace
-- **CoreSettings** now only contains: AppMute, AppVolume, LimitMidiDeviceCapture, logging flags
-- **RenderSettings**: Removed `ForNextExport` intermediary; `RenderSettings.Current` reads/writes directly from `SymbolUi.RenderSettings`. Fixed clone bug on composition switch.
-- **Fixed** `AddInt` reset button never highlighting (missing `isDefault` check)
-- **Wired up** RenderSettings defaults (FPS, Bitrate, MotionBlur, AutoIncrement, ExportAudio, FileFormat, ResolutionFactor)
-- **Converted** `ProjectSettingsPopup` → `ProjectSettingsWindow` (proper dockable Window)
-- **Added** all categories: Playback, Audio, Rendering, IO, Performance
-- **Timeline gear icon** toggles window visibility
-- **App menu** shows "Project Settings" with checkmark when focused op defines settings
-- **Audio toggle** in toolbar now toggles `AppMute` (app-wide) instead of per-project SoundtrackMute
+**OutputWindow State** (`OutputWindowState.cs`, stored on root op's `.t3ui`):
+- Gizmo visibility/mode — direct backing store on `State` (no copy)
+- Background color, resolution, camera position/target/roll/speed — copy-based, synced every frame via `SyncCopyFieldsToState()`
+- Camera control mode (AutoUseFirstCam, SceneViewer, etc.)
+- Pinning state (isPinned, instance path as Guid[], output ID)
+- Multiple output windows supported (stored as JSON array)
+- Saves on project close (`ProjectView.Close`), composition switch, and continuously via per-frame sync
+- Uses `ProjectView.Focused.RootInstance` (project-global, not per-composition)
+- Fixed: `ProjectView.Close` no longer calls `Unpin()` — saves state instead
+- Fixed: Pinning survives project close/reopen (stale ProjectView re-resolved against current)
+- Fixed: State saved to correct project on switch (tracks `_lastSyncedSymbolUi`)
+
+**Timeline State** (`TimelineState.cs`, stored per-symbol in `.t3ui`):
+- View state only: ScaleX, ScrollX, Mode (DopeView/CurveEditor)
+- Saved/loaded on composition change via `SyncStateWithComposition`
+- Loop range, playback position stay as runtime state on `Playback` object
+
+**Window Layout** (stored on root op's `.t3ui`):
+- `SymbolUi.WindowLayout` — ImGui INI layout string via `SaveIniSettingsToMemory()`
+- `SymbolUi.WindowLayoutImGuiVersion` — version tag for compatibility
+- `SymbolUi.WindowVisibility` — Dictionary<string, bool> of window title → visible
+- Saved in `ProjectView.Close()`, restored in `ProjectView.SetAsFocused()`
+- Version check: only restores if ImGui major.minor matches
+- Opt-in via `UserSettings.Config.SaveWindowLayoutsWithProjects` (default: true)
 
 ---
 
 ## Architecture
 
-### Separation Principle
-- **`ProjectSettings`** (in `.t3`, namespace `T3.Core.Settings`) — what Core/Player need: playback, audio mix, export, IO, performance
-- **Editor-only settings** (in `.t3ui` via `SymbolUi`) — render export, view state (future)
-- **`CoreSettings`** (global `projectSettings.json`) — app-level settings: AppMute/AppVolume, MIDI, logging
-- **`UserSettings`** (global `userSettings.json`) — user preferences, UI state
+### Three-Tier Settings Model
 
-### Current ProjectSettings structure
+**Project-global** (on root op's `.t3ui` only):
+- Output window state (resolution, camera, gizmos, pinning)
+- Window layout + visibility
+- IO (OSC port) — in `CoreSettings`
+- Performance flags — in `CoreSettings`
+
+**Per-symbol with CompositionSettings** (inherited via breadcrumb, in `.t3`):
+- Playback config (BPM, soundtrack, audio source, syncing)
+- Audio mix (volumes, mutes, resync threshold)
+- Export config (window mode, keyboard control)
+- Render settings (in `.t3ui`)
+- Timeline view state (in `.t3ui`)
+
+**App-level** (`CoreSettings` in `projectSettings.json`):
+- AppMute, AppVolume
+- LimitMidiDeviceCapture
+- DefaultOscPort, TimeClipSuspending, SkipOptimization, EnableDirectXDebug, EnableBeatSyncProfiling
+- Logging flags
+
+### Current Structure
 ```
-ProjectSettings (Core\Settings\ProjectSettings.cs, in .t3)
+CompositionSettings (Core\Settings\CompositionSettings.cs, in .t3)
 ├── Enabled
 ├── Playback (PlaybackConfig)
 │   ├── Bpm, AudioClips, AudioSource, Syncing
@@ -83,72 +100,64 @@ ProjectSettings (Core\Settings\ProjectSettings.cs, in .t3)
 │   ├── SoundtrackMute, SoundtrackVolume
 │   ├── OperatorMute, OperatorVolume
 │   └── AudioResyncThreshold
-├── Export (ExportConfig)
-│   ├── DefaultWindowMode
-│   └── EnablePlaybackControlWithKeyboard
-├── Io (IoConfig)
-│   └── DefaultOscPort
-└── Performance (PerformanceConfig)
-    ├── TimeClipSuspending, SkipOptimization
-    ├── EnableDirectXDebug
-    └── EnableBeatSyncProfiling
+└── Export (ExportConfig)
+    ├── DefaultWindowMode
+    └── EnablePlaybackControlWithKeyboard
 
-SymbolUi.RenderSettings (Editor, in .t3ui under Settings > RenderExport)
-├── FrameRate, StartInBars, EndInBars, TimeReference, TimeRange
-├── RenderMode, Bitrate, ResolutionFactor, OverrideMotionBlurSamples
-├── ExportAudio, AutoIncrementVersionNumber, CreateSubFolder, AutoIncrementSubFolder
-├── FileFormat
-└── VideoFilePath, SequenceFilePath, SequenceFileName, SequencePrefix
+SymbolUi (Editor, in .t3ui under "Settings")
+├── RenderSettings (RenderExport) — per-symbol
+│   ├── FrameRate, StartInBars, EndInBars, TimeReference, TimeRange
+│   ├── RenderMode, Bitrate, ResolutionFactor, OverrideMotionBlurSamples
+│   ├── ExportAudio, AutoIncrementVersionNumber, CreateSubFolder, AutoIncrementSubFolder
+│   ├── FileFormat
+│   └── VideoFilePath, SequenceFilePath, SequenceFileName, SequencePrefix
+├── TimelineState (Timeline) — per-symbol
+│   ├── ScaleX, ScrollX
+│   └── Mode (DopeView/CurveEditor)
+├── OutputWindowStates (OutputWindows) — project-global (root op only), array
+│   ├── ShowGizmos, TransformGizmoMode
+│   ├── BackgroundColor
+│   ├── CameraControlMode, CameraPosition, CameraTarget, CameraRoll, CameraSpeed
+│   ├── ResolutionTitle, ResolutionWidth, ResolutionHeight, ResolutionUseAsAspectRatio
+│   └── IsPinned, PinnedInstancePath, PinnedOutputId
+├── WindowLayout — project-global (root op only), ImGui INI string
+├── WindowLayoutImGuiVersion — version tag
+└── WindowVisibility — project-global, Dictionary<string, bool>
+
+CoreSettings (projectSettings.json)
+├── AppMute, AppVolume
+├── LimitMidiDeviceCapture
+├── DefaultOscPort
+├── TimeClipSuspending, SkipOptimization, EnableDirectXDebug, EnableBeatSyncProfiling
+├── LogAssemblyVersionMismatches, LogCompilationDetails, LogAssemblyLoadingDetails, LogFileEvents
 ```
 
-### Access patterns
-- `ProjectSettings.Current` — canonical access for project-level config (null-safe, falls back to Defaults)
+### Access Patterns
+- `CompositionSettings.Current` — per-symbol composition config (null-safe, falls back to Defaults)
 - `RenderSettings.Current` — reads directly from focused SymbolUi (lazy-inits with legacy migration)
-- `CoreSettings.Config` — app-level audio, MIDI, logging
+- `OutputWindow.State` — reads from root op's SymbolUi via `_lastSyncedSymbolUi`
+- `CoreSettings.Config` — app-level settings
 - `UserSettings.Config` — user preferences
 
 ---
 
-## Next: Editor State Persistence
-
-Store per-symbol editor state in `.t3ui` under `"Settings"`, alongside the existing `"RenderExport"` section. This enables restoring the full editor context when reopening a project.
-
-### Output Window State
-- Resolution, aspect ratio
-- Camera mode (perspective/ortho), pinned camera operator
-- Gizmo visibility, grid settings
-- Multiple output windows: store as array
-
-### Timeline State
-- Zoom level, scroll position
-- Loop range (start/end)
-- Playback mode (play/pause)
-- Pinned animation parameters
-- Time display mode (bars/seconds/frames)
+## Future Work
 
 ### Graph View State
+- Canvas position and zoom per symbol (partially exists in `UserSettings.ViewedCanvasAreaForSymbolChildId`)
 - Selected operator(s)
-- Canvas position and zoom
-- Expanded/collapsed state of nodes
 
-### Layout State
-- Not just the layout index, but the full ImGui docking layout
-- Allows restoring exact window arrangement per project
+### Default Composition Settings
+- `UserSettings.ConfigData` gets a `DefaultCompositionSettings` field
+- New compositions initialize from user defaults
+- Composition Settings Window uses defaults for reset-to-default buttons
 
-### Priority
-These feed directly into the automatic visual testing pipeline (see `Plan_AutomaticTests.md`):
-loading a test project → restoring editor state → capturing screenshot → comparing against reference.
-
----
-
-## Deferred
-
-### Default Project Settings
-- `UserSettings.ConfigData` gets a `DefaultProjectSettings` field
-- New projects initialize from `UserSettings.Config.DefaultProjectSettings`
-- Project Settings Window uses user defaults for reset-to-default buttons
-- Settings Window gets a "Default Project Settings" section
+### Automatic Visual Testing
+- See `Plan_AutomaticTests.md`
+- Load test project → restore editor state → capture screenshot → compare against reference
+- Editor state persistence is a prerequisite for deterministic test captures
 
 ### Other
 - Preferred resolution/aspect list per project
 - Key-value parameter storage per project
+- Pinned animation parameters (DopeSheetArea.PinnedParametersHashes)

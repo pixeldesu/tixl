@@ -328,6 +328,15 @@ internal sealed partial class SettingsWindow : Window
                                                        """,
                                                       UserSettings.Defaults.EnableAutoBackup);
 
+                    changed |= FormInputs.AddCheckBox("Save Layout with Projects",
+                        ref UserSettings.Config.SaveWindowLayoutsWithProjects,
+                        """
+                        When enabled, TiXL will save the window layout for each project.
+                        """,
+                        UserSettings.Defaults.SaveWindowLayoutsWithProjects
+                    );
+
+                    
                     changed |= FormInputs.AddCheckBox("Load multi-threaded",
                                                                      ref UserSettings.Config.LoadMultiThreaded,
                                                                      """

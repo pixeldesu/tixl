@@ -99,7 +99,7 @@ public sealed class CompositionSettings
         public float AudioGainFactor = 1;
         public float AudioDecayFactor = 0.9f;
 
-        public bool EnableAudioBeatLocking = false;
+        public bool EnableAudioBeatLocking = true;
         public float BeatLockAudioOffsetSec;
     }
 
