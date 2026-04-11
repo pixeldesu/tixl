@@ -573,16 +573,14 @@ internal static class TimeControls
         }
 
         // ToggleAudio
-        var audio = ProjectSettings.Current.Audio;
-        if (CustomComponents.IconButton(audio.SoundtrackMute ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
+        if (CustomComponents.IconButton(CoreSettings.Config.AppMute ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
                                         ControlSize,
-                                        audio.SoundtrackMute
+                                        CoreSettings.Config.AppMute
                                             ? CustomComponents.ButtonStates.NeedsAttention
                                             : CustomComponents.ButtonStates.Dimmed
                                        ))
         {
-            audio.SoundtrackMute = !audio.SoundtrackMute;
-            AudioEngine.SetSoundtrackMute(audio.SoundtrackMute);
+            AudioEngine.SetGlobalMute(!CoreSettings.Config.AppMute);
         }
 
         // ToggleHover

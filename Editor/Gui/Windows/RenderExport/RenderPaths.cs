@@ -27,10 +27,10 @@ internal static partial class RenderPaths
 
     public static string GetTargetFilePath(RenderSettings.RenderModes mode)
     {
-        var settings = RenderSettings.ForNextExport;
+        var settings = RenderSettings.Current;
         if (mode == RenderSettings.RenderModes.Video)
         {
-            var targetPath = ResolveProjectRelativePath(RenderSettings.ForNextExport.VideoFilePath ?? string.Empty);
+            var targetPath = ResolveProjectRelativePath(RenderSettings.Current.VideoFilePath ?? string.Empty);
             if (settings.AutoIncrementVersionNumber)
             {
                 if (!IsFilenameIncrementable(targetPath))
@@ -46,9 +46,9 @@ internal static partial class RenderPaths
             return targetPath;
         }
 
-        var folder = ResolveProjectRelativePath(RenderSettings.ForNextExport.SequenceFilePath ?? string.Empty);
-        var subFolder = RenderSettings.ForNextExport.SequenceFileName ?? "v01";
-        var prefix = RenderSettings.ForNextExport.SequencePrefix ?? "render";
+        var folder = ResolveProjectRelativePath(RenderSettings.Current.SequenceFilePath ?? string.Empty);
+        var subFolder = RenderSettings.Current.SequenceFileName ?? "v01";
+        var prefix = RenderSettings.Current.SequencePrefix ?? "render";
         
         if (settings.AutoIncrementSubFolder)
         {
@@ -89,7 +89,7 @@ internal static partial class RenderPaths
     public static string GetExpectedTargetDisplayPath(RenderSettings.RenderModes mode)
     {
         var targetPath = GetTargetFilePath(mode);
-        var settings = RenderSettings.ForNextExport;
+        var settings = RenderSettings.Current;
 
         if (mode == RenderSettings.RenderModes.Video)
         {
@@ -104,13 +104,13 @@ internal static partial class RenderPaths
 
     public static bool FileExists(string targetPath)
     {
-        if (RenderSettings.ForNextExport.RenderMode == RenderSettings.RenderModes.Video)
+        if (RenderSettings.Current.RenderMode == RenderSettings.RenderModes.Video)
         {
             return File.Exists(targetPath);
         }
 
         // For image sequences, check if the first frame or the folder exists
-        if (RenderSettings.ForNextExport.CreateSubFolder)
+        if (RenderSettings.Current.CreateSubFolder)
         {
             var directory = Path.GetDirectoryName(targetPath);
             if (directory != null && Directory.Exists(directory))
@@ -127,7 +127,7 @@ internal static partial class RenderPaths
             }
         }
 
-        var firstFrame = $"{targetPath}_0000.{RenderSettings.ForNextExport.FileFormat.ToString().ToLower()}";
+        var firstFrame = $"{targetPath}_0000.{RenderSettings.Current.FileFormat.ToString().ToLower()}";
         return File.Exists(firstFrame);
     }
 
@@ -164,17 +164,17 @@ internal static partial class RenderPaths
 
     public static bool IsFilenameIncrementable(string? path = null)
     {
-        var filename = Path.GetFileName(path ?? RenderSettings.ForNextExport.VideoFilePath);
+        var filename = Path.GetFileName(path ?? RenderSettings.Current.VideoFilePath);
         return !string.IsNullOrEmpty(filename) && _matchFileVersionPattern.Match(filename).Success;
     }
 
     public static void TryIncrementVideoFileName()
     {
-        var path = RenderSettings.ForNextExport.VideoFilePath;
+        var path = RenderSettings.Current.VideoFilePath;
         if (string.IsNullOrEmpty(path) || !IsFilenameIncrementable(path))
             return;
 
-        RenderSettings.ForNextExport.VideoFilePath = GetNextIncrementedPath(path);
+        RenderSettings.Current.VideoFilePath = GetNextIncrementedPath(path);
     }
 
     public static string GetVersionString(string? path)

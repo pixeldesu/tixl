@@ -21,67 +21,14 @@ internal sealed class RenderWindow : Window
 
     protected override void DrawContent()
     {
-        SyncSettingsFromProject();
         FormInputs.AddVerticalSpace(15);
         var modified = false;
         modified |= DrawTimeSetup();
         modified |= DrawInnerContent();
-        SyncSettingsToProject(modified);
+
+        if (modified)
+            ProjectView.Focused?.CompositionInstance?.Symbol.GetSymbolUi()?.FlagAsModified();
     }
-
-    /// <summary>
-    /// On composition change, loads render settings from the symbol's .t3ui.
-    /// Falls back to legacy UserSettings paths for migration.
-    /// </summary>
-    private void SyncSettingsFromProject()
-    {
-        var symbolUi = ProjectView.Focused?.CompositionInstance?.Symbol.GetSymbolUi();
-        if (symbolUi == null)
-            return;
-
-        var symbolId = symbolUi.Symbol.Id;
-        if (symbolId == _lastSyncedSymbolId)
-            return;
-
-        _lastSyncedSymbolId = symbolId;
-
-        if (symbolUi.RenderSettings != null)
-        {
-            RenderSettings.ForNextExport.CopyFrom(symbolUi.RenderSettings);
-        }
-        else
-        {
-            // One-time migration from UserSettings (preserves counter state like render-v07.mp4)
-            #pragma warning disable CS0612 // Obsolete
-            var legacy = UserSettings.Config;
-            if (!string.IsNullOrEmpty(legacy.RenderVideoFilePath))
-                RenderSettings.ForNextExport.VideoFilePath = legacy.RenderVideoFilePath;
-            if (!string.IsNullOrEmpty(legacy.RenderSequenceFilePath))
-                RenderSettings.ForNextExport.SequenceFilePath = legacy.RenderSequenceFilePath;
-            if (!string.IsNullOrEmpty(legacy.RenderSequenceFileName))
-                RenderSettings.ForNextExport.SequenceFileName = legacy.RenderSequenceFileName;
-            if (!string.IsNullOrEmpty(legacy.RenderSequencePrefix))
-                RenderSettings.ForNextExport.SequencePrefix = legacy.RenderSequencePrefix;
-            #pragma warning restore CS0612
-        }
-    }
-
-    /// <summary>
-    /// Assigns ForNextExport to the symbol's .t3ui and flags as modified when settings changed.
-    /// </summary>
-    private static void SyncSettingsToProject(bool settingsChanged)
-    {
-        var symbolUi = ProjectView.Focused?.CompositionInstance?.Symbol.GetSymbolUi();
-        if (symbolUi == null)
-            return;
-
-        symbolUi.RenderSettings = RenderSettings.ForNextExport;
-
-        if (settingsChanged)
-            symbolUi.FlagAsModified();
-    }
-
-    private Guid _lastSyncedSymbolId;
 
     private bool DrawInnerContent()
     {
@@ -99,7 +46,7 @@ internal sealed class RenderWindow : Window
                                   : "Select or pin a Symbol with Texture2D output in order to render to file";
             ImGui.Button("Start Render", new Vector2(-1, 0));
             CustomComponents.TooltipForLastItem("Only Symbols with a texture2D output can be rendered to file");
-            ImGui.EndDisabled();
+            //ImGui.EndDisabled();
             CustomComponents.HelpText(_uiState.LastHelpString);
             return false;
         }
@@ -115,11 +62,11 @@ internal sealed class RenderWindow : Window
         var modified = false;
 
         FormInputs.AddVerticalSpace();
-        modified |= FormInputs.AddSegmentedButtonWithLabel(ref RenderSettings.ForNextExport.RenderMode, "Render Mode");
+        modified |= FormInputs.AddSegmentedButtonWithLabel(ref RenderSettings.Current.RenderMode, "Render Mode");
 
         FormInputs.AddVerticalSpace();
 
-        if (RenderSettings.ForNextExport.RenderMode == RenderSettings.RenderModes.Video)
+        if (RenderSettings.Current.RenderMode == RenderSettings.RenderModes.Video)
             modified |= DrawVideoSettings();
         else
             modified |= DrawImageSequenceSettings();
@@ -160,7 +107,7 @@ internal sealed class RenderWindow : Window
     private bool DrawTimeSetup()
     {
         var modified = false;
-        var s = RenderSettings.ForNextExport;
+        var s = RenderSettings.Current;
 
         FormInputs.SetIndentToParameters();
 
@@ -191,7 +138,7 @@ internal sealed class RenderWindow : Window
         FormInputs.AddVerticalSpace(5);
 
         // FPS row
-        if (FormInputs.AddFloat("FPS", ref s.FrameRate, 1, 120, 0.1f, true))
+        if (FormInputs.AddFloat("FPS", ref s.FrameRate, 1, 120, 0.1f, true, false, null, RenderSettings.Defaults.FrameRate))
         {
             modified = true;
             if (s.TimeReference == RenderSettings.TimeReferences.Frames)
@@ -212,7 +159,8 @@ internal sealed class RenderWindow : Window
 
         // Motion Blur Samples
         if (FormInputs.AddInt("Motion Blur", ref s.OverrideMotionBlurSamples, -1, 50, 1,
-                              "Number of motion blur samples. Set to -1 to disable. Requires [RenderWithMotionBlur] operator."))
+                              "Number of motion blur samples. Set to -1 to disable. Requires [RenderWithMotionBlur] operator.",
+                              RenderSettings.Defaults.OverrideMotionBlurSamples))
         {
             modified = true;
             s.OverrideMotionBlurSamples = Math.Clamp(s.OverrideMotionBlurSamples, -1, 50);
@@ -230,7 +178,7 @@ internal sealed class RenderWindow : Window
     private static bool DrawResolutionPopoverCompact(float width)
     {
         var modified = false;
-        var currentPct = (int)(RenderSettings.ForNextExport.ResolutionFactor * 100);
+        var currentPct = (int)(RenderSettings.Current.ResolutionFactor * 100);
         ImGui.SetNextItemWidth(width);
 
         if (ImGui.Button($"{currentPct}%##Res", new Vector2(width, 0)))
@@ -247,10 +195,10 @@ internal sealed class RenderWindow : Window
         {
             bool DrawSelectable(string label, float factor)
             {
-                bool isSelected = Math.Abs(RenderSettings.ForNextExport.ResolutionFactor - factor) < 0.001f;
+                bool isSelected = Math.Abs(RenderSettings.Current.ResolutionFactor - factor) < 0.001f;
                 if (ImGui.Selectable(label, isSelected))
                 {
-                    RenderSettings.ForNextExport.ResolutionFactor = factor;
+                    RenderSettings.Current.ResolutionFactor = factor;
                     return true;
                 }
                 return false;
@@ -267,13 +215,13 @@ internal sealed class RenderWindow : Window
             ImGui.TextUnformatted("Custom:");
             ImGui.PopStyleColor();
 
-            var customPct = RenderSettings.ForNextExport.ResolutionFactor * 100f;
+            var customPct = RenderSettings.Current.ResolutionFactor * 100f;
             ImGui.SetNextItemWidth(100 * T3Ui.UiScaleFactor);
             if (ImGui.InputFloat("##CustomRes", ref customPct, 0, 0, "%.0f%%"))
             {
                 modified = true;
                 customPct = Math.Clamp(customPct, 1f, 1000f);
-                RenderSettings.ForNextExport.ResolutionFactor = customPct / 100f;
+                RenderSettings.Current.ResolutionFactor = customPct / 100f;
             }
 
             ImGui.EndPopup();
@@ -285,12 +233,14 @@ internal sealed class RenderWindow : Window
     private bool DrawVideoSettings()
     {
         var modified = false;
-        var s = RenderSettings.ForNextExport;
+        var s = RenderSettings.Current;
 
         // Bitrate in Mbps
         var bitrateMbps = s.Bitrate / 1_000_000f;
+        var defaultBitrateMbps = RenderSettings.Defaults.Bitrate / 1_000_000f;
         if (FormInputs.AddFloat("Bitrate", ref bitrateMbps, 0.1f, 500f, 0.5f, true, true,
-                                "Video bitrate in megabits per second."))
+                                "Video bitrate in megabits per second.",
+                                defaultBitrateMbps))
         {
             modified = true;
             s.Bitrate = (int)(bitrateMbps * 1_000_000f);
@@ -328,7 +278,7 @@ internal sealed class RenderWindow : Window
         if (!filename.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)) filename += ".mp4";
         s.VideoFilePath = Path.Combine(directory, filename);
 
-        modified |= FormInputs.AddCheckBox("Auto-increment version", ref s.AutoIncrementVersionNumber);
+        modified |= FormInputs.AddCheckBox("Auto-increment version", ref s.AutoIncrementVersionNumber, null, RenderSettings.Defaults.AutoIncrementVersionNumber);
         if (s.AutoIncrementVersionNumber)
         {
             var nextTargetPath = GetCachedTargetFilePath(RenderSettings.RenderModes.Video);
@@ -344,14 +294,14 @@ internal sealed class RenderWindow : Window
             }
         }
 
-        modified |= FormInputs.AddCheckBox("Export Audio (experimental)", ref s.ExportAudio);
+        modified |= FormInputs.AddCheckBox("Export Audio (experimental)", ref s.ExportAudio, null, RenderSettings.Defaults.ExportAudio);
         return modified;
     }
 
     private bool DrawImageSequenceSettings()
     {
         var modified = false;
-        var s = RenderSettings.ForNextExport;
+        var s = RenderSettings.Current;
 
         modified |= FormInputs.AddFilePicker("Main Folder", ref s.SequenceFilePath!, ".\\ImageSequence ", null, "Save folder.", FileOperations.FilePickerTypes.Folder);
 
@@ -367,9 +317,9 @@ internal sealed class RenderWindow : Window
             s.SequencePrefix = (s.SequencePrefix ?? string.Empty).Trim();
         }
 
-        modified |= FormInputs.AddEnumDropdown(ref s.FileFormat, "Format");
-        modified |= FormInputs.AddCheckBox("Create subfolder", ref s.CreateSubFolder);
-        modified |= FormInputs.AddCheckBox("Auto-increment version", ref s.AutoIncrementSubFolder);
+        modified |= FormInputs.AddEnumDropdown(ref s.FileFormat, "Format", null, RenderSettings.Defaults.FileFormat);
+        modified |= FormInputs.AddCheckBox("Create subfolder", ref s.CreateSubFolder, null, RenderSettings.Defaults.CreateSubFolder);
+        modified |= FormInputs.AddCheckBox("Auto-increment version", ref s.AutoIncrementSubFolder, null, RenderSettings.Defaults.AutoIncrementSubFolder);
 
         if (s.AutoIncrementSubFolder)
         {
@@ -485,7 +435,7 @@ internal sealed class RenderWindow : Window
 
             if (ImGui.Button("Start Render", new Vector2(-1, 36 * T3Ui.UiScaleFactor)))
             {
-                var targetPath = GetCachedTargetFilePath(RenderSettings.ForNextExport.RenderMode);
+                var targetPath = GetCachedTargetFilePath(RenderSettings.Current.RenderMode);
                 if (RenderPaths.FileExists(targetPath))
                 {
                     _uiState.ShowOverwriteModal = true;
@@ -512,9 +462,9 @@ internal sealed class RenderWindow : Window
     {
         errorMessage = string.Empty;
 
-        if (RenderSettings.ForNextExport.RenderMode == RenderSettings.RenderModes.Video)
+        if (RenderSettings.Current.RenderMode == RenderSettings.RenderModes.Video)
         {
-            var currentPath = RenderSettings.ForNextExport.VideoFilePath ?? string.Empty;
+            var currentPath = RenderSettings.Current.VideoFilePath ?? string.Empty;
             var filename = Path.GetFileNameWithoutExtension(currentPath);
             if (string.IsNullOrWhiteSpace(filename) || filename == ".")
             {
@@ -524,13 +474,13 @@ internal sealed class RenderWindow : Window
         }
         else
         {
-            if (RenderSettings.ForNextExport.CreateSubFolder && string.IsNullOrWhiteSpace(RenderSettings.ForNextExport.SequenceFileName))
+            if (RenderSettings.Current.CreateSubFolder && string.IsNullOrWhiteSpace(RenderSettings.Current.SequenceFileName))
             {
                 errorMessage = "Subfolder name cannot be empty.";
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(RenderSettings.ForNextExport.SequencePrefix))
+            if (string.IsNullOrWhiteSpace(RenderSettings.Current.SequencePrefix))
             {
                 errorMessage = "Filename prefix cannot be empty.";
                 return false;
@@ -562,8 +512,8 @@ internal sealed class RenderWindow : Window
         if (ImGui.BeginPopupModal("Overwrite?", ref _uiState.DummyOpen, ImGuiWindowFlags.AlwaysAutoResize))
         {
             ImGui.BeginGroup();
-            var targetPath = GetCachedTargetFilePath(RenderSettings.ForNextExport.RenderMode);
-            bool isFolder = RenderSettings.ForNextExport.RenderMode == RenderSettings.RenderModes.ImageSequence && RenderSettings.ForNextExport.CreateSubFolder;
+            var targetPath = GetCachedTargetFilePath(RenderSettings.Current.RenderMode);
+            bool isFolder = RenderSettings.Current.RenderMode == RenderSettings.RenderModes.ImageSequence && RenderSettings.Current.CreateSubFolder;
 
             var displayPath = isFolder ? Path.GetFileName(Path.GetDirectoryName(targetPath)) : Path.GetFileName(targetPath);
             var message = isFolder ? "A folder with this name already exists and is not empty:" : "A file with this name already exists:";
@@ -631,7 +581,7 @@ internal sealed class RenderWindow : Window
     private sealed class WindowUiState
     {
         public string LastHelpString = string.Empty;
-        public float LastValidFps = RenderSettings.ForNextExport.FrameRate;
+        public float LastValidFps = RenderSettings.Current.FrameRate;
 
         // UI State for Overwrite Dialog
         public bool ShowOverwriteModal;

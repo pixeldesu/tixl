@@ -68,7 +68,7 @@ internal static class RenderProcess
         if (MainOutputTexture == null || MainOutputTexture.IsDisposed)
             return false;
 
-        var settings = RenderSettings.ForNextExport.Clone();
+        var settings = RenderSettings.Current.Clone();
 
         if (State != States.ReadyForExport)
         {
@@ -309,11 +309,11 @@ internal static class RenderProcess
             {
                 if (settings.CreateSubFolder)
                 {
-                    RenderSettings.ForNextExport.SequenceFileName = RenderPaths.GetNextIncrementedPath(RenderSettings.ForNextExport.SequenceFileName);
+                    RenderSettings.Current.SequenceFileName = RenderPaths.GetNextIncrementedPath(RenderSettings.Current.SequenceFileName);
                 }
                 else
                 {
-                    RenderSettings.ForNextExport.SequencePrefix = RenderPaths.GetNextIncrementedPath(RenderSettings.ForNextExport.SequencePrefix);
+                    RenderSettings.Current.SequencePrefix = RenderPaths.GetNextIncrementedPath(RenderSettings.Current.SequencePrefix);
                 }
                 incremented = true;
             }
@@ -353,7 +353,7 @@ internal static class RenderProcess
     {
         return State == States.Exporting && _activeExportSession != null
                    ? _activeExportSession.Settings
-                   : RenderSettings.ForNextExport;
+                   : RenderSettings.Current;
     }
 
     public static bool TryGetActiveExportResolution(out Int2 resolution)
@@ -493,7 +493,7 @@ internal static class RenderProcess
 
     private static string GetSequenceFilePath()
     {
-        var prefix = RenderPaths.SanitizeFilename(RenderSettings.ForNextExport.SequencePrefix);
+        var prefix = RenderPaths.SanitizeFilename(RenderSettings.Current.SequencePrefix);
         return Path.Combine(_activeExportSession!.TargetDirectory,
                             $"{prefix}_{_activeExportSession.FrameIndex:0000}.{_activeExportSession.Settings.FileFormat.ToString().ToLower()}");
     }

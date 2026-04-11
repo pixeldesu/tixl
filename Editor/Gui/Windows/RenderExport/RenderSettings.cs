@@ -2,12 +2,51 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel;
+using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.RenderExport;
 
 internal sealed class RenderSettings
 {
-    public static readonly RenderSettings ForNextExport = new();
+    public static readonly RenderSettings Defaults = new();
+
+    /// <summary>
+    /// Returns the render settings for the focused composition, initializing from defaults
+    /// (with legacy path migration) if none exist yet.
+    /// </summary>
+    public static RenderSettings Current
+    {
+        get
+        {
+            var symbolUi = ProjectView.Focused?.CompositionInstance?.Symbol.GetSymbolUi();
+            if (symbolUi == null)
+                return Defaults;
+
+            if (symbolUi.RenderSettings != null)
+                return symbolUi.RenderSettings;
+
+            // First access for this composition — initialize with defaults + legacy paths
+            var settings = new RenderSettings();
+
+            #pragma warning disable CS0612 // Obsolete
+            var legacy = UserSettings.Config;
+            if (!string.IsNullOrEmpty(legacy.RenderVideoFilePath))
+                settings.VideoFilePath = legacy.RenderVideoFilePath;
+            if (!string.IsNullOrEmpty(legacy.RenderSequenceFilePath))
+                settings.SequenceFilePath = legacy.RenderSequenceFilePath;
+            if (!string.IsNullOrEmpty(legacy.RenderSequenceFileName))
+                settings.SequenceFileName = legacy.RenderSequenceFileName;
+            if (!string.IsNullOrEmpty(legacy.RenderSequencePrefix))
+                settings.SequencePrefix = legacy.RenderSequencePrefix;
+            #pragma warning restore CS0612
+
+            symbolUi.RenderSettings = settings;
+            symbolUi.FlagAsModified();
+            return settings;
+        }
+    }
 
     [JsonConverter(typeof(StringEnumConverter))]
     public TimeReferences TimeReference;

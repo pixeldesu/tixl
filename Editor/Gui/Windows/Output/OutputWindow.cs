@@ -407,7 +407,7 @@ internal sealed class OutputWindow : Window
 
         if (RenderProcess.IsExporting)
         {
-            var samples = RenderSettings.ForNextExport.OverrideMotionBlurSamples;
+            var samples = RenderProcess.GetActiveOrRequestedSettings().OverrideMotionBlurSamples;
             if (samples >= 0)
             {
                 EvaluationContext.IntVariables[overrideSampleVariableName] = samples;
