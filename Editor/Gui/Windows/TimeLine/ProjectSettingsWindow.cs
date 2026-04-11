@@ -16,139 +16,123 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.InputsAndTypes;
+using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
 /// <summary>
-/// Draws playback settings
+/// Per-project settings window with categories for Playback, Audio, Rendering, IO, and Performance.
 /// </summary>
 /// <remarks>
 /// Controlling the primary soundtrack is finicky:
 /// - "Add soundtrack" adds a <see cref="AudioClipResourceHandle"/> with empty filepath.
 /// - When modifying the path we use to resolve the path (i.e. verify if file exists) before setting the filepath.
 /// - If valid and set, <see cref="AudioEngine"/> will then load them in CompleteFrame.
-///
 /// </remarks>
-internal static class ProjectSettingsPopup
+internal sealed class ProjectSettingsWindow : Window
 {
-    /// <returns>true if composition was modified</returns>
-    internal static bool Draw(Instance? composition)
+    internal ProjectSettingsWindow()
     {
-        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(2, 2));
-        ImGui.SetNextWindowSize(new Vector2(650, 500) * T3Ui.UiScaleFactor);
-        if (!ImGui.BeginPopupContextItem(ProjectSettingsPopupId))
-        {
-            ImGui.PopStyleVar(1);
-            return false;
-        }
-
-        FrameStats.Current.OpenedPopUpName = ProjectSettingsPopupId;
-        FrameStats.Current.OpenedPopupHovered = ImGui.IsWindowHovered();
-        FrameStats.Current.IsItemContextMenuOpen = true;
-
-        var modified = DrawContent(composition); 
-            
-
-        ImGui.EndPopup();
-        ImGui.PopStyleVar(1);
-        return modified;
+        Config.Title = "Project Settings";
     }
 
-    
-    private static bool DrawContent(Instance? composition)
+    internal override List<Window> GetInstances() => [];
+
+    protected override void DrawContent()
     {
-        var modified = false;
-        ImGui.PushFont(Fonts.FontLarge);
-        ImGui.TextUnformatted("Project Settings");
-        ImGui.PopFont();
+        var composition = ProjectView.Focused?.CompositionInstance;
 
         if (composition == null)
         {
             CustomComponents.EmptyWindowMessage("no composition active");
-            return modified;
+            return;
         }
 
-        FormInputs.SetIndentToLeft();
+        PlaybackUtils.FindProjectSettingsForInstance(composition, out var compositionWithSettings,
+            out var settings);
 
-        PlaybackUtils.FindProjectSettingsForInstance(composition, out var compositionWithSettings, out var settings);
-
+        var isEnabledForCurrent = compositionWithSettings == composition && settings is {Enabled: true};
+        
         // Main toggle with composition name
-        var isEnabledForCurrent = compositionWithSettings == composition && settings is { Enabled: true };
-
-        if (FormInputs.AddCheckBox("Specify settings for", ref isEnabledForCurrent))
         {
-            modified = true;
-            if (isEnabledForCurrent)
+            FormInputs.SetIndent(0);
+            FormInputs.AddVerticalSpace();
+            
+            if (FormInputs.AddCheckBox("Specify settings for ", ref isEnabledForCurrent))
             {
-                settings = composition.Symbol.ProjectSettings;
-                if (settings == null)
+                if (isEnabledForCurrent)
                 {
-                    settings = new ProjectSettings();
-                    composition.Symbol.ProjectSettings = settings;
+                    settings = composition.Symbol.ProjectSettings;
+                    if (settings == null)
+                    {
+                        settings = new ProjectSettings();
+                        composition.Symbol.ProjectSettings = settings;
+                    }
+
+                    compositionWithSettings = composition;
+                    settings.Enabled = true;
+                    Playback.Current.Settings = settings;
+                }
+                else
+                {
+                    // ReSharper disable once PossibleNullReferenceException
+                    settings.Enabled = false;
                 }
 
-                compositionWithSettings = composition;
-                settings.Enabled = true;
-                Playback.Current.Settings = settings;
+                composition.Symbol.GetSymbolUi().FlagAsModified();
             }
-            else
+
+            ImGui.SameLine();
+            ImGui.PushFont(Fonts.FontBold);
+            ImGui.TextUnformatted(composition.Symbol.Name);
+            ImGui.PopFont();
+
+            // Explanation hint
+            var hint = "";
+            if (isEnabledForCurrent)
             {
-                // ReSharper disable once PossibleNullReferenceException
-                settings.Enabled = false;
+                hint = "These symbol settings are also used for its child operators.";
             }
+            else if (compositionWithSettings != null && compositionWithSettings != composition)
+            {
+                hint = $"Currently inheriting settings from {compositionWithSettings.Symbol.Name}";
+            }
+
+            FormInputs.AddVerticalSpace(4);
+            ImGui.SetCursorPosX( ImGui.GetCursorPosX() + 20 * T3Ui.UiScaleFactor);
+            CustomComponents
+                .HelpText(hint);
+
+            FormInputs.AddVerticalSpace();
         }
 
-        ImGui.SameLine();
-        ImGui.PushFont(Fonts.FontBold);
-        ImGui.TextUnformatted(composition.Symbol.Name);
-        ImGui.PopFont();
-
-        // Explanation hint
-        var hint = "";
-        if (isEnabledForCurrent)
-        {
-            hint = "You're defining new settings for this Project Operator.";
-        }
-        else if (compositionWithSettings != null && compositionWithSettings != composition)
-        {
-            hint = $"Inheriting settings from {compositionWithSettings.Symbol.Name}";
-        }
-
-
-        FormInputs.AddHint(hint);
+        ImGui.Separator();
 
         if (isEnabledForCurrent)
         {
-            modified |= DrawSettings(composition, settings, compositionWithSettings);
+            DrawSettingsPanels(composition, settings, compositionWithSettings);
         }
         else
         {
             CustomComponents.EmptyWindowMessage("No settings");
-            //ImGui.EndPopup();
-            //ImGui.PopStyleVar(1);
             FormInputs.SetIndentToParameters();
         }
-
-        return modified;
     }
 
-    
     private enum Categories
     {
         Playback,
-        Rendering,
         Audio,
         Io,
+        Executable,
         Performance,
     }
 
     private static Categories _activeCategory;
 
-    private static bool DrawSettings(Instance composition, ProjectSettings settings,
+    private void DrawSettingsPanels(Instance composition, ProjectSettings settings,
         Instance? compositionWithSettings)
     {
-        var modified = false;
-
         ImGui.BeginChild("categories", new Vector2(120 * T3Ui.UiScaleFactor, -1),
             ImGuiChildFlags.Borders,
             ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
@@ -164,6 +148,7 @@ internal static class ProjectSettingsPopup
         ImGui.BeginChild("content", new Vector2(0, 0), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoBackground);
         {
             FormInputs.SetIndentToParameters();
+            var modified = false;
             switch (_activeCategory)
             {
                 case Categories.Playback:
@@ -172,7 +157,7 @@ internal static class ProjectSettingsPopup
                 case Categories.Audio:
                     modified |= DrawAudioSettings(settings);
                     break;
-                case Categories.Rendering:
+                case Categories.Executable:
                     modified |= DrawRenderingSettings(settings);
                     break;
                 case Categories.Io:
@@ -182,12 +167,16 @@ internal static class ProjectSettingsPopup
                     modified |= DrawPerformanceSettings(settings);
                     break;
             }
+
+            if (modified)
+                composition.Symbol.GetSymbolUi().FlagAsModified();
         }
 
         ImGui.EndChild();
         ImGui.PopStyleVar();
-        return modified;
     }
+
+    #region Category panels
 
     private static bool DrawAudioSettings(ProjectSettings settings)
     {
@@ -259,7 +248,8 @@ internal static class ProjectSettingsPopup
         var defaults = ProjectSettings.Defaults.Io;
 
         FormInputs.AddSectionHeader("OSC");
-        CustomComponents.HelpText("Tooll listens for OSC messages on the default port.\nYou can also use the OscInput operator for other ports.");
+        CustomComponents.HelpText(
+            "Tooll listens for OSC messages on the default port.\nYou can also use the OscInput operator for other ports.");
         FormInputs.AddVerticalSpace();
 
         modified |= FormInputs.AddInt("Default Port", ref io.DefaultOscPort,
@@ -302,14 +292,16 @@ internal static class ProjectSettingsPopup
         return modified;
     }
 
+    #endregion
+
+    #region Playback settings
+
     private static bool DrawPlaybackSettings(Instance composition, ProjectSettings settings,
         Instance? compositionWithSettings)
     {
         var modified = false;
-        
+
         FormInputs.AddSectionHeader("Playback");
-        
-        //FormInputs.SetIndentToParameters();
 
         var playback = settings.Playback;
 
@@ -364,21 +356,14 @@ internal static class ProjectSettingsPopup
                     }
 
                     var editResult = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File,
-                        AllFilesAudioFilesMp3WavOggMp3WavOgg,
+                        AudioFileFilter,
                         ref _tempSoundtrackFilepathForEdit,
-                        showAssetFolderToggle:false);
-
+                        showAssetFolderToggle: false);
 
                     var filepathModified = (editResult & InputEditStateFlags.Modified) != 0;
                     if (filepathModified)
                     {
                         modified = true;
-                        if (!string.IsNullOrEmpty(_tempSoundtrackFilepathForEdit))
-                        {
-                        }
-                        else
-                        {
-                        }
                     }
 
                     FormInputs.ApplyIndent();
@@ -413,7 +398,7 @@ internal static class ProjectSettingsPopup
                         modified = true;
                     }
 
-                    var soundtrackStartTime = (float)soundtrackHandle.Clip.StartTime;
+                    var soundtrackStartTime = (float) soundtrackHandle.Clip.StartTime;
 
                     if (FormInputs.AddFloat("Offset",
                             ref soundtrackStartTime,
@@ -467,7 +452,6 @@ internal static class ProjectSettingsPopup
                                        The right click on measure to resync and refine.
                                        """);
 
-
                     modified |= FormInputs.AddCheckBox("Enable audio beat lock",
                         ref playback.EnableAudioBeatLocking,
                         """
@@ -507,10 +491,10 @@ internal static class ProjectSettingsPopup
                     """,
                     0);
 
-
                 FormInputs.AddVerticalSpace();
 
-                modified |= FormInputs.AddFloat("Audio Gain", ref playback.AudioGainFactor , 0.01f, 100, 0.01f, true, true,
+                modified |= FormInputs.AddFloat("Audio Gain", ref playback.AudioGainFactor, 0.01f, 100, 0.01f, true,
+                    true,
                     "Can be used to adjust the input signal (e.g. in live situation where the input level might vary.",
                     1);
 
@@ -522,13 +506,14 @@ internal static class ProjectSettingsPopup
                     "The decay factors controls the impact of [AudioReaction] when AttackMode. Good values strongly depend on style, loudness and variation of input signal.",
                     0.9f);
 
-                // Input meter - aligned to match form input fields (with tooltip + reset button space like Audio Gain)
+                // Input meter
                 var level = playback.AudioGainFactor * WasapiAudioInput.DecayingAudioLevel * 0.03f;
                 var normalizedLevel = level / 644f;
                 FormInputs.DrawInputLabel("Input Level");
-                var inputSize = FormInputs.GetAvailableInputSize(" ", true, true); // Pass tooltip + hasReset to account for 2 icon spaces
+                var inputSize = FormInputs.GetAvailableInputSize(" ", true, true);
                 var cursorScreenPos = ImGui.GetCursorScreenPos();
-                AudioLevelMeter.DrawAbsoluteWithinBounds("", normalizedLevel, ref _smoothedLevel, 2f, cursorScreenPos.X, cursorScreenPos.X + inputSize.X);
+                AudioLevelMeter.DrawAbsoluteWithinBounds("", normalizedLevel, ref _smoothedLevel, 2f, cursorScreenPos.X,
+                    cursorScreenPos.X + inputSize.X);
 
                 FormInputs.DrawInputLabel("Input Device");
                 ImGui.BeginGroup();
@@ -538,14 +523,14 @@ internal static class ProjectSettingsPopup
                     foreach (var d in WasapiAudioInput.InputDevices)
                     {
                         var isSelected = d.DeviceInfo.Name == playback.AudioInputDeviceName;
-                        if (ImGui.Selectable($"{d.DeviceInfo.Name}", isSelected, ImGuiSelectableFlags.NoAutoClosePopups))
+                        if (ImGui.Selectable($"{d.DeviceInfo.Name}", isSelected,
+                                ImGuiSelectableFlags.NoAutoClosePopups))
                         {
                             Bass.Configure(Configuration.UpdateThreads, false);
                             playback.AudioInputDeviceName = d.DeviceInfo.Name;
                             modified = true;
                             CoreSettings.Save();
-                            //WasapiAudioInput.StartInputCapture(d);
-                            T3.Core.Audio.AudioEngine.OnAudioDeviceChanged(); // <-- Ensure audio engine resets on device change
+                            AudioEngine.OnAudioDeviceChanged();
                         }
 
                         if (ImGui.IsItemHovered())
@@ -569,11 +554,12 @@ internal static class ProjectSettingsPopup
                             ImGui.EndTooltip();
                         }
                     }
+
                     ImGui.EndCombo();
                 }
 
                 if (!string.IsNullOrEmpty(playback.AudioInputDeviceName)
-                    &&playback.AudioInputDeviceName != WasapiAudioInput.ActiveInputDeviceName)
+                    && playback.AudioInputDeviceName != WasapiAudioInput.ActiveInputDeviceName)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
                     ImGui.TextUnformatted(playback.AudioInputDeviceName + " (NOT FOUND)");
@@ -588,6 +574,10 @@ internal static class ProjectSettingsPopup
         return modified;
     }
 
+    #endregion
+
+    #region Helpers
+
     private static void UpdatePlaybackAndTimeline(ProjectSettings settings)
     {
         var playback = settings.Playback;
@@ -597,9 +587,6 @@ internal static class ProjectSettingsPopup
 
             if (playback.AudioClips.Count > 0)
             {
-                // Don't call Bass.Free() directly - this destroys all operator streams!
-                // Instead, ensure the mixer is properly initialized
-                // AudioMixerManager handles BASS initialization internally
                 Playback.Current.Bpm = playback.AudioClips[0].Bpm;
                 if (Playback.Current.Settings != null)
                     Playback.Current.Settings.Playback.Syncing = ProjectSettings.SyncModes.Timeline;
@@ -614,7 +601,6 @@ internal static class ProjectSettingsPopup
                 Playback.Current = T3Ui.DefaultBeatTimingPlayback;
                 UserSettings.Config.ShowTimeline = false;
                 UserSettings.Config.EnableIdleMotion = true;
-                // Don't call Bass.Free() directly - this destroys all operator streams!
                 Playback.Current.PlaybackSpeed = 1;
             }
             else
@@ -646,10 +632,9 @@ internal static class ProjectSettingsPopup
         }
     }
 
-    /** We use this for modification inside the input field and checking if path is valid before actually assigning it to the soundtrack */
-    private static string? _tempSoundtrackFilepathForEdit = string.Empty;
+    #endregion
 
+    private static string? _tempSoundtrackFilepathForEdit = string.Empty;
     private static float _smoothedLevel;
-    public const string ProjectSettingsPopupId = "##PlaybackSettings";
-    private const string AllFilesAudioFilesMp3WavOggMp3WavOgg = "mp3,wav,ogg";
+    private const string AudioFileFilter = "mp3,wav,ogg";
 }

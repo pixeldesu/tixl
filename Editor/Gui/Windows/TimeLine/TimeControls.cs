@@ -189,13 +189,7 @@ internal static class TimeControls
                                                                         ? CustomComponents.ButtonStates.Normal
                                                                         : CustomComponents.ButtonStates.Dimmed))
         {
-            //playback.TimeInBars = playback.LoopRange.Start;
-            ImGui.OpenPopup(ProjectSettingsPopup.ProjectSettingsPopupId);
-        }
-
-        if (ProjectSettingsPopup.Draw(composition))
-        {
-            composition.Symbol.GetSymbolUi().FlagAsModified();
+            WindowManager.ToggleInstanceVisibility<ProjectSettingsWindow>();
         }
 
         CustomComponents.TooltipForLastItem("Project Settings",

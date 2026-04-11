@@ -360,6 +360,14 @@ internal static class AppMenuBar
             ImGui.Separator();
 
             WindowManager.SettingsWindow.DrawMenuItemToggle();
+            {
+                var hasSettings = ProjectView.Focused?.CompositionInstance?.Symbol.ProjectSettings is { Enabled: true };
+                var window = WindowManager.ProjectSettingsWindow;
+                if (ImGui.MenuItem("Project Settings", "", hasSettings))
+                {
+                    window.Config.Visible = !window.Config.Visible;
+                }
+            }
 
             ImGui.Separator();
 
