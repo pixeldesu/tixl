@@ -22,6 +22,8 @@ internal static class SymbolUiJson
         {
             writer.WriteStartObject();
 
+            writer.WriteValue(JsonKeys.FormatVersion, SymbolFormatVersion.Current);
+            writer.WriteObject(JsonKeys.TixlVersion, SymbolFormatVersion.TixlVersion);
             writer.WriteValue(JsonKeys.Id, symbolUi.Symbol.Id);
             writer.WriteComment(symbolUi.Symbol.Name);
 
@@ -280,6 +282,10 @@ internal static class SymbolUiJson
 
     internal static bool TryReadSymbolUi(JToken mainObject, Symbol symbol, [NotNullWhen(true)] out SymbolUi? symbolUi)
     {
+        var formatVersion = mainObject[JsonKeys.FormatVersion]?.Value<int>() ?? 0;
+        var fileTixlVersion = mainObject[JsonKeys.TixlVersion]?.Value<string>();
+        SymbolFormatVersion.WarnIfNewer(formatVersion, fileTixlVersion, symbol.Name);
+
         var inputDict = new OrderedDictionary<Guid, IInputUi>();
         if (TryGetJArray(JsonKeys.InputUis, mainObject, symbol, out var inputUiArray))
         {
@@ -607,30 +613,44 @@ internal static class SymbolUiJson
 
     private readonly struct JsonKeys
     {
+        // Top-level fields (in serialization order)
+        public const string FormatVersion = nameof(FormatVersion);
+        public const string TixlVersion = nameof(TixlVersion);
+        public const string Id = nameof(Id);
+        public const string Description = nameof(Description);
+        public const string SymbolTags = nameof(SymbolTags);
         public const string InputUis = nameof(InputUis);
-        public const string InputId = nameof(InputId);
-        public const string OutputUis = nameof(OutputUis);
-        public const string OutputId = nameof(OutputId);
         public const string SymbolChildUis = nameof(SymbolChildUis);
+        public const string OutputUis = nameof(OutputUis);
+        public const string Annotations = nameof(Annotations);
+        public const string Links = nameof(Links);
+        public const string TourPoints = nameof(TourPoints);
+        // Settings is written by WriteSettings()
+
+        // InputUi fields
+        public const string InputId = nameof(InputId);
+
+        // OutputUi fields
+        public const string OutputId = nameof(OutputId);
+
+        // ChildUi fields
         public const string ChildId = nameof(ChildId);
         public const string Position = nameof(Position);
-        public const string Annotations = nameof(Annotations);
-        public const string AnnotationId = nameof(AnnotationId);
-        public const string Collapsed = nameof(Collapsed);
-        public const string Links = nameof(Links);
+        public const string Size = nameof(Size);
+        public const string Style = nameof(Style);
         public const string Comment = nameof(Comment);
-        public const string Id = nameof(Id);
+        public const string ConnectionStyleOverrides = nameof(ConnectionStyleOverrides);
+
+        // Annotation fields
+        public const string AnnotationId = nameof(AnnotationId);
         public const string Title = nameof(Title);
         public const string Label = nameof(Label);
         public const string Color = nameof(Color);
-        public const string Size = nameof(Size);
-        public const string Description = nameof(Description);
-        public const string Style = nameof(Style);
-        public const string ConnectionStyleOverrides = nameof(ConnectionStyleOverrides);
+        public const string Collapsed = nameof(Collapsed);
+
+        // Link fields
         public const string LinkType = nameof(LinkType);
         public const string LinkUrl = nameof(LinkUrl);
-        public const string SymbolTags = nameof(SymbolTags);
-        public const string TourPoints = nameof(TourPoints);
     }
 
     #region Settings

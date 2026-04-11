@@ -21,6 +21,8 @@ public static class SymbolJson
     {
         writer.WriteStartObject();
 
+        writer.WriteValue(JsonKeys.FormatVersion, SymbolFormatVersion.Current);
+        writer.WriteObject(JsonKeys.TixlVersion, SymbolFormatVersion.TixlVersion);
         writer.WriteValue(JsonKeys.Id, symbol.Id);
         writer.WriteComment(symbol.Name);
 
@@ -301,6 +303,10 @@ public static class SymbolJson
 
     public static SymbolReadResult ReadSymbolRoot(in Guid id, JToken jToken, Type instanceType, SymbolPackage package)
     {
+        var formatVersion = jToken[JsonKeys.FormatVersion]?.Value<int>() ?? 0;
+        var fileTixlVersion = jToken[JsonKeys.TixlVersion]?.Value<string>();
+        SymbolFormatVersion.WarnIfNewer(formatVersion, fileTixlVersion, instanceType.Name);
+
         // Read symbol with Id -> dictionary of Guid-JToken?
         var jChildrenJsonArray = (JArray?)jToken[JsonKeys.Children];
 
@@ -380,26 +386,36 @@ public static class SymbolJson
 
     public readonly struct JsonKeys
     {
+        // Top-level symbol fields (in serialization order)
+        internal const string FormatVersion = "FormatVersion";
+        internal const string TixlVersion = "TixlVersion";
+        public const string Id = "Id";
+        internal const string Inputs = "Inputs";
+        internal const string Children = "Children";
         internal const string Connections = "Connections";
+        // ProjectSettings is written by ProjectSettings.WriteToJson()
+        internal const string Animator = "Animator";
+
+        // Connection fields
         internal const string SourceParentOrChildId = "SourceParentOrChildId";
         internal const string SourceSlotId = "SourceSlotId";
         internal const string TargetParentOrChildId = "TargetParentOrChildId";
         internal const string TargetSlotId = "TargetSlotId";
-        internal const string Children = "Children";
-        public const string Id = "Id";
+
+        // Child fields
         internal const string SymbolChildName = "Name";
         internal const string SymbolId = "SymbolId";
         internal const string InputValues = "InputValues";
+        internal const string Outputs = "Outputs";
         internal const string OutputData = "OutputData";
         internal const string Type = "Type";
         internal const string IsBypassed = "IsBypassed";
         internal const string DirtyFlagTrigger = "DirtyFlagTrigger";
         internal const string IsDisabled = "IsDisabled";
+
+        // Input fields
         internal const string DefaultValue = "DefaultValue";
         internal const string Value = "Value";
-        internal const string Inputs = "Inputs";
-        internal const string Outputs = "Outputs";
-        internal const string Animator = "Animator";
     }
 
     public readonly record struct SymbolReadResult(Symbol? Symbol, JsonChildResult[] ChildrenJsonArray, JArray? AnimatorJsonData);
