@@ -319,9 +319,7 @@ public sealed class Curve : IEditableInputType
             var key = curves[index].GetV(time) ?? new VDefinition { U = time };
             key.Value = values[index];
             curves[index].AddOrUpdateV(time, key);
-            curves[index].ChangeCount++;
         }
-        
     }
 
     public static void UpdateCurveValues(Curve[] curves, double time, int[] values)
@@ -338,7 +336,6 @@ public sealed class Curve : IEditableInputType
                                                       };
             key.Value = values[index];
             curves[index].AddOrUpdateV(time, key);
-            curves[index].ChangeCount++;
         }
     }
     

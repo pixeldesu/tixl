@@ -56,7 +56,9 @@ public sealed class VDefinition
                        InEditMode = InEditMode,
                        OutEditMode = OutEditMode,
                        InTangentAngle = InTangentAngle,
-                       OutTangentAngle = OutTangentAngle
+                       OutTangentAngle = OutTangentAngle,
+                       Weighted = Weighted,
+                       BrokenTangents = BrokenTangents
                    };
     }
 
@@ -69,7 +71,9 @@ public sealed class VDefinition
         InEditMode = def.InEditMode;
         OutEditMode = def.OutEditMode;
         InTangentAngle = def.InTangentAngle;
-        OutTangentAngle = def.OutTangentAngle;            
+        OutTangentAngle = def.OutTangentAngle;
+        Weighted = def.Weighted;
+        BrokenTangents = def.BrokenTangents;
     }
 
     internal void Read(JToken jsonV)
@@ -77,12 +81,15 @@ public sealed class VDefinition
         Value = jsonV.Value<double>(nameof(Value));
         InType = jsonV[nameof(InType)].GetEnumValue(Interpolation.Linear);
         OutType = jsonV[nameof(OutType)].GetEnumValue(Interpolation.Linear);
-        
+
         InTangentAngle = jsonV.Value<double>(nameof(InTangentAngle));
         OutTangentAngle = jsonV.Value<double>(nameof(OutTangentAngle));
 
         InEditMode = jsonV[nameof(InEditMode)].GetEnumValue(EditMode.Linear);
         OutEditMode = jsonV[nameof(OutEditMode)].GetEnumValue(EditMode.Linear);
+
+        Weighted = jsonV.ReadValueSafe(nameof(Weighted), false);
+        BrokenTangents = jsonV.ReadValueSafe(nameof(BrokenTangents), false);
     }
 
     internal void Write(JsonTextWriter writer)
@@ -94,5 +101,7 @@ public sealed class VDefinition
         writer.WriteObject(nameof(OutEditMode), OutEditMode);
         writer.WriteValue(nameof(InTangentAngle), InTangentAngle);
         writer.WriteValue(nameof(OutTangentAngle), OutTangentAngle);
+        writer.WriteValue(nameof(Weighted), Weighted);
+        writer.WriteValue(nameof(BrokenTangents), BrokenTangents);
     }
 }
