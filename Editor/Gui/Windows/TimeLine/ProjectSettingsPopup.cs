@@ -28,34 +28,42 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// - If valid and set, <see cref="AudioEngine"/> will then load them in CompleteFrame.
 ///
 /// </remarks>
-internal static class PlaybackSettingsPopup
+internal static class ProjectSettingsPopup
 {
     /// <returns>true if composition was modified</returns>
-    internal static bool DrawPlaybackSettings(Instance? composition)
+    internal static bool Draw(Instance? composition)
     {
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(2, 2));
         ImGui.SetNextWindowSize(new Vector2(650, 500) * T3Ui.UiScaleFactor);
-        if (!ImGui.BeginPopupContextItem(PlaybackSettingsPopupId))
+        if (!ImGui.BeginPopupContextItem(ProjectSettingsPopupId))
         {
             ImGui.PopStyleVar(1);
             return false;
         }
 
-        FrameStats.Current.OpenedPopUpName = PlaybackSettingsPopupId;
+        FrameStats.Current.OpenedPopUpName = ProjectSettingsPopupId;
         FrameStats.Current.OpenedPopupHovered = ImGui.IsWindowHovered();
         FrameStats.Current.IsItemContextMenuOpen = true;
 
+        var modified = DrawContent(composition); 
+            
+
+        ImGui.EndPopup();
+        ImGui.PopStyleVar(1);
+        return modified;
+    }
+
+    private static bool DrawContent(Instance? composition)
+    {
+        var modified = false;
         ImGui.PushFont(Fonts.FontLarge);
-        ImGui.TextUnformatted("Playback settings");
+        ImGui.TextUnformatted("Project Settings");
         ImGui.PopFont();
 
         if (composition == null)
         {
             CustomComponents.EmptyWindowMessage("no composition active");
-            ImGui.EndPopup();
-            ImGui.PopStyleVar(1);
-
-            return false;
+            return modified;
         }
 
         FormInputs.SetIndentToLeft();
@@ -64,7 +72,6 @@ internal static class PlaybackSettingsPopup
 
         // Main toggle with composition name
         var isEnabledForCurrent = compositionWithSettings == composition && settings is { Enabled: true };
-        var modified = false;
 
         if (FormInputs.AddCheckBox("Specify settings for", ref isEnabledForCurrent))
         {
@@ -95,7 +102,7 @@ internal static class PlaybackSettingsPopup
         ImGui.PopFont();
 
         // Explanation hint
-        string hint;
+        var hint = "";
         if (isEnabledForCurrent)
         {
             hint = "You're defining new settings for this Project Operator.";
@@ -104,22 +111,29 @@ internal static class PlaybackSettingsPopup
         {
             hint = $"Inheriting settings from {compositionWithSettings.Symbol.Name}";
         }
-        else
-        {
-            hint = string.Empty;
-        }
+
 
         FormInputs.AddHint(hint);
 
-        if (!isEnabledForCurrent)
+        if (isEnabledForCurrent)
+        {
+            modified |= DrawPlaybackSettings(composition, settings, modified, compositionWithSettings);
+        }
+        else
         {
             CustomComponents.EmptyWindowMessage("No settings");
             ImGui.EndPopup();
             ImGui.PopStyleVar(1);
             FormInputs.SetIndentToParameters();
-            return modified;
         }
 
+        return modified;
+    }
+
+
+    private static bool DrawPlaybackSettings(Instance composition, ProjectSettings settings, bool modified,
+        Instance? compositionWithSettings)
+    {
         FormInputs.SetIndentToParameters();
 
         var playback = settings.Playback;
@@ -144,9 +158,9 @@ internal static class PlaybackSettingsPopup
                     {
                         modified = true;
                         playback.AudioClips.Add(new SoundtrackClipDefinition()
-                                                    {
-                                                        IsSoundtrack = true,
-                                                    });
+                        {
+                            IsSoundtrack = true,
+                        });
                         _tempSoundtrackFilepathForEdit = string.Empty;
                     }
                 }
@@ -175,9 +189,9 @@ internal static class PlaybackSettingsPopup
                     }
 
                     var editResult = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File,
-                                                                       AllFilesAudioFilesMp3WavOggMp3WavOgg,
-                                                                       ref _tempSoundtrackFilepathForEdit,
-                                                                       showAssetFolderToggle:false);
+                        AllFilesAudioFilesMp3WavOggMp3WavOgg,
+                        ref _tempSoundtrackFilepathForEdit,
+                        showAssetFolderToggle:false);
 
 
                     var filepathModified = (editResult & InputEditStateFlags.Modified) != 0;
@@ -186,13 +200,9 @@ internal static class PlaybackSettingsPopup
                         modified = true;
                         if (!string.IsNullOrEmpty(_tempSoundtrackFilepathForEdit))
                         {
-                            _warningMessage = soundtrackHandle.TryToApplyFilePath(_tempSoundtrackFilepathForEdit, composition)
-                                                  ? string.Empty
-                                                  : "File not found?";
                         }
                         else
                         {
-                            _warningMessage = string.Empty;
                         }
                     }
 
@@ -215,13 +225,13 @@ internal static class PlaybackSettingsPopup
                     FormInputs.AddVerticalSpace();
 
                     if (FormInputs.AddFloat("BPM",
-                                            ref soundtrackHandle.Clip.Bpm,
-                                            0,
-                                            1000,
-                                            0.02f,
-                                            true, true,
-                                            "In T3 animation units are in bars.\nThe BPM rate controls the animation speed of your project.",
-                                            120))
+                            ref soundtrackHandle.Clip.Bpm,
+                            0,
+                            1000,
+                            0.02f,
+                            true, true,
+                            "In T3 animation units are in bars.\nThe BPM rate controls the animation speed of your project.",
+                            120))
                     {
                         Playback.Current.Bpm = soundtrackHandle.Clip.Bpm;
                         playback.Bpm = soundtrackHandle.Clip.Bpm;
@@ -231,13 +241,13 @@ internal static class PlaybackSettingsPopup
                     var soundtrackStartTime = (float)soundtrackHandle.Clip.StartTime;
 
                     if (FormInputs.AddFloat("Offset",
-                                            ref soundtrackStartTime,
-                                            -100,
-                                            100,
-                                            0.02f,
-                                            false, true,
-                                            "Offsets the beginning of the soundtrack in seconds.",
-                                            0))
+                            ref soundtrackStartTime,
+                            -100,
+                            100,
+                            0.02f,
+                            false, true,
+                            "Offsets the beginning of the soundtrack in seconds.",
+                            0))
                     {
                         soundtrackHandle.Clip.StartTime = soundtrackStartTime;
                         modified = true;
@@ -246,25 +256,25 @@ internal static class PlaybackSettingsPopup
                     FormInputs.AddEnumDropdown(ref UserSettings.Config.TimeDisplayMode, "Display Timeline in");
 
                     if (FormInputs.AddFloat("Resync Threshold",
-                                            ref CoreSettings.Config.AudioResyncThreshold,
-                                            0.001f,
-                                            0.1f,
-                                            0.001f,
-                                            true, true,
-                                            "If audio playbacks drifts too far from the animation playback it will be resynced. If the threshold for this is too low you will encounter audio glitches. If the threshold is too large you will lose precision. A normal range is between 0.02s and 0.05s.",
-                                            CoreSettings.Defaults.AudioResyncThreshold))
+                            ref CoreSettings.Config.AudioResyncThreshold,
+                            0.001f,
+                            0.1f,
+                            0.001f,
+                            true, true,
+                            "If audio playbacks drifts too far from the animation playback it will be resynced. If the threshold for this is too low you will encounter audio glitches. If the threshold is too large you will lose precision. A normal range is between 0.02s and 0.05s.",
+                            CoreSettings.Defaults.AudioResyncThreshold))
 
                     {
                         modified = true;
                     }
 
                     modified |= FormInputs.AddFloat("Audio Decay", ref playback.AudioDecayFactor,
-                                                    0.001f,
-                                                    1f,
-                                                    0.01f,
-                                                    true, true,
-                                                    "The decay factors controls the impact of [AudioReaction] when AttackMode. Good values strongly depend on style, loudness and variation of input signal.",
-                                                    0.9f);
+                        0.001f,
+                        1f,
+                        0.01f,
+                        true, true,
+                        "The decay factors controls the impact of [AudioReaction] when AttackMode. Good values strongly depend on style, loudness and variation of input signal.",
+                        0.9f);
 
                     if (filepathModified)
                     {
@@ -297,58 +307,58 @@ internal static class PlaybackSettingsPopup
 
 
                     modified |= FormInputs.AddCheckBox("Enable audio beat lock",
-                                                       ref playback.EnableAudioBeatLocking,
-                                                       """
-                                                       If enabled, the editor will look for transient bass, hihats and snares and attempt to look the playback onto the incoming audio signal.
-                                                       To use this, start by tapping the base beat (e.g. with X) then tap the beginning of the bar with (e.g. with X).
-                                                       From now on, you will see the BPM be constantly sliding to look onto the beat).
-                                                       """,
-                                                       true
-                                                      );
+                        ref playback.EnableAudioBeatLocking,
+                        """
+                        If enabled, the editor will look for transient bass, hihats and snares and attempt to look the playback onto the incoming audio signal.
+                        To use this, start by tapping the base beat (e.g. with X) then tap the beginning of the bar with (e.g. with X).
+                        From now on, you will see the BPM be constantly sliding to look onto the beat).
+                        """,
+                        true
+                    );
                     FormInputs.AddVerticalSpace();
                 }
 
                 if (!playback.EnableAudioBeatLocking)
                 {
                     modified |= FormInputs.AddFloat("BPM",
-                                                    ref playback.Bpm,
-                                                    0,
-                                                    1000,
-                                                    0.02f,
-                                                    true, true,
-                                                    """
-                                                    In T3 animation units are in bars.
-                                                    The BPM rate controls the animation speed of your project.
-                                                    """,
-                                                    120);
+                        ref playback.Bpm,
+                        0,
+                        1000,
+                        0.02f,
+                        true, true,
+                        """
+                        In T3 animation units are in bars.
+                        The BPM rate controls the animation speed of your project.
+                        """,
+                        120);
                 }
 
                 FormInputs.SetIndentToParameters();
                 modified |= FormInputs.AddFloat("Beat Sync Offset (sec)",
-                                                ref playback.BeatLockAudioOffsetSec,
-                                                -1f, 1f, 0.001f,
-                                                true, true,
-                                                """
-                                                When using beat lock through audio analysis, you can slightly offset the phase.
+                    ref playback.BeatLockAudioOffsetSec,
+                    -1f, 1f, 0.001f,
+                    true, true,
+                    """
+                    When using beat lock through audio analysis, you can slightly offset the phase.
 
-                                                This might be useful to tighten the sync between audio and video, e.g. if the visual output is delayed by video-processing devices.
-                                                """,
-                                                0);
+                    This might be useful to tighten the sync between audio and video, e.g. if the visual output is delayed by video-processing devices.
+                    """,
+                    0);
 
 
                 FormInputs.AddVerticalSpace();
 
                 modified |= FormInputs.AddFloat("Audio Gain", ref playback.AudioGainFactor , 0.01f, 100, 0.01f, true, true,
-                                                "Can be used to adjust the input signal (e.g. in live situation where the input level might vary.",
-                                                1);
+                    "Can be used to adjust the input signal (e.g. in live situation where the input level might vary.",
+                    1);
 
                 modified |= FormInputs.AddFloat("Audio Decay", ref playback.AudioDecayFactor,
-                                                0.001f,
-                                                1f,
-                                                0.01f,
-                                                true, true,
-                                                "The decay factors controls the impact of [AudioReaction] when AttackMode. Good values strongly depend on style, loudness and variation of input signal.",
-                                                0.9f);
+                    0.001f,
+                    1f,
+                    0.01f,
+                    true, true,
+                    "The decay factors controls the impact of [AudioReaction] when AttackMode. Good values strongly depend on style, loudness and variation of input signal.",
+                    0.9f);
 
                 // Input meter - aligned to match form input fields (with tooltip + reset button space like Audio Gain)
                 var level = playback.AudioGainFactor * WasapiAudioInput.DecayingAudioLevel * 0.03f;
@@ -413,8 +423,6 @@ internal static class PlaybackSettingsPopup
             }
         }
 
-        ImGui.EndPopup();
-        ImGui.PopStyleVar(1);
         return modified;
     }
 
@@ -479,8 +487,7 @@ internal static class PlaybackSettingsPopup
     /** We use this for modification inside the input field and checking if path is valid before actually assigning it to the soundtrack */
     private static string? _tempSoundtrackFilepathForEdit = string.Empty;
 
-    private static float _smoothedLevel = 0f;
-    private static string _warningMessage = string.Empty;
-    public const string PlaybackSettingsPopupId = "##PlaybackSettings";
+    private static float _smoothedLevel;
+    public const string ProjectSettingsPopupId = "##PlaybackSettings";
     private const string AllFilesAudioFilesMp3WavOggMp3WavOgg = "mp3,wav,ogg";
 }

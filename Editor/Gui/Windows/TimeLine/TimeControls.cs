@@ -189,15 +189,15 @@ internal static class TimeControls
                                                                         : CustomComponents.ButtonStates.Dimmed))
         {
             //playback.TimeInBars = playback.LoopRange.Start;
-            ImGui.OpenPopup(PlaybackSettingsPopup.PlaybackSettingsPopupId);
+            ImGui.OpenPopup(ProjectSettingsPopup.ProjectSettingsPopupId);
         }
 
-        if (PlaybackSettingsPopup.DrawPlaybackSettings(composition))
+        if (ProjectSettingsPopup.Draw(composition))
         {
             composition.Symbol.GetSymbolUi().FlagAsModified();
         }
 
-        CustomComponents.TooltipForLastItem("Timeline Settings",
+        CustomComponents.TooltipForLastItem("Project Settings",
                                             "Switch between soundtrack and VJ modes. Control BPM and other inputs.");
 
         ImGui.SameLine();

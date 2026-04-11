@@ -1,54 +1,84 @@
-# Saving Project settings
+# Project Settings Refactoring
 
-## Status quo
+## Completed Work
 
-1. We currently use Playback-Settings to define the soundtrack, timeline style and BPM-Settings. 
-2. These playback-settings are stored for symbols
-3. When working with the graph, we transverse the current graph breadcrumps up until we find a symbol with a playback definition. This allows to nest projects (e.g. a demo of demos) and see to most relevant inner playback settings and soundtrack.
-4. We should extend this behaviour:
+### Commit 1: Renamed global `ProjectSettings` → `CoreSettings`
+- Class `ProjectSettings` in `Core\IO` renamed to `CoreSettings`
+- Keeps `projectSettings.json` as the file name for backward compat
+- `ExportSettings` record now references `CoreSettings.ConfigData`
+- All ~30+ consumer files updated
 
-What's currently missing:
-1. Every time, I restart TiXL, these settings are restored
-   1. After opening a project, the last active operator nesting from an IdPath
-   2. The rough view area of the graph
-2. From user-setting (shared by all projects)
-   1. last active layout (from user settings)
-   2. Visible Ui ELements (e.g. MiniMap etc)
-   3. Timeline Visibily
-   4. MirrorUiOn2ndScreen
-   5. RenderVideoFilePath
-   6. RenderSequenceFilePath
-   7. RenderSequenceFileName
-   8. RenderSequencePrefix
-3. Not saved:
-   1. Render settings (time range, fps, quality settings, etc)
-   2. Output settings (Resolution, Gizmo, Pinning op, Camera Mode, Pinned camera)
-   3. Selected operators
-   4. Timeline-View
-      1. Zoom/Scroll
-      2. Mode (Dopesheet / Curve)
-      3. Current TimePlayback time
-      4. Loop Range
-      5. Pinned Anim Parameters
+### Commit 2: Renamed per-symbol `PlaybackSettings` → `ProjectSettings`
+- `Core\Operator\PlaybackSettings` → `Core\Operator\ProjectSettings`
+- Fields restructured into `PlaybackConfig` sub-class: `settings.Bpm` → `settings.Playback.Bpm`
+- `Symbol.PlaybackSettings` → `Symbol.ProjectSettings`
+- Backward-compatible JSON reading: tries `"ProjectSettings"` key first, falls back to `"PlaybackSettings"`
+- New format writes nested `"Playback"` sub-object
 
-Some of these settings (e.g. output resolution / aspect ratio ) are directly relevant for player export
+### Commit 3: Renamed popup + updated plan
+- `PlaybackSettingsPopup` → `ProjectSettingsPopup`
+- UI title changed to "Project Settings"
 
-## Notes on Implementation
+---
 
-1. Playback settings should be renamed to Project-Settings
-2. Playback settings format should be change to a layout with a section pannel on left like the settings window, with sections for
-   1. Playback
-   2. Project specific settings (currently in Settings Window)
-   3. Probably more options like
-      1. a preferred target resolution or aspect list 
-      2. A key value storage for parameters
-3. The PlaybackSettings-Popup probably needs some structure and refactoring
-4. I'm not really sure, where these settings should be serialized. Options would be:
-   1. separate projectsettings.json -> Awkward and would need some link to symbol ui
-   2. inside .t3 <-- probably the most easiest, but might pollute with view specific settings
-   3. inside .t3ui
-   4. split between t3 and t3ui (e.g. for view specific settings)
-5. The current projectSettings.json must die
-   1. This might be tricky, because over time this got polluted with settings that are not project specific but required by core and player which don't have access to UserSettings
-6. When reading old symbols.t3 files the Playback settings should be converted
-7. It might also be a good idea to introduce a file format version number to the .cs, .t3 and .t3ui files.
+## Architecture: Separation Principle
+
+- **Core `ProjectSettings`** (in `.t3`) — holds what Core/Player need: playback, audio, timing
+- **Editor-only settings** (in `.t3ui` via `SymbolUi`) — render export, view state, etc.
+- **`CoreSettings`** (global `projectSettings.json`) — app-wide settings. Many of these should eventually migrate into per-symbol ProjectSettings.
+
+---
+
+## Next Steps
+
+### Render Export Settings (Commit 4)
+- Create `RenderExportConfig` class in `Editor\UiModel`
+- Serialize into `.t3ui` via `SymbolUi.RenderExport`
+- Wire `RenderSettings.ForNextExport` to sync with `RenderExportConfig`
+- Move render paths from `UserSettings` into per-symbol `.t3ui`
+
+### CoreSettings Cleanup
+The current `CoreSettings.ConfigData` (exported via `ExportSettings` record to Player) contains a mix of concerns:
+
+**Should become per-project (move to `ProjectSettings`):**
+- `TimeClipSuspending` — project-specific behavior
+- `AudioResyncThreshold` — project-specific audio tuning
+- `EnablePlaybackControlWithKeyboard` — project-specific
+- `SkipOptimization` — project-specific build setting
+- `DefaultWindowMode` — project-specific (Fullscreen vs Windowed for export)
+- `DefaultOscPort` — project-specific
+- `SoundtrackMute`, `SoundtrackPlaybackVolume` — project audio mix
+- `OperatorMute`, `OperatorPlaybackVolume` — project audio mix
+- `EnableBeatSyncProfiling` — project-specific debug
+- Logging flags (`LogCompilationDetails`, `LogAssemblyLoadingDetails`, `LogFileEvents`, `LogAssemblyVersionMismatches`) — arguably project-specific
+
+**Should stay as editor/machine settings (move to `UserSettings` or keep in `CoreSettings`):**
+- `GlobalMute` → rename to `EditorMute` to prevent accidentally muting exported projects
+- `GlobalPlaybackVolume` → rename to `EditorGlobalVolume` (same reason)
+- `LimitMidiDeviceCapture` — machine-specific hardware config
+- `EnableDirectXDebug` — used in `ProgramWindows.cs` for DX debug layer, editor-specific
+
+**Dead code — remove:**
+- `EnableMidiSnapshotIndication` — zero consumers, obsolete
+
+**ExportSettings record:**
+- Currently bundles full `CoreSettings.ConfigData` for Player. As settings migrate to `ProjectSettings`, the Player should read them from the exported symbol's `ProjectSettings` instead.
+
+### Default Project Settings
+- Add a "Default Project Settings" section to the Settings Window
+- These defaults are used when creating a new project / new Home operator
+- User can configure preferred BPM, audio source, OSC port, window mode, etc. as defaults
+
+### UI Restructuring
+- Project Settings popup should get a section panel on left (like Settings Window)
+- Sections: Playback, Audio Mix, Export, Output
+- Add new settings: preferred resolution/aspect list, key-value parameter storage
+
+### State Persistence (not yet persisted)
+- Render settings (time range, fps, quality) → `.t3ui` via `RenderExportConfig`
+- Output settings (resolution, camera mode, gizmo, pinned camera)
+- Timeline state (zoom/scroll, mode, loop range, pinned anim params)
+- Selected operators
+
+### File Format Versioning
+- Consider adding a version number to `.t3` and `.t3ui` files for future migration support
