@@ -5,10 +5,11 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Audio;
+using T3.Core.IO;
 using T3.Serialization;
 using T3.Core.Resource;
 
-namespace T3.Core.Operator;
+namespace T3.Core.Settings;
 
 /// <summary>
 /// Per-symbol project settings including playback configuration (soundtrack, BPM, audio input).
@@ -16,9 +17,24 @@ namespace T3.Core.Operator;
 /// </summary>
 public sealed class ProjectSettings
 {
+    /// <summary>
+    /// Provides default values when no project settings are active.
+    /// </summary>
+    public static ProjectSettings Defaults { get; } = new();
+
+    /// <summary>
+    /// Returns the active project settings from the current playback, falling back to defaults.
+    /// This is the primary access path for project-level configuration.
+    /// </summary>
+    public static ProjectSettings Current => Animation.Playback.Current?.Settings ?? Defaults;
+
     public bool Enabled { get; set; }
 
     public PlaybackConfig Playback { get; init; } = new();
+    public AudioMixConfig Audio { get; init; } = new();
+    public ExportConfig Export { get; init; } = new();
+    public IoConfig Io { get; init; } = new();
+    public PerformanceConfig Performance { get; init; } = new();
 
     public bool TryGetMainSoundtrack(IResourceConsumer? instance, [NotNullWhen(true)] out AudioClipResourceHandle? soundtrack)
     {
@@ -58,6 +74,34 @@ public sealed class ProjectSettings
     #endregion
 
     #region Nested config classes
+
+    public sealed class AudioMixConfig
+    {
+        public bool SoundtrackMute = false;
+        public float SoundtrackVolume = 0.5f;
+        public bool OperatorMute = false;
+        public float OperatorVolume = 1;
+        public float AudioResyncThreshold = 0.04f;
+    }
+
+    public sealed class ExportConfig
+    {
+        public WindowMode DefaultWindowMode = WindowMode.Fullscreen;
+        public bool EnablePlaybackControlWithKeyboard = true;
+    }
+
+    public sealed class IoConfig
+    {
+        public int DefaultOscPort = 8000;
+    }
+
+    public sealed class PerformanceConfig
+    {
+        public bool TimeClipSuspending = true;
+        public bool SkipOptimization;
+        public bool EnableDirectXDebug;
+        public bool EnableBeatSyncProfiling = false;
+    }
 
     public sealed class PlaybackConfig
     {
@@ -115,6 +159,46 @@ public sealed class ProjectSettings
                 }
             }
             writer.WriteEndObject();
+
+            // Audio mix section
+            writer.WritePropertyName("Audio");
+            writer.WriteStartObject();
+            {
+                writer.WriteValue(nameof(AudioMixConfig.SoundtrackMute), Audio.SoundtrackMute);
+                writer.WriteValue(nameof(AudioMixConfig.SoundtrackVolume), Audio.SoundtrackVolume);
+                writer.WriteValue(nameof(AudioMixConfig.OperatorMute), Audio.OperatorMute);
+                writer.WriteValue(nameof(AudioMixConfig.OperatorVolume), Audio.OperatorVolume);
+                writer.WriteValue(nameof(AudioMixConfig.AudioResyncThreshold), Audio.AudioResyncThreshold);
+            }
+            writer.WriteEndObject();
+
+            // Export section
+            writer.WritePropertyName("Export");
+            writer.WriteStartObject();
+            {
+                writer.WriteValue(nameof(ExportConfig.DefaultWindowMode), Export.DefaultWindowMode);
+                writer.WriteValue(nameof(ExportConfig.EnablePlaybackControlWithKeyboard), Export.EnablePlaybackControlWithKeyboard);
+            }
+            writer.WriteEndObject();
+
+            // IO section
+            writer.WritePropertyName("Io");
+            writer.WriteStartObject();
+            {
+                writer.WriteValue(nameof(IoConfig.DefaultOscPort), Io.DefaultOscPort);
+            }
+            writer.WriteEndObject();
+
+            // Performance section
+            writer.WritePropertyName("Performance");
+            writer.WriteStartObject();
+            {
+                writer.WriteValue(nameof(PerformanceConfig.TimeClipSuspending), Performance.TimeClipSuspending);
+                writer.WriteValue(nameof(PerformanceConfig.SkipOptimization), Performance.SkipOptimization);
+                writer.WriteValue(nameof(PerformanceConfig.EnableDirectXDebug), Performance.EnableDirectXDebug);
+                writer.WriteValue(nameof(PerformanceConfig.EnableBeatSyncProfiling), Performance.EnableBeatSyncProfiling);
+            }
+            writer.WriteEndObject();
         }
 
         writer.WriteEndObject();
@@ -143,6 +227,11 @@ public sealed class ProjectSettings
     private static ProjectSettings ReadNewFormat(JObject settingsToken, JObject playbackToken)
     {
         var clips = GetClips(playbackToken).ToList();
+        var audioToken = settingsToken["Audio"] as JObject;
+        var exportToken = settingsToken["Export"] as JObject;
+        var debugToken = settingsToken["Debug"] as JObject; // legacy compat
+        var ioToken = settingsToken["Io"] as JObject;
+        var performanceToken = settingsToken["Performance"] as JObject;
 
         var settings = new ProjectSettings
                        {
@@ -158,7 +247,26 @@ public sealed class ProjectSettings
                                           AudioInputDeviceName = JsonUtils.ReadValueSafe<string>(playbackToken, nameof(PlaybackConfig.AudioInputDeviceName)) ?? string.Empty,
                                           EnableAudioBeatLocking = JsonUtils.ReadValueSafe(playbackToken, nameof(PlaybackConfig.EnableAudioBeatLocking), false),
                                           BeatLockAudioOffsetSec = JsonUtils.ReadValueSafe(playbackToken, nameof(PlaybackConfig.BeatLockAudioOffsetSec), 0f),
-                                      }
+                                      },
+                           Audio = audioToken != null
+                               ? new AudioMixConfig
+                                 {
+                                     SoundtrackMute = JsonUtils.ReadValueSafe(audioToken, nameof(AudioMixConfig.SoundtrackMute), Defaults.Audio.SoundtrackMute),
+                                     SoundtrackVolume = JsonUtils.ReadValueSafe(audioToken, nameof(AudioMixConfig.SoundtrackVolume), Defaults.Audio.SoundtrackVolume),
+                                     OperatorMute = JsonUtils.ReadValueSafe(audioToken, nameof(AudioMixConfig.OperatorMute), Defaults.Audio.OperatorMute),
+                                     OperatorVolume = JsonUtils.ReadValueSafe(audioToken, nameof(AudioMixConfig.OperatorVolume), Defaults.Audio.OperatorVolume),
+                                     AudioResyncThreshold = JsonUtils.ReadValueSafe(audioToken, nameof(AudioMixConfig.AudioResyncThreshold), Defaults.Audio.AudioResyncThreshold),
+                                 }
+                               : new AudioMixConfig(),
+                           Export = exportToken != null
+                               ? new ExportConfig
+                                 {
+                                     DefaultWindowMode = JsonUtils.ReadEnum<WindowMode>(exportToken, nameof(ExportConfig.DefaultWindowMode)),
+                                     EnablePlaybackControlWithKeyboard = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.EnablePlaybackControlWithKeyboard), Defaults.Export.EnablePlaybackControlWithKeyboard),
+                                 }
+                               : new ExportConfig(),
+                           Io = ReadIoConfig(ioToken, debugToken),
+                           Performance = ReadPerformanceConfig(performanceToken, debugToken),
                        };
 
         return settings;
@@ -198,6 +306,35 @@ public sealed class ProjectSettings
         }
 
         return settings;
+    }
+
+    /// <summary>Reads IoConfig from "Io" section, falling back to legacy "Debug" section.</summary>
+    private static IoConfig ReadIoConfig(JObject? ioToken, JObject? debugToken)
+    {
+        var source = ioToken ?? debugToken;
+        if (source == null)
+            return new IoConfig();
+
+        return new IoConfig
+               {
+                   DefaultOscPort = JsonUtils.ReadValueSafe(source, nameof(IoConfig.DefaultOscPort), Defaults.Io.DefaultOscPort),
+               };
+    }
+
+    /// <summary>Reads PerformanceConfig from "Performance" section, falling back to legacy "Debug" section.</summary>
+    private static PerformanceConfig ReadPerformanceConfig(JObject? performanceToken, JObject? debugToken)
+    {
+        var source = performanceToken ?? debugToken;
+        if (source == null)
+            return new PerformanceConfig();
+
+        return new PerformanceConfig
+               {
+                   TimeClipSuspending = JsonUtils.ReadValueSafe(source, nameof(PerformanceConfig.TimeClipSuspending), Defaults.Performance.TimeClipSuspending),
+                   SkipOptimization = JsonUtils.ReadValueSafe(source, nameof(PerformanceConfig.SkipOptimization), Defaults.Performance.SkipOptimization),
+                   EnableDirectXDebug = JsonUtils.ReadValueSafe(source, nameof(PerformanceConfig.EnableDirectXDebug), Defaults.Performance.EnableDirectXDebug),
+                   EnableBeatSyncProfiling = JsonUtils.ReadValueSafe(source, nameof(PerformanceConfig.EnableBeatSyncProfiling), Defaults.Performance.EnableBeatSyncProfiling),
+               };
     }
 
     private static IEnumerable<SoundtrackClipDefinition> GetClips(JToken token)

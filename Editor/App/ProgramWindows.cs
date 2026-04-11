@@ -6,6 +6,7 @@ using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using T3.Core.IO;
 using T3.Core.Resource;
+using T3.Core.Settings;
 using T3.Core.SystemUi;
 using T3.Editor.Gui; // for ReleaseMode
 using T3.Editor.Gui.UiHelpers;
@@ -195,7 +196,7 @@ internal static class ProgramWindows
             // Create Device and SwapChain with the selected adapter
             var deviceCreationFlags = DeviceCreationFlags.BgraSupport;
 
-            if (CoreSettings.Config.EnableDirectXDebug)
+            if (ProjectSettings.Current.Performance.EnableDirectXDebug)
                 deviceCreationFlags |= DeviceCreationFlags.Debug;
             
             Log.Debug("Creating Device...");

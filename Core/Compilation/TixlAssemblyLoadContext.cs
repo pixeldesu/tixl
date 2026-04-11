@@ -11,7 +11,7 @@ using System.Runtime.Loader;
 using System.Threading;
 using T3.Core.IO;
 using T3.Core.Logging;
-using T3.Core.UserData;
+using T3.Core.Settings;
 
 namespace T3.Core.Compilation;
 

@@ -8,7 +8,7 @@ using System.Threading;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Resource.Assets;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Core.Utils;
 
 namespace T3.Core.Resource;

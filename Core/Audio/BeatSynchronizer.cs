@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.IO;
+using T3.Core.Settings;
 
 namespace T3.Core.Audio;
 
@@ -111,7 +112,7 @@ public static class BeatSynchronizer
             if (!TryDetectAndQueueOnsetStrength(band, currentBassOnsetStrength, currentTimeMs, out var onset))
                 continue;
 
-            if (CoreSettings.Config.EnableBeatSyncProfiling)
+            if (ProjectSettings.Current.Performance.EnableBeatSyncProfiling)
             {
                 DebugDataRecording.KeepTraceData("BPM/OnSet/" + band.Type, onset.Amplitude);
             }
@@ -176,7 +177,7 @@ public static class BeatSynchronizer
 
         var bpmCorrection = (proportionalBpmAdjustment * currentPhaseErrorNormalized);
 
-        if (CoreSettings.Config.EnableBeatSyncProfiling)
+        if (ProjectSettings.Current.Performance.EnableBeatSyncProfiling)
         {
             DebugDataRecording.KeepTraceData("BPM/barProgress", _barTime % 1);
             DebugDataRecording.KeepTraceData("BPM/current", _currentBpm);

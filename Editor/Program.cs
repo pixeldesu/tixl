@@ -11,7 +11,7 @@ using T3.Core.Logging;
 using T3.Core.Resource;
 using T3.Core.Resource.ShaderCompiling;
 using T3.Core.SystemUi;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Editor.App;
 using T3.Editor.Compilation;
 using T3.Editor.Gui;

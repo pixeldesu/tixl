@@ -14,35 +14,18 @@ public sealed class CoreSettings : Settings<CoreSettings.ConfigData>
 
     public sealed class ConfigData
     {
-        public bool TimeClipSuspending = true;
-        public float AudioResyncThreshold = 0.04f;
-
-        public bool EnablePlaybackControlWithKeyboard = true;
-
-        public bool SkipOptimization;
-        public bool EnableDirectXDebug;
-
         public bool LogAssemblyVersionMismatches = false;
 
         public string LimitMidiDeviceCapture = null;
-        public WindowMode DefaultWindowMode = WindowMode.Fullscreen;
-        public int DefaultOscPort = 8000;
 
         // Logging
         public bool LogCompilationDetails = false;
         public bool LogAssemblyLoadingDetails = false;
         public bool LogFileEvents = false;
 
-        // Profiling
-        public bool EnableBeatSyncProfiling = false;
-
         // Audio
-        public bool EditorMute = false;
-        public float EditorVolume = 1;
-        public bool SoundtrackMute = false;
-        public float SoundtrackPlaybackVolume = 0.5f;
-        public bool OperatorMute = false;
-        public float OperatorPlaybackVolume = 1;
+        public bool AppMute = false;
+        public float AppVolume = 1;
     }
 }
 

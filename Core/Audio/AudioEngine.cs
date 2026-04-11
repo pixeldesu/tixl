@@ -5,7 +5,7 @@ using ManagedBass;
 using T3.Core.Animation;
 using T3.Core.IO;
 using T3.Core.Logging;
-using T3.Core.Operator;
+using T3.Core.Settings;
 using T3.Core.Resource.Assets;
 // ReSharper disable MergeIntoPattern
 
@@ -292,7 +292,7 @@ public static class AudioEngine
     /// <summary>
     /// Gets a value indicating whether global audio is currently muted.
     /// </summary>
-    public static bool IsGlobalMuted => CoreSettings.Config.EditorMute;
+    public static bool IsGlobalMuted => CoreSettings.Config.AppMute;
 
     internal static void UpdateFftBufferFromSoundtrack(Playback playback)
     {
@@ -1291,7 +1291,7 @@ public static class AudioEngine
     /// <param name="volume">The volume level (0.0 to 1.0).</param>
     public static void SetGlobalVolume(float volume)
     {
-        CoreSettings.Config.EditorVolume = volume;
+        CoreSettings.Config.AppVolume = volume;
         AudioMixerManager.SetGlobalVolume(volume);
     }
 
@@ -1300,7 +1300,7 @@ public static class AudioEngine
     /// </summary>
     public static void InitializeGlobalVolumeFromSettings()
     {
-        AudioMixerManager.SetGlobalVolume(CoreSettings.Config.EditorVolume);
+        AudioMixerManager.SetGlobalVolume(CoreSettings.Config.AppVolume);
     }
 
     /// <summary>
@@ -1310,7 +1310,7 @@ public static class AudioEngine
     public static void SetGlobalMute(bool mute)
     {
         AudioMixerManager.SetGlobalMute(mute);
-        CoreSettings.Config.EditorMute = mute;
+        CoreSettings.Config.AppMute = mute;
     }
 
     /// <summary>
@@ -1320,7 +1320,7 @@ public static class AudioEngine
     public static void SetOperatorMute(bool mute)
     {
         AudioMixerManager.SetOperatorMute(mute);
-        CoreSettings.Config.OperatorMute = mute;
+        ProjectSettings.Current.Audio.OperatorMute = mute;
     }
 
     #endregion

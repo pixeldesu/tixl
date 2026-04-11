@@ -1,7 +1,9 @@
 using System.IO;
 using ImGuiNET;
 using Operators.Utils;
+using T3.Core.Animation;
 using T3.Core.IO;
+using T3.Core.Settings;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.Keyboard;
@@ -244,9 +246,9 @@ internal sealed partial class SettingsWindow : Window
                                                       UserSettings.Defaults.MiddleMouseButtonZooms);
 
                     changed |= FormInputs.AddCheckBox("Suspend invalidation of inactive time clips",
-                                                      ref CoreSettings.Config.TimeClipSuspending,
+                                                      ref ProjectSettings.Current.Performance.TimeClipSuspending,
                                                       "An experimental optimization that avoids dirty flag evaluation of graph behind inactive TimeClips. This is only relevant for very complex projects and multiple parts separated by timelines.",
-                                                      CoreSettings.Defaults.TimeClipSuspending);
+                                                      ProjectSettings.Defaults.Performance.TimeClipSuspending);
 
                     changed |= FormInputs.AddCheckBox("Warn before Lib modifications",
                                                       ref UserSettings.Config.WarnBeforeLibEdit,
@@ -329,20 +331,21 @@ internal sealed partial class SettingsWindow : Window
                     FormInputs.AddSectionSubHeader("Performance Settings");
                     FormInputs.SetIndentToLeft();
 
+                    var performance = ProjectSettings.Current.Performance;
                     projectSettingsChanged |= FormInputs.AddCheckBox("Skip Shader Optimization",
-                                                                     ref CoreSettings.Config.SkipOptimization,
+                                                                     ref performance.SkipOptimization,
                                                                      "This make working with shader graphs easier.",
-                                                                     CoreSettings.Config.SkipOptimization);
+                                                                     ProjectSettings.Defaults.Performance.SkipOptimization);
 
                     projectSettingsChanged |= FormInputs.AddCheckBox("Enable DirectX Debug Mode",
-                                                                     ref CoreSettings.Config.EnableDirectXDebug,
+                                                                     ref performance.EnableDirectXDebug,
                                                                      """
                                                                      This will add debug information for to shaders and buffers that can help developing wiht Tools like RenderDoc.
                                                                      Enabling this can impact rendering performance.
 
                                                                      Changing this option requires a restart.
                                                                      """,
-                                                                     CoreSettings.Config.EnableDirectXDebug);
+                                                                     ProjectSettings.Defaults.Performance.EnableDirectXDebug);
 
                     changed |= FormInputs.AddCheckBox("Load multi-threaded",
                                                                      ref UserSettings.Config.LoadMultiThreaded,
@@ -362,15 +365,17 @@ internal sealed partial class SettingsWindow : Window
                     CustomComponents.HelpText("These settings only when playback as executable");
                     FormInputs.AddVerticalSpace();
 
-                    projectSettingsChanged |= FormInputs.AddEnumDropdown(ref CoreSettings.Config.DefaultWindowMode,
+                    var export = ProjectSettings.Current.Export;
+                    var exportDefaults = ProjectSettings.Defaults.Export;
+                    projectSettingsChanged |= FormInputs.AddEnumDropdown(ref export.DefaultWindowMode,
                                                                          "Show export as",
                                                                          "The default window mode when exporting an executable.",
-                                                                         WindowMode.Fullscreen);
+                                                                         exportDefaults.DefaultWindowMode);
 
                     projectSettingsChanged |= FormInputs.AddCheckBox("Enable Playback Control",
-                                                                     ref CoreSettings.Config.EnablePlaybackControlWithKeyboard,
+                                                                     ref export.EnablePlaybackControlWithKeyboard,
                                                                      "Users can use cursor left/right to skip through time\nand space key to pause playback\nof exported executable.",
-                                                                     CoreSettings.Defaults.EnablePlaybackControlWithKeyboard);
+                                                                     exportDefaults.EnablePlaybackControlWithKeyboard);
 
 
 
@@ -428,7 +433,8 @@ internal sealed partial class SettingsWindow : Window
                     CustomComponents
                        .HelpText("Changing the port will require a restart of Tooll.");
 
-                    FormInputs.AddInt("Default Port", ref CoreSettings.Config.DefaultOscPort,
+                    var io = ProjectSettings.Current.Io;
+                    FormInputs.AddInt("Default Port", ref io.DefaultOscPort,
                                       0, 65535, 1,
                                       "If a valid port is set, Tooll will listen for OSC messages on this port by default.",
                                       -1);
@@ -504,9 +510,9 @@ internal sealed partial class SettingsWindow : Window
                         changed = true;
                     }
                     changed |= FormInputs.AddCheckBox("Profile Beat Syncing",
-                        ref CoreSettings.Config.EnableBeatSyncProfiling,
+                        ref ProjectSettings.Current.Performance.EnableBeatSyncProfiling,
                         "Logs beat sync timing to IO Window",
-                        CoreSettings.Defaults.EnableBeatSyncProfiling);
+                        ProjectSettings.Defaults.Performance.EnableBeatSyncProfiling);
                     FormInputs.AddVerticalSpace();
 
                     changed |= FormInputs.AddCheckBox("Log Asset File Events",

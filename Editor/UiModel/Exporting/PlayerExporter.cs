@@ -1,15 +1,16 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using T3.Core.Animation;
 using T3.Core.Compilation;
 using T3.Core.DataTypes;
 using T3.Core.IO;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Settings;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
-using T3.Core.UserData;
 using T3.Editor.Compilation;
 using T3.Editor.Gui;
 using T3.Editor.Gui.InputUi.SimpleInputUis;
@@ -454,7 +455,7 @@ internal static partial class PlayerExporter
         // Update project settings
         var exportSettings = new ExportSettings(OperatorId: symbol.Id,
                                                 ApplicationTitle: symbol.Name,
-                                                WindowMode: CoreSettings.Config.DefaultWindowMode,
+                                                WindowMode: ProjectSettings.Current.Export.DefaultWindowMode,
                                                 ConfigData: CoreSettings.Config,
                                                 Author: symbol.SymbolPackage.AssemblyInformation?.Name ?? string.Empty, // todo - actual author name
                                                 BuildId: Guid.NewGuid(),

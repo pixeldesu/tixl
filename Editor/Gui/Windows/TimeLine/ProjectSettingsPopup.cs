@@ -8,6 +8,7 @@ using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.IO;
 using T3.Core.Operator;
+using T3.Core.Settings;
 using T3.Editor.Gui.Audio;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.Timing;
@@ -256,13 +257,13 @@ internal static class ProjectSettingsPopup
                     FormInputs.AddEnumDropdown(ref UserSettings.Config.TimeDisplayMode, "Display Timeline in");
 
                     if (FormInputs.AddFloat("Resync Threshold",
-                            ref CoreSettings.Config.AudioResyncThreshold,
+                            ref settings.Audio.AudioResyncThreshold,
                             0.001f,
                             0.1f,
                             0.001f,
                             true, true,
                             "If audio playbacks drifts too far from the animation playback it will be resynced. If the threshold for this is too low you will encounter audio glitches. If the threshold is too large you will lose precision. A normal range is between 0.02s and 0.05s.",
-                            CoreSettings.Defaults.AudioResyncThreshold))
+                            ProjectSettings.Defaults.Audio.AudioResyncThreshold))
 
                     {
                         modified = true;

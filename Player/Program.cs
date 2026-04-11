@@ -23,6 +23,7 @@ using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Settings;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
 using Device = SharpDX.Direct3D11.Device;
@@ -30,7 +31,6 @@ using Resource = SharpDX.Direct3D11.Resource;
 using SharpDX.Windows;
 using SilkWindows;
 using T3.Core.Resource.ShaderCompiling;
-using T3.Core.UserData;
 using T3.Core.Utils;
 using T3.Serialization;
 using DeviceContext = SharpDX.Direct3D11.DeviceContext;
@@ -90,7 +90,7 @@ internal static partial class Program
 
         CoreSettings.Config = exportSettings!.ConfigData;
             
-        var logDirectory = Path.Combine(Core.UserData.FileLocations.SettingsDirectory, "Player" , exportSettings.Author, exportSettings.ApplicationTitle);
+        var logDirectory = Path.Combine(Core.Settings.FileLocations.SettingsDirectory, "Player" , exportSettings.Author, exportSettings.ApplicationTitle);
         var fileWriter = FileWriter.CreateDefault(logDirectory, out var logPath);
         try
         {

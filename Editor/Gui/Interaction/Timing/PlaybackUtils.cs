@@ -4,6 +4,7 @@ using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.IO;
 using T3.Core.Operator;
+using T3.Core.Settings;
 using T3.Core.Resource;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.ProjectHandling;

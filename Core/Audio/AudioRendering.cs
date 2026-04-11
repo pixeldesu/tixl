@@ -7,6 +7,7 @@ using T3.Core.Animation;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Operator;
+using T3.Core.Settings;
 
 namespace T3.Core.Audio;
 
@@ -218,10 +219,10 @@ public static class AudioRendering
                 long targetBytes = Bass.ChannelSeconds2Bytes(clipStream.StreamHandle, timeInClip);
                 Bass.ChannelSetPosition(clipStream.StreamHandle, targetBytes);
                 
-                // Apply volume: clip.Volume * SoundtrackPlaybackVolume * EditorVolume
-                float effectiveVolume = handle.Clip.Volume 
-                                        * CoreSettings.Config.SoundtrackPlaybackVolume
-                                        * CoreSettings.Config.EditorVolume;
+                // Apply volume: clip.Volume * SoundtrackVolume * AppVolume
+                float effectiveVolume = handle.Clip.Volume
+                                        * ProjectSettings.Current.Audio.SoundtrackVolume
+                                        * CoreSettings.Config.AppVolume;
                 Bass.ChannelSetAttribute(clipStream.StreamHandle, ChannelAttribute.Volume, effectiveVolume);
                 
                 // Unpause for this frame

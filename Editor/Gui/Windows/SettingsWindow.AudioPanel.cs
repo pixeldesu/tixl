@@ -1,6 +1,7 @@
 using ImGuiNET;
 using T3.Core.Audio;
 using T3.Core.IO;
+using T3.Core.Settings;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
@@ -23,42 +24,45 @@ internal sealed partial class SettingsWindow
         FormInputs.AddVerticalSpace();
         
         changed |= DrawMixerSection(
-            "Editor Mixer",
-            ref CoreSettings.Config.EditorVolume,
+            "App Mixer",
+            ref CoreSettings.Config.AppVolume,
             0.0f, 1.0f,
-            CoreSettings.Defaults.EditorVolume,
+            CoreSettings.Defaults.AppVolume,
             "Affects all audio output at the global mixer level.",
             AudioMixerManager.GetGlobalMixerLevel(),
             ref _smoothedGlobalLevel,
-            ref CoreSettings.Config.EditorMute,
-            CoreSettings.Defaults.EditorMute,
+            ref CoreSettings.Config.AppMute,
+            CoreSettings.Defaults.AppMute,
             "Mute all audio output at the global mixer level.");
-        AudioEngine.SetGlobalMute(CoreSettings.Config.EditorMute);
+        AudioEngine.SetGlobalMute(CoreSettings.Config.AppMute);
         
+        var audio = ProjectSettings.Current.Audio;
+        var audioDefaults = ProjectSettings.Defaults.Audio;
+
         changed |= DrawMixerSection(
             "Operator Mixer",
-            ref CoreSettings.Config.OperatorPlaybackVolume,
+            ref audio.OperatorVolume,
             0.0f, 1.0f,
-            CoreSettings.Defaults.OperatorPlaybackVolume,
+            audioDefaults.OperatorVolume,
             "Affects all operator audio output at the operator mixer level.",
             AudioMixerManager.GetOperatorMixerLevel(),
             ref _smoothedOperatorLevel,
-            ref CoreSettings.Config.OperatorMute,
-            CoreSettings.Defaults.OperatorMute,
+            ref audio.OperatorMute,
+            audioDefaults.OperatorMute,
             "Mute all operator audio output at the operator mixer level.");
-        AudioMixerManager.SetOperatorMixerVolume(CoreSettings.Config.OperatorPlaybackVolume);
-        AudioEngine.SetOperatorMute(CoreSettings.Config.OperatorMute);
-        
+        AudioMixerManager.SetOperatorMixerVolume(audio.OperatorVolume);
+        AudioEngine.SetOperatorMute(audio.OperatorMute);
+
         changed |= DrawMixerSection(
             "Soundtrack Mixer",
-            ref CoreSettings.Config.SoundtrackPlaybackVolume,
+            ref audio.SoundtrackVolume,
             0.0f, 10f,
-            CoreSettings.Defaults.SoundtrackPlaybackVolume,
+            audioDefaults.SoundtrackVolume,
             "Limit the audio playback volume for the soundtrack",
             AudioMixerManager.GetSoundtrackMixerLevel(),
             ref _smoothedSoundtrackLevel,
-            ref CoreSettings.Config.SoundtrackMute,
-            CoreSettings.Defaults.SoundtrackMute,
+            ref audio.SoundtrackMute,
+            audioDefaults.SoundtrackMute,
             "Mute soundtrack audio only.");
     }
     

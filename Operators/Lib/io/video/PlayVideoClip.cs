@@ -127,7 +127,7 @@ internal sealed class PlayVideoClip : Instance<PlayVideoClip>
         }
 
         // Set the volume while respecting the global mute/volume settings
-        _engine.Volume = CoreSettings.Config.EditorMute ? 0 : Volume.GetValue(context).Clamp(0f, 1f) * CoreSettings.Config.EditorVolume;
+        _engine.Volume = CoreSettings.Config.AppMute ? 0 : Volume.GetValue(context).Clamp(0f, 1f) * CoreSettings.Config.AppVolume;
 
         UpdateVideo();
     }

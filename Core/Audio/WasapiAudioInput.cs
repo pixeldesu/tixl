@@ -5,7 +5,7 @@ using ManagedBass;
 using ManagedBass.Wasapi;
 using T3.Core.Animation;
 using T3.Core.Logging;
-using T3.Core.Operator;
+using T3.Core.Settings;
 
 namespace T3.Core.Audio;
 

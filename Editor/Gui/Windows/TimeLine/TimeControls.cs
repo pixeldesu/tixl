@@ -5,6 +5,7 @@ using T3.Core.DataTypes.DataSet;
 using T3.Core.DataTypes.Vector;
 using T3.Core.IO;
 using T3.Core.Operator;
+using T3.Core.Settings;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
@@ -572,15 +573,16 @@ internal static class TimeControls
         }
 
         // ToggleAudio
-        if (CustomComponents.IconButton(CoreSettings.Config.SoundtrackMute ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
+        var audio = ProjectSettings.Current.Audio;
+        if (CustomComponents.IconButton(audio.SoundtrackMute ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
                                         ControlSize,
-                                        CoreSettings.Config.SoundtrackMute
+                                        audio.SoundtrackMute
                                             ? CustomComponents.ButtonStates.NeedsAttention
                                             : CustomComponents.ButtonStates.Dimmed
                                        ))
         {
-            CoreSettings.Config.SoundtrackMute = !CoreSettings.Config.SoundtrackMute;
-            AudioEngine.SetSoundtrackMute(CoreSettings.Config.SoundtrackMute);
+            audio.SoundtrackMute = !audio.SoundtrackMute;
+            AudioEngine.SetSoundtrackMute(audio.SoundtrackMute);
         }
 
         // ToggleHover

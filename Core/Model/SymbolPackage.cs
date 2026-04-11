@@ -14,7 +14,7 @@ using T3.Core.Operator;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.Stats;
-using T3.Core.UserData;
+using T3.Core.Settings;
 
 // ReSharper disable RedundantNameQualifier
 
