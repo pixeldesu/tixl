@@ -25,10 +25,9 @@ internal sealed partial class SettingsWindow : Window
     {
         Interface,
         Theme,
-        Project,
+        Projects,
         Audio,
         Midi,
-        OSC,
         SpaceMouse,
         Keyboard,
         Profiling,
@@ -268,9 +267,11 @@ internal sealed partial class SettingsWindow : Window
                     ColorThemeEditor.DrawEditor();
                     break;
 
-                case Categories.Project:
+                case Categories.Projects:
                 {
                     FormInputs.AddSectionHeader("Project specific settings");
+                    CustomComponents
+                        .HelpText("These are global settings. Also see the Project Settings window.");                    
                     FormInputs.AddVerticalSpace();
 
                     FormInputs.AddSectionSubHeader("Project Settings");
@@ -327,25 +328,6 @@ internal sealed partial class SettingsWindow : Window
                                                        """,
                                                       UserSettings.Defaults.EnableAutoBackup);
 
-                    FormInputs.AddSectionSubHeader("Performance Settings");
-                    FormInputs.SetIndentToLeft();
-
-                    var performance = ProjectSettings.Current.Performance;
-                    projectSettingsChanged |= FormInputs.AddCheckBox("Skip Shader Optimization",
-                                                                     ref performance.SkipOptimization,
-                                                                     "This make working with shader graphs easier.",
-                                                                     ProjectSettings.Defaults.Performance.SkipOptimization);
-
-                    projectSettingsChanged |= FormInputs.AddCheckBox("Enable DirectX Debug Mode",
-                                                                     ref performance.EnableDirectXDebug,
-                                                                     """
-                                                                     This will add debug information for to shaders and buffers that can help developing wiht Tools like RenderDoc.
-                                                                     Enabling this can impact rendering performance.
-
-                                                                     Changing this option requires a restart.
-                                                                     """,
-                                                                     ProjectSettings.Defaults.Performance.EnableDirectXDebug);
-
                     changed |= FormInputs.AddCheckBox("Load multi-threaded",
                                                                      ref UserSettings.Config.LoadMultiThreaded,
                                                                      """
@@ -354,30 +336,6 @@ internal sealed partial class SettingsWindow : Window
                                                                      """,
                                                                      UserSettings.Config.LoadMultiThreaded);
                     
-                    FormInputs.AddSectionSubHeader("Audio Sync");
-
-                    FormInputs.SetIndentToParameters();
-
-                    FormInputs.AddVerticalSpace();
-
-                    FormInputs.AddSectionSubHeader("Export Settings");
-                    CustomComponents.HelpText("These settings only when playback as executable");
-                    FormInputs.AddVerticalSpace();
-
-                    var export = ProjectSettings.Current.Export;
-                    var exportDefaults = ProjectSettings.Defaults.Export;
-                    projectSettingsChanged |= FormInputs.AddEnumDropdown(ref export.DefaultWindowMode,
-                                                                         "Show export as",
-                                                                         "The default window mode when exporting an executable.",
-                                                                         exportDefaults.DefaultWindowMode);
-
-                    projectSettingsChanged |= FormInputs.AddCheckBox("Enable Playback Control",
-                                                                     ref export.EnablePlaybackControlWithKeyboard,
-                                                                     "Users can use cursor left/right to skip through time\nand space key to pause playback\nof exported executable.",
-                                                                     exportDefaults.EnablePlaybackControlWithKeyboard);
-
-
-
                     FormInputs.SetIndentToParameters();
 
                     break;
@@ -420,28 +378,6 @@ internal sealed partial class SettingsWindow : Window
                     FormInputs.AddVerticalSpace();
                     break;
                 }
-                case Categories.OSC:
-                {
-                    FormInputs.AddSectionHeader("OSC");
-
-                    CustomComponents
-                       .HelpText("On startup, Tooll will listen for OSC messages on the default port." +
-                                 "The IO indicator in the timeline will show incoming messages.\n" +
-                                 "You can also use the OscInput operator to receive OSC from other ports.");
-
-                    CustomComponents
-                       .HelpText("Changing the port will require a restart of Tooll.");
-
-                    var io = ProjectSettings.Current.Io;
-                    FormInputs.AddInt("Default Port", ref io.DefaultOscPort,
-                                      0, 65535, 1,
-                                      "If a valid port is set, Tooll will listen for OSC messages on this port by default.",
-                                      -1);
-
-                    FormInputs.AddVerticalSpace();
-                    break;
-                }
-
                 case Categories.SpaceMouse:
                     FormInputs.AddSectionHeader("Space Mouse");
 
@@ -508,12 +444,6 @@ internal sealed partial class SettingsWindow : Window
                         Log.Gated.AudioEnabled = UserSettings.Config.LogAudioDetails;
                         changed = true;
                     }
-                    changed |= FormInputs.AddCheckBox("Profile Beat Syncing",
-                        ref ProjectSettings.Current.Performance.EnableBeatSyncProfiling,
-                        "Logs beat sync timing to IO Window",
-                        ProjectSettings.Defaults.Performance.EnableBeatSyncProfiling);
-                    FormInputs.AddVerticalSpace();
-
                     changed |= FormInputs.AddCheckBox("Log Asset File Events",
                         ref CoreSettings.Config.LogFileEvents,
                         "Logs events related to changing and updating assets files.",

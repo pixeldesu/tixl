@@ -150,9 +150,9 @@ internal sealed class RenderWindow : Window
         }
 
         // Resolution row
-        FormInputs.DrawInputLabel("Resolution");
-        var resSize = FormInputs.GetAvailableInputSize(null, false, true);
-        modified |= DrawResolutionPopoverCompact(resSize.X);
+        modified |= FormInputs.AddFloat("Resolution %", ref s.ResolutionFactor, 0.01f, 10f, 0.01f, true, true,
+                                         "Scale factor for rendered resolution (1.0 = 100%).",
+                                         RenderSettings.Defaults.ResolutionFactor);
 
         FormInputs.AddVerticalSpace(10);
         FormInputs.AddVerticalSpace(5);
@@ -175,60 +175,6 @@ internal sealed class RenderWindow : Window
         return modified;
     }
 
-    private static bool DrawResolutionPopoverCompact(float width)
-    {
-        var modified = false;
-        var currentPct = (int)(RenderSettings.Current.ResolutionFactor * 100);
-        ImGui.SetNextItemWidth(width);
-
-        if (ImGui.Button($"{currentPct}%##Res", new Vector2(width, 0)))
-        {
-            ImGui.OpenPopup("ResolutionPopover");
-        }
-        CustomComponents.TooltipForLastItem("Scale resolution of rendered frames.");
-
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(12, 12));
-        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(8, 8));
-        ImGui.SetNextWindowSize(new Vector2(160 * T3Ui.UiScaleFactor, 0));
-
-        if (ImGui.BeginPopup("ResolutionPopover", ImGuiWindowFlags.NoMove))
-        {
-            bool DrawSelectable(string label, float factor)
-            {
-                bool isSelected = Math.Abs(RenderSettings.Current.ResolutionFactor - factor) < 0.001f;
-                if (ImGui.Selectable(label, isSelected))
-                {
-                    RenderSettings.Current.ResolutionFactor = factor;
-                    return true;
-                }
-                return false;
-            }
-
-            modified |= DrawSelectable("25%", 0.25f);
-            modified |= DrawSelectable("50%", 0.5f);
-            modified |= DrawSelectable("100%", 1.0f);
-            modified |= DrawSelectable("200%", 2.0f);
-
-            CustomComponents.SeparatorLine();
-
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-            ImGui.TextUnformatted("Custom:");
-            ImGui.PopStyleColor();
-
-            var customPct = RenderSettings.Current.ResolutionFactor * 100f;
-            ImGui.SetNextItemWidth(100 * T3Ui.UiScaleFactor);
-            if (ImGui.InputFloat("##CustomRes", ref customPct, 0, 0, "%.0f%%"))
-            {
-                modified = true;
-                customPct = Math.Clamp(customPct, 1f, 1000f);
-                RenderSettings.Current.ResolutionFactor = customPct / 100f;
-            }
-
-            ImGui.EndPopup();
-        }
-        ImGui.PopStyleVar(2);
-        return modified;
-    }
 
     private bool DrawVideoSettings()
     {

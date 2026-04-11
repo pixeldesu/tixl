@@ -54,6 +54,7 @@ internal static class ProjectSettingsPopup
         return modified;
     }
 
+    
     private static bool DrawContent(Instance? composition)
     {
         var modified = false;
@@ -118,24 +119,197 @@ internal static class ProjectSettingsPopup
 
         if (isEnabledForCurrent)
         {
-            modified |= DrawPlaybackSettings(composition, settings, modified, compositionWithSettings);
+            modified |= DrawSettings(composition, settings, compositionWithSettings);
         }
         else
         {
             CustomComponents.EmptyWindowMessage("No settings");
-            ImGui.EndPopup();
-            ImGui.PopStyleVar(1);
+            //ImGui.EndPopup();
+            //ImGui.PopStyleVar(1);
             FormInputs.SetIndentToParameters();
         }
 
         return modified;
     }
 
+    
+    private enum Categories
+    {
+        Playback,
+        Rendering,
+        Audio,
+        Io,
+        Performance,
+    }
 
-    private static bool DrawPlaybackSettings(Instance composition, ProjectSettings settings, bool modified,
+    private static Categories _activeCategory;
+
+    private static bool DrawSettings(Instance composition, ProjectSettings settings,
         Instance? compositionWithSettings)
     {
-        FormInputs.SetIndentToParameters();
+        var modified = false;
+
+        ImGui.BeginChild("categories", new Vector2(120 * T3Ui.UiScaleFactor, -1),
+            ImGuiChildFlags.Borders,
+            ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
+        {
+            ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(0, 0.5f));
+            FormInputs.AddSegmentedButtonWithLabel(ref _activeCategory, "", 110 * T3Ui.UiScaleFactor);
+            ImGui.PopStyleVar();
+        }
+        ImGui.EndChild();
+
+        ImGui.SameLine();
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(20, 5));
+        ImGui.BeginChild("content", new Vector2(0, 0), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoBackground);
+        {
+            FormInputs.SetIndentToParameters();
+            switch (_activeCategory)
+            {
+                case Categories.Playback:
+                    modified |= DrawPlaybackSettings(composition, settings, compositionWithSettings);
+                    break;
+                case Categories.Audio:
+                    modified |= DrawAudioSettings(settings);
+                    break;
+                case Categories.Rendering:
+                    modified |= DrawRenderingSettings(settings);
+                    break;
+                case Categories.Io:
+                    modified |= DrawIoSettings(settings);
+                    break;
+                case Categories.Performance:
+                    modified |= DrawPerformanceSettings(settings);
+                    break;
+            }
+        }
+
+        ImGui.EndChild();
+        ImGui.PopStyleVar();
+        return modified;
+    }
+
+    private static bool DrawAudioSettings(ProjectSettings settings)
+    {
+        var modified = false;
+        var audio = settings.Audio;
+        var defaults = ProjectSettings.Defaults.Audio;
+
+        FormInputs.AddSectionHeader("Audio Mix");
+
+        modified |= FormInputs.AddFloat("Soundtrack Volume",
+            ref audio.SoundtrackVolume, 0f, 10f, 0.01f, true, true,
+            "Volume level for the project soundtrack.",
+            defaults.SoundtrackVolume);
+
+        modified |= FormInputs.AddCheckBox("Mute Soundtrack",
+            ref audio.SoundtrackMute,
+            "Mute the soundtrack audio.",
+            defaults.SoundtrackMute);
+
+        FormInputs.AddVerticalSpace();
+
+        modified |= FormInputs.AddFloat("Operator Volume",
+            ref audio.OperatorVolume, 0f, 1f, 0.01f, true, true,
+            "Volume level for operator-generated audio.",
+            defaults.OperatorVolume);
+
+        modified |= FormInputs.AddCheckBox("Mute Operators",
+            ref audio.OperatorMute,
+            "Mute all operator audio output.",
+            defaults.OperatorMute);
+
+        FormInputs.AddVerticalSpace();
+
+        modified |= FormInputs.AddFloat("Resync Threshold",
+            ref audio.AudioResyncThreshold, 0.001f, 0.1f, 0.001f, true, true,
+            "If audio playback drifts too far from the animation it will be resynced. A normal range is between 0.02s and 0.05s.",
+            defaults.AudioResyncThreshold);
+
+        return modified;
+    }
+
+    private static bool DrawRenderingSettings(ProjectSettings settings)
+    {
+        var modified = false;
+        var export = settings.Export;
+        var defaults = ProjectSettings.Defaults.Export;
+
+        FormInputs.AddSectionHeader("Export");
+        CustomComponents.HelpText("These settings apply when exporting as executable.");
+        FormInputs.AddVerticalSpace();
+
+        modified |= FormInputs.AddEnumDropdown(ref export.DefaultWindowMode,
+            "Window Mode",
+            "The default window mode when running the exported executable.",
+            defaults.DefaultWindowMode);
+
+        modified |= FormInputs.AddCheckBox("Enable Playback Control",
+            ref export.EnablePlaybackControlWithKeyboard,
+            "Users can use cursor left/right to skip through time\nand space key to pause playback\nof exported executable.",
+            defaults.EnablePlaybackControlWithKeyboard);
+
+        return modified;
+    }
+
+    private static bool DrawIoSettings(ProjectSettings settings)
+    {
+        var modified = false;
+        var io = settings.Io;
+        var defaults = ProjectSettings.Defaults.Io;
+
+        FormInputs.AddSectionHeader("OSC");
+        CustomComponents.HelpText("Tooll listens for OSC messages on the default port.\nYou can also use the OscInput operator for other ports.");
+        FormInputs.AddVerticalSpace();
+
+        modified |= FormInputs.AddInt("Default Port", ref io.DefaultOscPort,
+            0, 65535, 1,
+            "If a valid port is set, Tooll will listen for OSC messages on this port by default.\nChanging the port requires a restart.",
+            defaults.DefaultOscPort);
+
+        return modified;
+    }
+
+    private static bool DrawPerformanceSettings(ProjectSettings settings)
+    {
+        var modified = false;
+        var perf = settings.Performance;
+        var defaults = ProjectSettings.Defaults.Performance;
+
+        FormInputs.AddSectionHeader("Performance");
+        FormInputs.AddVerticalSpace();
+
+        modified |= FormInputs.AddCheckBox("Suspend inactive time clips",
+            ref perf.TimeClipSuspending,
+            "Avoids dirty flag evaluation of the graph behind inactive TimeClips. Only relevant for complex projects with multiple timeline parts.",
+            defaults.TimeClipSuspending);
+
+        modified |= FormInputs.AddCheckBox("Skip Shader Optimization",
+            ref perf.SkipOptimization,
+            "Makes working with shader graphs easier by skipping HLSL optimization.",
+            defaults.SkipOptimization);
+
+        modified |= FormInputs.AddCheckBox("Enable DirectX Debug Mode",
+            ref perf.EnableDirectXDebug,
+            "Adds debug information to shaders and buffers for tools like RenderDoc.\nCan impact rendering performance. Requires a restart.",
+            defaults.EnableDirectXDebug);
+
+        modified |= FormInputs.AddCheckBox("Profile Beat Syncing",
+            ref perf.EnableBeatSyncProfiling,
+            "Logs beat sync timing to IO Window.",
+            defaults.EnableBeatSyncProfiling);
+
+        return modified;
+    }
+
+    private static bool DrawPlaybackSettings(Instance composition, ProjectSettings settings,
+        Instance? compositionWithSettings)
+    {
+        var modified = false;
+        
+        FormInputs.AddSectionHeader("Playback");
+        
+        //FormInputs.SetIndentToParameters();
 
         var playback = settings.Playback;
 
@@ -255,19 +429,6 @@ internal static class ProjectSettingsPopup
                     }
 
                     FormInputs.AddEnumDropdown(ref UserSettings.Config.TimeDisplayMode, "Display Timeline in");
-
-                    if (FormInputs.AddFloat("Resync Threshold",
-                            ref settings.Audio.AudioResyncThreshold,
-                            0.001f,
-                            0.1f,
-                            0.001f,
-                            true, true,
-                            "If audio playbacks drifts too far from the animation playback it will be resynced. If the threshold for this is too low you will encounter audio glitches. If the threshold is too large you will lose precision. A normal range is between 0.02s and 0.05s.",
-                            ProjectSettings.Defaults.Audio.AudioResyncThreshold))
-
-                    {
-                        modified = true;
-                    }
 
                     modified |= FormInputs.AddFloat("Audio Decay", ref playback.AudioDecayFactor,
                         0.001f,
