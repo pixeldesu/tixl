@@ -70,9 +70,13 @@ internal static class CurvePoint
             if (!_vDef.BrokenTangents)
             {
                 _vDef.OutInterpolation = VDefinition.KeyInterpolation.Tangent;
-
                 _rightTangentInScreen = new Vector2(-_leftTangentInScreen.X, -_leftTangentInScreen.Y);
                 _vDef.OutTangentAngle = _vDef.InTangentAngle + Math.PI;
+            }
+            else if (_vDef.OutInterpolation == VDefinition.KeyInterpolation.Linear)
+            {
+                // Promote the other side from Linear so the dope sheet icon reflects the change
+                _vDef.OutInterpolation = VDefinition.KeyInterpolation.Tangent;
             }
         }
     }
@@ -104,9 +108,13 @@ internal static class CurvePoint
             if (!_vDef.BrokenTangents)
             {
                 _vDef.InInterpolation = VDefinition.KeyInterpolation.Tangent;
-
                 _leftTangentInScreen = new Vector2(-_rightTangentInScreen.X, -_rightTangentInScreen.Y);
                 _vDef.InTangentAngle = _vDef.OutTangentAngle + Math.PI;
+            }
+            else if (_vDef.InInterpolation == VDefinition.KeyInterpolation.Linear)
+            {
+                // Promote the other side from Linear so the dope sheet icon reflects the change
+                _vDef.InInterpolation = VDefinition.KeyInterpolation.Tangent;
             }
         }
     }
