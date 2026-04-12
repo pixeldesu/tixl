@@ -10,7 +10,7 @@ namespace T3.Core.Model;
 public static class SymbolFormatVersion
 {
     /// <summary>Current format version written by this editor.</summary>
-    public const int Current = 1;
+    public const int Current = 2;
 
     /// <summary>The TiXL editor version string, written alongside the format version.</summary>
     public static string TixlVersion => RuntimeAssemblies.Version.ToString();
@@ -20,10 +20,11 @@ public static class SymbolFormatVersion
     /// </summary>
     public static readonly FormatChange[] Changes =
     [
-        new(1, "Added per-symbol ProjectSettings with PlaybackConfig; RenderExport in .t3ui Settings section"),
+        new(1, "4.2.0.1", "Added per-symbol ProjectSettings with PlaybackConfig; RenderExport in .t3ui Settings section"),
+        new(2, "4.2.0.2","Keyframe interpolation format"),
     ];
 
-    public record FormatChange(int Version, string Description);
+    public sealed record FormatChange(int FormatVersion, string EditorVersion, string Description);
 
     /// <summary>
     /// Checks a file's format version and logs a warning if it was written by a newer editor.
