@@ -314,6 +314,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         if (Mode == _lastMode)
             return false;
 
+        // Tear down previous mode (skip on first call when _lastMode is null)
         switch (_lastMode)
         {
             case Modes.DopeView:
@@ -351,12 +352,13 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
 
     public enum Modes
     {
+        Undefined,
         DopeView,
         CurveEditor,
     }
 
     public Modes Mode = Modes.DopeView;
-    private Modes _lastMode = Modes.CurveEditor; // Make different to force initial update
+    private Modes _lastMode = Modes.Undefined;
 
     private void SyncStateWithComposition(Instance compositionOp)
     {
@@ -408,7 +410,6 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         ScrollTarget = new Vector2(state.ScrollX, ScrollTarget.Y);
         Scroll = new Vector2(state.ScrollX, Scroll.Y);
         Mode = state.Mode;
-        _lastMode = Mode; // Prevent mode-change reset
     }
 
     #endregion
