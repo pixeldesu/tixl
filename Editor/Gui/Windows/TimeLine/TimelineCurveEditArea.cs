@@ -34,16 +34,20 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
     private readonly StringBuilder _stringBuilder = new(100);
     private readonly List<VDefinition> _visibleKeyframes = new(1000);
 
-    public void Draw(Instance compositionOp, List<TimeLineCanvas.AnimationParameter> animationParameters, bool fitCurvesVertically = false)
+    public void Draw(Instance compositionOp, List<TimeLineCanvas.AnimationParameter> animationParameters,
+                     bool fitCurvesVertically = false, bool fitVerticalOnly = false)
     {
         _visibleKeyframes.Clear();
         AnimationParameters = animationParameters;
 
-        if (fitCurvesVertically)
+        if (fitVerticalOnly)
+        {
+            if (TryGetBoundsOnCanvas(GetSelectedOrAllPoints(), out var bounds))
+                TimeLineCanvas.Current?.SetVerticalScopeToCanvasArea(bounds, flipY: true, paddingFraction: 0.15f);
+        }
+        else if (fitCurvesVertically)
         {
             ViewAllOrSelectedKeys(alsoChangeTimeRange: false);
-            //TryGetBoundsOnCanvas(GetSelectedOrAllPoints(), out var bounds);
-            //TimeLineCanvas.Current.SetVerticalScopeToCanvasArea(bounds, flipY: true);
         }
 
         ImGui.BeginGroup();

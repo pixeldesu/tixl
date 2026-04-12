@@ -103,8 +103,14 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
                         _horizontalRaster.Draw(this);
                         var heightChanged = Math.Abs(ImGui.GetWindowHeight() - _lastCurveEditorHeight) > 1f;
                         _lastCurveEditorHeight = ImGui.GetWindowHeight();
+
+                        var selectionHash = ComputeSelectionHash();
+                        var selectionChanged = selectionHash != _lastSelectionHash;
+                        _lastSelectionHash = selectionHash;
+
                         _timelineCurveEditArea.Draw(compositionOp, _selectedAnimationParameters,
-                                                    fitCurvesVertically: modeChanged || heightChanged);
+                                                    fitCurvesVertically: modeChanged || heightChanged,
+                                                    fitVerticalOnly: selectionChanged);
                         break;
                     }
                 }
@@ -366,6 +372,17 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
     public Modes Mode = Modes.DopeView;
     private Modes _lastMode = Modes.Undefined;
     private float _lastCurveEditorHeight;
+    private int _lastSelectionHash;
+
+    private int ComputeSelectionHash()
+    {
+        var hash = _selectedAnimationParameters.Count;
+        for (var i = 0; i < _selectedAnimationParameters.Count; i++)
+        {
+            hash = hash * 397 ^ _selectedAnimationParameters[i].Hash;
+        }
+        return hash;
+    }
 
     private void SyncStateWithComposition(Instance compositionOp)
     {

@@ -385,6 +385,8 @@ internal static class CurvePoint
     private static Vector2 _rightTangentInScreen;
     private static double? _neighborAngleIn;
     private static double? _neighborAngleOut;
+    private static double _segmentWidthIn = 1.0;
+    private static double _segmentWidthOut = 1.0;
 
     #endregion
 
