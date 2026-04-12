@@ -66,13 +66,24 @@ internal static class SplineInterpolator
 
         double tangentLength = b.Key - a.Key;
         var p0 = a.Value.Value;
-        var m0 = Math.Tan(a.Value.OutTangentAngle) * tangentLength;
+        var m0 = SlopFromAngle(a.Value.OutTangentAngle) * tangentLength;
         var p1 = b.Value.Value;
-        var m1 = Math.Tan(b.Value.InTangentAngle) * tangentLength;
+        var m1 = SlopFromAngle(b.Value.InTangentAngle) * tangentLength;
 
         var t2 = t * t;
         var t3 = t2 * t;
         return (2 * t3 - 3 * t2 + 1) * p0 + (t3 - 2 * t2 + t) * m0 + (-2 * t3 + 3 * t2) * p1 + (t3 - t2) * m1;
+    }
+
+    /// <summary>
+    /// Computes tan(angle) with precision guard: snaps near-zero results to exactly 0.
+    /// Avoids floating-point noise from tan(PI) ≈ -1.22e-16 which causes visible
+    /// wobble on flat curves when amplified by tangent length and min/max normalization.
+    /// </summary>
+    private static double SlopFromAngle(double angle)
+    {
+        var slope = Math.Tan(angle);
+        return Math.Abs(slope) < 1e-10 ? 0.0 : slope;
     }
 
     private static double CalcStartTangent(double aKey, VDefinition aDef, double bKey, VDefinition bDef)

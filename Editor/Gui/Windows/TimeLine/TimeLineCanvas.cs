@@ -342,8 +342,9 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
                 SnapHandlerForU.AddSnapAttractor(_timelineCurveEditArea);
                 break;
 
-            default:
-                throw new ArgumentOutOfRangeException();
+            case Modes.Undefined:
+                Mode = Modes.DopeView;
+                goto case Modes.DopeView;
         }
 
         _lastMode = Mode;

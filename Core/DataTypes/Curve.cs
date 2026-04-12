@@ -181,6 +181,12 @@ public sealed class Curve : IEditableInputType
     {
         u = Math.Round(u, TimePrecision);
         key.U = u;
+
+        // Clear parent on old key if replacing
+        if (_state.Table.TryGetValue(u, out var oldKey))
+            oldKey.ParentCurve = null;
+
+        key.ParentCurve = this;
         _state.Table[u] = key;
         SplineInterpolator.UpdateTangents(_state.Table);
         ChangeCount++;
@@ -190,6 +196,10 @@ public sealed class Curve : IEditableInputType
     {
         u = Math.Round(u, TimePrecision);
         var state = _state;
+
+        if (state.Table.TryGetValue(u, out var removedKey))
+            removedKey.ParentCurve = null;
+
         state.Table.Remove(u);
         SplineInterpolator.UpdateTangents(state.Table);
         ChangeCount++;
@@ -310,7 +320,21 @@ public sealed class Curve : IEditableInputType
     internal void Read(JToken inputToken)
     {
         _state.Read(inputToken);
+        SetParentOnAllKeys();
     }
+
+    private void SetParentOnAllKeys()
+    {
+        for (var i = 0; i < _state.Table.Count; i++)
+        {
+            _state.Table.Values[i].ParentCurve = this;
+        }
+    }
+
+    /// <summary>
+    /// Per-curve sample cache for efficient polyline rendering.
+    /// </summary>
+    public CurveSampleCache SampleCache { get; } = new();
 
     private CurveState _state = new();
 
@@ -351,5 +375,12 @@ public sealed class Curve : IEditableInputType
         }
     }
     
+    /// <summary>
+    /// Increments the revision counter to invalidate caches.
+    /// Call this after directly modifying VDefinition properties (e.g. tangent angles)
+    /// without going through AddOrUpdateV/MoveKey/RemoveKeyframeAt.
+    /// </summary>
+    public void NotifyChanged() => ChangeCount++;
+
     public int ChangeCount { get; private set; }
 }

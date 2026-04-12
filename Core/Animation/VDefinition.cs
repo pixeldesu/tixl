@@ -22,6 +22,12 @@ public sealed class VDefinition
 
     public int UniqueId { get; } = Interlocked.Increment(ref _nextId);
 
+    /// <summary>
+    /// Set by <see cref="Curve"/> when this key is added to its table.
+    /// Cleared when removed. Property setters use this to auto-invalidate the curve's cache.
+    /// </summary>
+    internal Curve? ParentCurve;
+
     private double _u;
     public double U
     {
@@ -29,55 +35,90 @@ public sealed class VDefinition
         set => _u = Math.Round(value, Curve.TimePrecision);
     }
 
-    public double Value { get; set; } = 0.0;
-    public KeyInterpolation InInterpolation { get; set; } = KeyInterpolation.Linear;
-    public KeyInterpolation OutInterpolation { get; set; } = KeyInterpolation.Linear;
+    public double Value
+    {
+        get => _value;
+        set { _value = value; ParentCurve?.NotifyChanged(); }
+    }
 
-    public double InTangentAngle { get; set; }
-    public double OutTangentAngle { get; set; }
-    public bool Weighted { get; set; }
-    public bool BrokenTangents { get; set; }
+    public KeyInterpolation InInterpolation
+    {
+        get => _inInterpolation;
+        set { _inInterpolation = value; ParentCurve?.NotifyChanged(); }
+    }
+
+    public KeyInterpolation OutInterpolation
+    {
+        get => _outInterpolation;
+        set { _outInterpolation = value; ParentCurve?.NotifyChanged(); }
+    }
+
+    public double InTangentAngle
+    {
+        get => _inTangentAngle;
+        set { _inTangentAngle = value; ParentCurve?.NotifyChanged(); }
+    }
+
+    public double OutTangentAngle
+    {
+        get => _outTangentAngle;
+        set { _outTangentAngle = value; ParentCurve?.NotifyChanged(); }
+    }
+
+    public bool Weighted
+    {
+        get => _weighted;
+        set { _weighted = value; ParentCurve?.NotifyChanged(); }
+    }
+
+    public bool BrokenTangents
+    {
+        get => _brokenTangents;
+        set { _brokenTangents = value; ParentCurve?.NotifyChanged(); }
+    }
 
     public VDefinition Clone()
     {
         return new VDefinition()
                    {
-                       Value = Value,
-                       U = U,
-                       InInterpolation = InInterpolation,
-                       OutInterpolation = OutInterpolation,
-                       InTangentAngle = InTangentAngle,
-                       OutTangentAngle = OutTangentAngle,
-                       Weighted = Weighted,
-                       BrokenTangents = BrokenTangents
+                       _value = _value,
+                       _u = _u,
+                       _inInterpolation = _inInterpolation,
+                       _outInterpolation = _outInterpolation,
+                       _inTangentAngle = _inTangentAngle,
+                       _outTangentAngle = _outTangentAngle,
+                       _weighted = _weighted,
+                       _brokenTangents = _brokenTangents,
+                       // ParentCurve intentionally NOT copied — clone is independent
                    };
     }
 
     public void CopyValuesFrom(VDefinition def)
     {
-        Value = def.Value;
-        U = def.U;
-        InInterpolation = def.InInterpolation;
-        OutInterpolation = def.OutInterpolation;
-        InTangentAngle = def.InTangentAngle;
-        OutTangentAngle = def.OutTangentAngle;
-        Weighted = def.Weighted;
-        BrokenTangents = def.BrokenTangents;
+        _value = def._value;
+        _u = def._u;
+        _inInterpolation = def._inInterpolation;
+        _outInterpolation = def._outInterpolation;
+        _inTangentAngle = def._inTangentAngle;
+        _outTangentAngle = def._outTangentAngle;
+        _weighted = def._weighted;
+        _brokenTangents = def._brokenTangents;
+        ParentCurve?.NotifyChanged();
     }
 
     internal void Read(JToken jsonV)
     {
-        Value = jsonV.Value<double>(nameof(Value));
-        InTangentAngle = jsonV.ReadValueSafe(nameof(InTangentAngle), 0.0);
-        OutTangentAngle = jsonV.ReadValueSafe(nameof(OutTangentAngle), 0.0);
-        Weighted = jsonV.ReadValueSafe(nameof(Weighted), false);
-        BrokenTangents = jsonV.ReadValueSafe(nameof(BrokenTangents), false);
+        _value = jsonV.Value<double>(nameof(Value));
+        _inTangentAngle = jsonV.ReadValueSafe(nameof(InTangentAngle), 0.0);
+        _outTangentAngle = jsonV.ReadValueSafe(nameof(OutTangentAngle), 0.0);
+        _weighted = jsonV.ReadValueSafe(nameof(Weighted), false);
+        _brokenTangents = jsonV.ReadValueSafe(nameof(BrokenTangents), false);
 
         // New format: unified InInterpolation / OutInterpolation
         if (jsonV[nameof(InInterpolation)] != null)
         {
-            InInterpolation = jsonV[nameof(InInterpolation)].GetEnumValue(KeyInterpolation.Linear);
-            OutInterpolation = jsonV[nameof(OutInterpolation)].GetEnumValue(KeyInterpolation.Linear);
+            _inInterpolation = jsonV[nameof(InInterpolation)].GetEnumValue(KeyInterpolation.Linear);
+            _outInterpolation = jsonV[nameof(OutInterpolation)].GetEnumValue(KeyInterpolation.Linear);
         }
         else
         {
@@ -93,8 +134,8 @@ public sealed class VDefinition
         var inEditStr = jsonV["InEditMode"]?.Value<string>() ?? "Linear";
         var outEditStr = jsonV["OutEditMode"]?.Value<string>() ?? "Linear";
 
-        InInterpolation = ConvertLegacy(inTypeStr, inEditStr);
-        OutInterpolation = ConvertLegacy(outTypeStr, outEditStr);
+        _inInterpolation = ConvertLegacy(inTypeStr, inEditStr);
+        _outInterpolation = ConvertLegacy(outTypeStr, outEditStr);
     }
 
     private static KeyInterpolation ConvertLegacy(string interpolationType, string editMode)
@@ -118,22 +159,29 @@ public sealed class VDefinition
 
     internal void Write(JsonTextWriter writer)
     {
-        writer.WriteValue(nameof(Value), Value);
-        writer.WriteObject(nameof(InInterpolation), InInterpolation);
-        writer.WriteObject(nameof(OutInterpolation), OutInterpolation);
+        writer.WriteValue(nameof(Value), _value);
+        writer.WriteObject(nameof(InInterpolation), _inInterpolation);
+        writer.WriteObject(nameof(OutInterpolation), _outInterpolation);
 
-        if (InTangentAngle != 0.0)
-            writer.WriteValue(nameof(InTangentAngle), InTangentAngle);
+        if (_inTangentAngle != 0.0)
+            writer.WriteValue(nameof(InTangentAngle), _inTangentAngle);
 
-        if (OutTangentAngle != 0.0)
-            writer.WriteValue(nameof(OutTangentAngle), OutTangentAngle);
+        if (_outTangentAngle != 0.0)
+            writer.WriteValue(nameof(OutTangentAngle), _outTangentAngle);
 
-        if (Weighted)
+        if (_weighted)
             writer.WriteValue(nameof(Weighted), true);
 
-        if (BrokenTangents)
+        if (_brokenTangents)
             writer.WriteValue(nameof(BrokenTangents), true);
     }
 
+    private double _value;
+    private KeyInterpolation _inInterpolation = KeyInterpolation.Linear;
+    private KeyInterpolation _outInterpolation = KeyInterpolation.Linear;
+    private double _inTangentAngle;
+    private double _outTangentAngle;
+    private bool _weighted;
+    private bool _brokenTangents;
     private static int _nextId;
 }

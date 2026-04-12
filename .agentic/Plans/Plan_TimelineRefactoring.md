@@ -192,6 +192,7 @@ Select many keyframes across several parameters (for example, `U=10` to `U=50`):
   - Store explicit `(time, value)` handles, or
   - Store semantic speed/influence and derive handles at evaluation/edit time
 - If unit cubic temporal bezier is added later, what monotonicity and inversion constraints should be enforced?
+- Should VDefinition become effectively read-only externally, with all mutations routed through `Curve.UpdateKey()`? This would guarantee ChangeCount bumps, tangent recomputation, and cache invalidation without requiring ParentCurve back-references. Large refactor touching CurvePoint, CurveEditing, ChangeKeyframesCommand, Animator, etc.
 
 ## Incremental Implementation Plan
 
