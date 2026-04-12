@@ -377,16 +377,7 @@ internal abstract class CurveEditing
                                      vDef.TensionOut = 1.0f;
                                      vDef.Weighted = false;
                                  });
-
-        // Set first key's In and last key's Out to Horizontal for artist-friendly endpoints
-        var allKeys = GetSelectedOrAllPoints().OrderBy(v => v.U).ToList();
-        if (allKeys.Count >= 2)
-        {
-            allKeys[0].InInterpolation = VDefinition.KeyInterpolation.Horizontal;
-            allKeys[0].InTangentAngle = 0;
-            allKeys[^1].OutInterpolation = VDefinition.KeyInterpolation.Horizontal;
-            allKeys[^1].OutTangentAngle = Math.PI;
-        }
+        
     }
 
     private void OnCubic()
