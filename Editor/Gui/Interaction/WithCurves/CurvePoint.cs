@@ -59,8 +59,7 @@ internal static class CurvePoint
         // Dragging
         if (ImGui.IsItemActive() && ImGui.IsMouseDragging(0, 0f))
         {
-            _vDef.InType = VDefinition.Interpolation.Spline;
-            _vDef.InEditMode = VDefinition.EditMode.Tangent;
+            _vDef.InInterpolation = VDefinition.KeyInterpolation.Tangent;
 
             var vectorInCanvas = _curveEditCanvas.InverseTransformDirection(ImGui.GetMousePos() - pCenter);
             _vDef.InTangentAngle = (float)(Math.PI / 2 - Math.Atan2(-vectorInCanvas.X, -vectorInCanvas.Y));
@@ -70,8 +69,7 @@ internal static class CurvePoint
 
             if (!_vDef.BrokenTangents)
             {
-                _vDef.OutType = VDefinition.Interpolation.Spline;
-                _vDef.OutEditMode = VDefinition.EditMode.Tangent;
+                _vDef.OutInterpolation = VDefinition.KeyInterpolation.Tangent;
 
                 _rightTangentInScreen = new Vector2(-_leftTangentInScreen.X, -_leftTangentInScreen.Y);
                 _vDef.OutTangentAngle = _vDef.InTangentAngle + Math.PI;
@@ -95,8 +93,7 @@ internal static class CurvePoint
         // Dragging
         if (ImGui.IsItemActive() && ImGui.IsMouseDragging(0, 0f))
         {
-            _vDef.OutType = VDefinition.Interpolation.Spline;
-            _vDef.OutEditMode = VDefinition.EditMode.Tangent;
+            _vDef.OutInterpolation = VDefinition.KeyInterpolation.Tangent;
 
             var vectorInCanvas = _curveEditCanvas.InverseTransformDirection(ImGui.GetMousePos() - pCenter);
             _vDef.OutTangentAngle = (float)(-Math.PI / 2 - Math.Atan2(vectorInCanvas.X, vectorInCanvas.Y));
@@ -106,8 +103,7 @@ internal static class CurvePoint
 
             if (!_vDef.BrokenTangents)
             {
-                _vDef.InType = VDefinition.Interpolation.Spline;
-                _vDef.InEditMode = VDefinition.EditMode.Tangent;
+                _vDef.InInterpolation = VDefinition.KeyInterpolation.Tangent;
 
                 _leftTangentInScreen = new Vector2(-_rightTangentInScreen.X, -_rightTangentInScreen.Y);
                 _vDef.InTangentAngle = _vDef.OutTangentAngle + Math.PI;

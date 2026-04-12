@@ -59,14 +59,19 @@ internal static class SplineInterpolator
 
     private static double CalcStartTangent(KeyValuePair<double, VDefinition> a, KeyValuePair<double, VDefinition> b)
     {
-        switch (a.Value.OutEditMode)
+        switch (a.Value.OutInterpolation)
         {
-            case VDefinition.EditMode.Tangent:
+            case VDefinition.KeyInterpolation.Tangent:
                 return a.Value.OutTangentAngle;
 
-            case VDefinition.EditMode.Linear:
+            case VDefinition.KeyInterpolation.Linear:
+            case VDefinition.KeyInterpolation.Smooth:
+            case VDefinition.KeyInterpolation.Cubic:
+                // With only one neighbor, aim at that neighbor
                 var angle = Math.PI / 2 - Math.Atan2(a.Key - b.Key, a.Value.Value - b.Value.Value);
                 return angle;
+
+            case VDefinition.KeyInterpolation.Horizontal:
             default:
                 return Math.PI;
         }
@@ -74,14 +79,19 @@ internal static class SplineInterpolator
 
     private static double CalcEndTangent(KeyValuePair<double, VDefinition> a, KeyValuePair<double, VDefinition> b)
     {
-        switch (b.Value.InEditMode)
+        switch (b.Value.InInterpolation)
         {
-            case VDefinition.EditMode.Tangent:
+            case VDefinition.KeyInterpolation.Tangent:
                 return b.Value.InTangentAngle;
 
-            case VDefinition.EditMode.Linear:
+            case VDefinition.KeyInterpolation.Linear:
+            case VDefinition.KeyInterpolation.Smooth:
+            case VDefinition.KeyInterpolation.Cubic:
+                // With only one neighbor, aim at that neighbor
                 var angle = Math.PI / 2 - Math.Atan2(b.Key - a.Key, b.Value.Value - a.Value.Value);
                 return angle;
+
+            case VDefinition.KeyInterpolation.Horizontal:
             default:
                 return 0;
         }
@@ -91,11 +101,11 @@ internal static class SplineInterpolator
 
     private static double CalcInTangent(KeyValuePair<double, VDefinition> prev, KeyValuePair<double, VDefinition> cur, KeyValuePair<double, VDefinition> next)
     {
-        switch (cur.Value.InEditMode)
+        switch (cur.Value.InInterpolation)
         {
-            case VDefinition.EditMode.Tangent:
+            case VDefinition.KeyInterpolation.Tangent:
                 return cur.Value.InTangentAngle;
-            case VDefinition.EditMode.Smooth:
+            case VDefinition.KeyInterpolation.Smooth:
                 var angle = Math.PI / 2 - Math.Atan2(next.Key - prev.Key, next.Value.Value - prev.Value.Value);
 
                 double thirdToPrev = (prev.Key - cur.Key) / TANGENT_CLAMP_RATIO;
@@ -111,7 +121,7 @@ internal static class SplineInterpolator
                     angle = Math.PI + Math.PI / 2 - Math.Atan2(-thirdToNext, Math.Min(0, cur.Value.Value - next.Value.Value));
                 }
 
-                // Avoid Overshooting to previous keyframe                    
+                // Avoid Overshooting to previous keyframe
                 else if (prev.Value.Value > next.Value.Value && (cur.Value.Value + Math.Tan(angle) * thirdToPrev) > prev.Value.Value)
                 {
                     angle = Math.PI + Math.PI / 2 - Math.Atan2(thirdToPrev, Math.Max(0, -cur.Value.Value + prev.Value.Value));
@@ -122,13 +132,13 @@ internal static class SplineInterpolator
                 }
                 return angle;
 
-            case VDefinition.EditMode.Cubic:
+            case VDefinition.KeyInterpolation.Cubic:
                 return Math.PI / 2 - Math.Atan2(next.Key - prev.Key, next.Value.Value - prev.Value.Value);
 
-            case VDefinition.EditMode.Linear:
+            case VDefinition.KeyInterpolation.Linear:
                 return Math.PI / 2 - Math.Atan2(cur.Key - prev.Key, cur.Value.Value - prev.Value.Value);
 
-            case VDefinition.EditMode.Horizontal:
+            case VDefinition.KeyInterpolation.Horizontal:
             default:
                 return 0;
         }
@@ -136,11 +146,11 @@ internal static class SplineInterpolator
 
     private static double CalcOutTangent(KeyValuePair<double, VDefinition> prev, KeyValuePair<double, VDefinition> cur, KeyValuePair<double, VDefinition> next)
     {
-        switch (cur.Value.OutEditMode)
+        switch (cur.Value.OutInterpolation)
         {
-            case VDefinition.EditMode.Tangent:
+            case VDefinition.KeyInterpolation.Tangent:
                 return cur.Value.OutTangentAngle;
-            case VDefinition.EditMode.Smooth:
+            case VDefinition.KeyInterpolation.Smooth:
                 double thirdToNext = (next.Key - cur.Key) / TANGENT_CLAMP_RATIO;
                 double thirdToPrev = (prev.Key - cur.Key) / TANGENT_CLAMP_RATIO;
 
@@ -155,7 +165,7 @@ internal static class SplineInterpolator
                 {
                     angle = Math.PI / 2 - Math.Atan2(-thirdToNext, Math.Min(0, cur.Value.Value - next.Value.Value));
                 }
-                //// Avoid Overshooting to prev keyframe                    
+                //// Avoid Overshooting to prev keyframe
                 else if (prev.Value.Value > next.Value.Value && (cur.Value.Value + Math.Tan(angle) * thirdToPrev) > prev.Value.Value)
                 {
                     angle = Math.PI / 2 - Math.Atan2(thirdToPrev, Math.Max(0, -cur.Value.Value + prev.Value.Value));
@@ -166,16 +176,16 @@ internal static class SplineInterpolator
                 }
                 return angle;
 
-            case VDefinition.EditMode.Cubic:
+            case VDefinition.KeyInterpolation.Cubic:
                 return Math.PI / 2 - Math.Atan2(prev.Key - next.Key, prev.Value.Value - next.Value.Value);
 
-            case VDefinition.EditMode.Linear:
+            case VDefinition.KeyInterpolation.Linear:
                 return Math.PI / 2 - Math.Atan2(cur.Key - next.Key, cur.Value.Value - next.Value.Value);
 
-            case VDefinition.EditMode.Horizontal:
+            case VDefinition.KeyInterpolation.Horizontal:
             default:
                 return Math.PI;
         }
     }
 
-};
+}

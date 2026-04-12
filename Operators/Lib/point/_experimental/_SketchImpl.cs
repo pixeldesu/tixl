@@ -811,10 +811,8 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
                                        {
                                            U = t,
                                            Value = i,
-                                           InType = VDefinition.Interpolation.Constant,
-                                           OutType = VDefinition.Interpolation.Constant,
-                                           InEditMode = VDefinition.EditMode.Constant,
-                                           OutEditMode = VDefinition.EditMode.Constant,
+                                           InInterpolation = VDefinition.KeyInterpolation.Constant,
+                                           OutInterpolation = VDefinition.KeyInterpolation.Constant,
                                        });
             }
         }
@@ -825,10 +823,8 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
                        {
                            U = t,
                            Value = index,
-                           InType = VDefinition.Interpolation.Constant,
-                           OutType = VDefinition.Interpolation.Constant,
-                           InEditMode = VDefinition.EditMode.Constant,
-                           OutEditMode = VDefinition.EditMode.Constant,
+                           InInterpolation = VDefinition.KeyInterpolation.Constant,
+                           OutInterpolation = VDefinition.KeyInterpolation.Constant,
                        };
         }
 

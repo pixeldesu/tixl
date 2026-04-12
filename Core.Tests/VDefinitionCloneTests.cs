@@ -14,10 +14,8 @@ public class VDefinitionCloneTests
 
         Assert.Equal(original.U, clone.U);
         Assert.Equal(original.Value, clone.Value);
-        Assert.Equal(original.InType, clone.InType);
-        Assert.Equal(original.OutType, clone.OutType);
-        Assert.Equal(original.InEditMode, clone.InEditMode);
-        Assert.Equal(original.OutEditMode, clone.OutEditMode);
+        Assert.Equal(original.InInterpolation, clone.InInterpolation);
+        Assert.Equal(original.OutInterpolation, clone.OutInterpolation);
         Assert.Equal(original.InTangentAngle, clone.InTangentAngle);
         Assert.Equal(original.OutTangentAngle, clone.OutTangentAngle);
         Assert.Equal(original.Weighted, clone.Weighted);
@@ -40,6 +38,27 @@ public class VDefinitionCloneTests
     }
 
     [Fact]
+    public void CloneGetsNewUniqueId()
+    {
+        var original = CreateNonDefaultVDefinition();
+        var clone = original.Clone();
+
+        Assert.NotEqual(original.UniqueId, clone.UniqueId);
+    }
+
+    [Fact]
+    public void UniqueIdsAreUnique()
+    {
+        var a = new VDefinition();
+        var b = new VDefinition();
+        var c = new VDefinition();
+
+        Assert.NotEqual(a.UniqueId, b.UniqueId);
+        Assert.NotEqual(b.UniqueId, c.UniqueId);
+        Assert.NotEqual(a.UniqueId, c.UniqueId);
+    }
+
+    [Fact]
     public void CopyValuesFromCopiesAllProperties()
     {
         var source = CreateNonDefaultVDefinition();
@@ -49,14 +68,25 @@ public class VDefinitionCloneTests
 
         Assert.Equal(source.U, target.U);
         Assert.Equal(source.Value, target.Value);
-        Assert.Equal(source.InType, target.InType);
-        Assert.Equal(source.OutType, target.OutType);
-        Assert.Equal(source.InEditMode, target.InEditMode);
-        Assert.Equal(source.OutEditMode, target.OutEditMode);
+        Assert.Equal(source.InInterpolation, target.InInterpolation);
+        Assert.Equal(source.OutInterpolation, target.OutInterpolation);
         Assert.Equal(source.InTangentAngle, target.InTangentAngle);
         Assert.Equal(source.OutTangentAngle, target.OutTangentAngle);
         Assert.Equal(source.Weighted, target.Weighted);
         Assert.Equal(source.BrokenTangents, target.BrokenTangents);
+    }
+
+    [Fact]
+    public void CopyValuesFromDoesNotCopyUniqueId()
+    {
+        var source = CreateNonDefaultVDefinition();
+        var target = new VDefinition();
+        var originalTargetId = target.UniqueId;
+
+        target.CopyValuesFrom(source);
+
+        Assert.Equal(originalTargetId, target.UniqueId);
+        Assert.NotEqual(source.UniqueId, target.UniqueId);
     }
 
     [Fact]
@@ -82,10 +112,8 @@ public class VDefinitionCloneTests
                {
                    U = 10.5,
                    Value = 42.0,
-                   InType = VDefinition.Interpolation.Spline,
-                   OutType = VDefinition.Interpolation.Constant,
-                   InEditMode = VDefinition.EditMode.Smooth,
-                   OutEditMode = VDefinition.EditMode.Horizontal,
+                   InInterpolation = VDefinition.KeyInterpolation.Smooth,
+                   OutInterpolation = VDefinition.KeyInterpolation.Horizontal,
                    InTangentAngle = 1.5,
                    OutTangentAngle = 2.7,
                    Weighted = true,

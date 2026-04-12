@@ -399,15 +399,15 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                         maxValue = (float)vDef.Value;
                 }
 
-                if (lastVDef != null && lastVDef.OutEditMode == VDefinition.EditMode.Constant)
+                if (lastVDef != null && lastVDef.OutInterpolation == VDefinition.KeyInterpolation.Constant)
                 {
                     _positions.Add(new Vector2(
                                                uOnScreen,
                                                lastValue));
                 }
                 else if ((uOnScreen - lastUOnScreen) > 15 && lastVDef != null
-                                                          && (lastVDef.OutEditMode != VDefinition.EditMode.Linear ||
-                                                              vDef.OutEditMode != VDefinition.EditMode.Linear))
+                                                          && (lastVDef.OutInterpolation != VDefinition.KeyInterpolation.Linear ||
+                                                              vDef.OutInterpolation != VDefinition.KeyInterpolation.Linear))
                 {
                     int curveSteps = 6;
                     for (var stepIndex = 0; stepIndex < curveSteps; stepIndex++)
@@ -523,7 +523,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                                       TimeLineCanvas.Current.TransformX(vDefU) - KeyframeIconWidth * T3Ui.UiScaleFactor / 2 + 1,
                                       layerArea.Min.Y);
 
-        if (vDef.OutEditMode == VDefinition.EditMode.Constant)
+        if (vDef.OutInterpolation == VDefinition.KeyInterpolation.Constant)
         {
             var availableSpace = nextVDef != null
                                      ? TimeLineCanvas.Current.TransformX((float)nextVDef.U) - posOnScreen.X
@@ -546,19 +546,19 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         {
             ImGui.PushStyleColor(ImGuiCol.Text, Color.White.Rgba);
             var isSelected = SelectedKeyframes.Contains(vDef);
-            if (vDef.OutEditMode == VDefinition.EditMode.Constant)
+            if (vDef.OutInterpolation == VDefinition.KeyInterpolation.Constant)
             {
                 Icons.DrawIconAtScreenPosition(isSelected ? Icon.ConstantKeyframeSelected : Icon.ConstantKeyframe, posOnScreen);
             }
-            else if (vDef.OutEditMode == VDefinition.EditMode.Horizontal)
+            else if (vDef.OutInterpolation == VDefinition.KeyInterpolation.Horizontal)
             {
                 Icons.DrawIconAtScreenPosition(isSelected ? Icon.DopeSheetKeyframeHorizontalSelected : Icon.DopeSheetKeyframeHorizontal, posOnScreen);
             }
-            else if (vDef.OutEditMode == VDefinition.EditMode.Cubic)
+            else if (vDef.OutInterpolation == VDefinition.KeyInterpolation.Cubic)
             {
                 Icons.DrawIconAtScreenPosition(isSelected ? Icon.DopeSheetKeyframeCubicSelected : Icon.DopeSheetKeyframeCubic, posOnScreen);
             }
-            else if (vDef.OutEditMode == VDefinition.EditMode.Smooth)
+            else if (vDef.OutInterpolation == VDefinition.KeyInterpolation.Smooth)
             {
                 Icons.DrawIconAtScreenPosition(isSelected ? Icon.DopeSheetKeyframeSmoothSelected : Icon.DopeSheetKeyframeSmooth, posOnScreen);
             }

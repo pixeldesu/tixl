@@ -115,8 +115,8 @@ public sealed class Animator : SymbolExtension
                                    new VDefinition
                                        {
                                            Value = values[i],
-                                           InType = VDefinition.Interpolation.Spline,
-                                           OutType = VDefinition.Interpolation.Spline,
+                                           InInterpolation = VDefinition.KeyInterpolation.Smooth,
+                                           OutInterpolation = VDefinition.KeyInterpolation.Smooth,
                                        });
         }
 
@@ -145,10 +145,8 @@ public sealed class Animator : SymbolExtension
                                    new VDefinition
                                        {
                                            Value = values[i],
-                                           InType = VDefinition.Interpolation.Constant,
-                                           OutType = VDefinition.Interpolation.Constant,
-                                           InEditMode = VDefinition.EditMode.Constant,
-                                           OutEditMode = VDefinition.EditMode.Constant,
+                                           InInterpolation = VDefinition.KeyInterpolation.Constant,
+                                           OutInterpolation = VDefinition.KeyInterpolation.Constant,
                                        });
         }
 

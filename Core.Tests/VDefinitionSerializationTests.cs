@@ -15,10 +15,8 @@ public class VDefinitionSerializationTests
         var original = new VDefinition
                        {
                            Value = 3.14,
-                           InType = VDefinition.Interpolation.Spline,
-                           OutType = VDefinition.Interpolation.Constant,
-                           InEditMode = VDefinition.EditMode.Smooth,
-                           OutEditMode = VDefinition.EditMode.Horizontal,
+                           InInterpolation = VDefinition.KeyInterpolation.Smooth,
+                           OutInterpolation = VDefinition.KeyInterpolation.Horizontal,
                            InTangentAngle = 1.23,
                            OutTangentAngle = 4.56,
                            Weighted = true,
@@ -30,10 +28,8 @@ public class VDefinitionSerializationTests
         restored.Read(json);
 
         Assert.Equal(original.Value, restored.Value);
-        Assert.Equal(original.InType, restored.InType);
-        Assert.Equal(original.OutType, restored.OutType);
-        Assert.Equal(original.InEditMode, restored.InEditMode);
-        Assert.Equal(original.OutEditMode, restored.OutEditMode);
+        Assert.Equal(original.InInterpolation, restored.InInterpolation);
+        Assert.Equal(original.OutInterpolation, restored.OutInterpolation);
         Assert.Equal(original.InTangentAngle, restored.InTangentAngle);
         Assert.Equal(original.OutTangentAngle, restored.OutTangentAngle);
         Assert.True(restored.Weighted);
@@ -41,7 +37,7 @@ public class VDefinitionSerializationTests
     }
 
     [Fact]
-    public void ReadLegacyJsonWithoutWeightedAndBrokenTangents()
+    public void ReadLegacyJsonWithoutNewFields()
     {
         var json = new JObject
                    {
@@ -57,55 +53,96 @@ public class VDefinitionSerializationTests
         var vDef = new VDefinition();
         vDef.Read(json);
 
+        Assert.Equal(VDefinition.KeyInterpolation.Smooth, vDef.InInterpolation);
+        Assert.Equal(VDefinition.KeyInterpolation.Linear, vDef.OutInterpolation);
+        Assert.Equal(1.0, vDef.Value);
         Assert.False(vDef.Weighted);
         Assert.False(vDef.BrokenTangents);
-        Assert.Equal(1.0, vDef.Value);
-        Assert.Equal(VDefinition.Interpolation.Spline, vDef.InType);
     }
 
     [Fact]
-    public void ReadJsonWithTrueValues()
+    public void ReadLegacyConstant()
     {
         var json = new JObject
                    {
-                       ["Value"] = 2.0,
-                       ["InType"] = "Linear",
-                       ["OutType"] = "Linear",
-                       ["InEditMode"] = "Linear",
-                       ["OutEditMode"] = "Linear",
+                       ["Value"] = 5.0,
+                       ["InType"] = "Constant",
+                       ["OutType"] = "Constant",
+                       ["InEditMode"] = "Constant",
+                       ["OutEditMode"] = "Constant",
                        ["InTangentAngle"] = 0.0,
-                       ["OutTangentAngle"] = 0.0,
-                       ["Weighted"] = true,
-                       ["BrokenTangents"] = true
+                       ["OutTangentAngle"] = 0.0
                    };
 
         var vDef = new VDefinition();
         vDef.Read(json);
 
-        Assert.True(vDef.Weighted);
-        Assert.True(vDef.BrokenTangents);
+        Assert.Equal(VDefinition.KeyInterpolation.Constant, vDef.InInterpolation);
+        Assert.Equal(VDefinition.KeyInterpolation.Constant, vDef.OutInterpolation);
     }
 
     [Fact]
-    public void ReadJsonWithExplicitFalseValues()
+    public void ReadLegacySplineCubic()
     {
         var json = new JObject
                    {
                        ["Value"] = 0.0,
-                       ["InType"] = "Linear",
-                       ["OutType"] = "Linear",
-                       ["InEditMode"] = "Linear",
-                       ["OutEditMode"] = "Linear",
+                       ["InType"] = "Spline",
+                       ["OutType"] = "Spline",
+                       ["InEditMode"] = "Cubic",
+                       ["OutEditMode"] = "Cubic",
+                       ["InTangentAngle"] = 0.0,
+                       ["OutTangentAngle"] = 0.0
+                   };
+
+        var vDef = new VDefinition();
+        vDef.Read(json);
+
+        Assert.Equal(VDefinition.KeyInterpolation.Cubic, vDef.InInterpolation);
+        Assert.Equal(VDefinition.KeyInterpolation.Cubic, vDef.OutInterpolation);
+    }
+
+    [Fact]
+    public void ReadLegacySplineTangent()
+    {
+        var json = new JObject
+                   {
+                       ["Value"] = 0.0,
+                       ["InType"] = "Spline",
+                       ["OutType"] = "Spline",
+                       ["InEditMode"] = "Tangent",
+                       ["OutEditMode"] = "Horizontal",
+                       ["InTangentAngle"] = 1.5,
+                       ["OutTangentAngle"] = 3.14
+                   };
+
+        var vDef = new VDefinition();
+        vDef.Read(json);
+
+        Assert.Equal(VDefinition.KeyInterpolation.Tangent, vDef.InInterpolation);
+        Assert.Equal(VDefinition.KeyInterpolation.Horizontal, vDef.OutInterpolation);
+    }
+
+    [Fact]
+    public void ReadNewFormatDirectly()
+    {
+        var json = new JObject
+                   {
+                       ["Value"] = 2.0,
+                       ["InInterpolation"] = "Cubic",
+                       ["OutInterpolation"] = "Smooth",
                        ["InTangentAngle"] = 0.0,
                        ["OutTangentAngle"] = 0.0,
-                       ["Weighted"] = false,
+                       ["Weighted"] = true,
                        ["BrokenTangents"] = false
                    };
 
         var vDef = new VDefinition();
         vDef.Read(json);
 
-        Assert.False(vDef.Weighted);
+        Assert.Equal(VDefinition.KeyInterpolation.Cubic, vDef.InInterpolation);
+        Assert.Equal(VDefinition.KeyInterpolation.Smooth, vDef.OutInterpolation);
+        Assert.True(vDef.Weighted);
         Assert.False(vDef.BrokenTangents);
     }
 

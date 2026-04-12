@@ -32,9 +32,25 @@ public sealed class Curve : IEditableInputType
         return new Curve { _state = _state.Clone() };
     }
 
-    public Animation.CurveUtils.OutsideCurveBehavior PreCurveMapping { get => _state.PreCurveMapping; set => _state.PreCurveMapping = value; }
+    public Animation.CurveUtils.OutsideCurveBehavior PreCurveMapping
+    {
+        get => _state.PreCurveMapping;
+        set
+        {
+            _state.PreCurveMapping = value;
+            ChangeCount++;
+        }
+    }
 
-    public Animation.CurveUtils.OutsideCurveBehavior PostCurveMapping { get => _state.PostCurveMapping; set => _state.PostCurveMapping = value; }
+    public Animation.CurveUtils.OutsideCurveBehavior PostCurveMapping
+    {
+        get => _state.PostCurveMapping;
+        set
+        {
+            _state.PostCurveMapping = value;
+            ChangeCount++;
+        }
+    }
 
     public bool HasVAt(double u)
     {
@@ -268,12 +284,13 @@ public sealed class Curve : IEditableInputType
         else
         {
             TryGetKeysForInterpolation(mappedU, out var a, out var b);
-            
-            if (a.Value.OutType == VDefinition.Interpolation.Constant)
+
+            if (a.Value.OutInterpolation == VDefinition.KeyInterpolation.Constant)
             {
                 resultValue = offset + ConstInterpolator.Interpolate(a, b, mappedU);
             }
-            else if (a.Value.OutType == VDefinition.Interpolation.Linear && b.Value.OutType == VDefinition.Interpolation.Linear)
+            else if (a.Value.OutInterpolation == VDefinition.KeyInterpolation.Linear
+                     && b.Value.InInterpolation == VDefinition.KeyInterpolation.Linear)
             {
                 resultValue = offset + LinearInterpolator.Interpolate(a, b, mappedU);
             }
@@ -303,10 +320,8 @@ public sealed class Curve : IEditableInputType
         var key = curves.GetV(time) ?? new VDefinition
                                            {
                                                U = time,
-                                               InType = VDefinition.Interpolation.Constant,
-                                               OutType = VDefinition.Interpolation.Constant,
-                                               InEditMode = VDefinition.EditMode.Constant,
-                                               OutEditMode = VDefinition.EditMode.Constant,
+                                               InInterpolation = VDefinition.KeyInterpolation.Constant,
+                                               OutInterpolation = VDefinition.KeyInterpolation.Constant,
                                            };
         key.Value = value ? 1 : 0;
         curves.AddOrUpdateV(time, key);
@@ -329,10 +344,8 @@ public sealed class Curve : IEditableInputType
             var key = curves[index].GetV(time) ?? new VDefinition
                                                       {
                                                           U = time,
-                                                          InType = VDefinition.Interpolation.Constant,
-                                                          OutType = VDefinition.Interpolation.Constant,
-                                                          InEditMode = VDefinition.EditMode.Constant,
-                                                          OutEditMode = VDefinition.EditMode.Constant,
+                                                          InInterpolation = VDefinition.KeyInterpolation.Constant,
+                                                          OutInterpolation = VDefinition.KeyInterpolation.Constant,
                                                       };
             key.Value = values[index];
             curves[index].AddOrUpdateV(time, key);

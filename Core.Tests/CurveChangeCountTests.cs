@@ -36,8 +36,8 @@ public class CurveChangeCountTests
         curves[0].AddOrUpdateV(0.0, new VDefinition
                                         {
                                             Value = 0.0,
-                                            InType = VDefinition.Interpolation.Constant,
-                                            OutType = VDefinition.Interpolation.Constant
+                                            InInterpolation = VDefinition.KeyInterpolation.Constant,
+                                            OutInterpolation = VDefinition.KeyInterpolation.Constant
                                         });
         var initial = curves[0].ChangeCount;
 
@@ -66,6 +66,28 @@ public class CurveChangeCountTests
         var initial = curve.ChangeCount;
 
         curve.MoveKey(1.0, 2.0);
+
+        Assert.Equal(initial + 1, curve.ChangeCount);
+    }
+
+    [Fact]
+    public void SetPreCurveMappingIncrementsChangeCount()
+    {
+        var curve = new Curve();
+        var initial = curve.ChangeCount;
+
+        curve.PreCurveMapping = CurveUtils.OutsideCurveBehavior.Cycle;
+
+        Assert.Equal(initial + 1, curve.ChangeCount);
+    }
+
+    [Fact]
+    public void SetPostCurveMappingIncrementsChangeCount()
+    {
+        var curve = new Curve();
+        var initial = curve.ChangeCount;
+
+        curve.PostCurveMapping = CurveUtils.OutsideCurveBehavior.Oscillate;
 
         Assert.Equal(initial + 1, curve.ChangeCount);
     }
