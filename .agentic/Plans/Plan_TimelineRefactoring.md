@@ -184,6 +184,7 @@ Select many keyframes across several parameters (for example, `U=10` to `U=50`):
 
 ### Open Design Questions
 
+- Bulk keyframe moves are slow (~100ms for 200 keys in Debug): `MoveKey` calls `UpdateTangents` after every single key. Fix: add a batch move API that defers tangent recomputation until all keys are moved, then recomputes once.
 - Should `UniqueId` remain `int` or switch to `long` to avoid extremely long-session overflow concerns?
 - What is the final `IRevisionVersioning` API shape (`FlagChanged`, `BeginNewFrame`, `WasChangedInLastFrame`, `Revision`)?
 - Should curves serialize the symbol revision of their last modification, or should that remain runtime-only metadata?
@@ -192,6 +193,7 @@ Select many keyframes across several parameters (for example, `U=10` to `U=50`):
   - Store explicit `(time, value)` handles, or
   - Store semantic speed/influence and derive handles at evaluation/edit time
 - If unit cubic temporal bezier is added later, what monotonicity and inversion constraints should be enforced?
+- Should VDefinition become effectively read-only externally, with all mutations routed through `Curve.UpdateKey()`? This would guarantee ChangeCount bumps, tangent recomputation, and cache invalidation without requiring ParentCurve back-references. Large refactor touching CurvePoint, CurveEditing, ChangeKeyframesCommand, Animator, etc.
 
 ## Incremental Implementation Plan
 

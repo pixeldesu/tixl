@@ -99,9 +99,19 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
                         DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
                         break;
                     case Modes.CurveEditor:
+                    {
                         _horizontalRaster.Draw(this);
-                        _timelineCurveEditArea.Draw(compositionOp, _selectedAnimationParameters, fitCurvesVertically: modeChanged);
+                        var heightChanged = Math.Abs(ImGui.GetWindowHeight() - _lastCurveEditorHeight) > 1f;
+                        _lastCurveEditorHeight = ImGui.GetWindowHeight();
+
+                        var selectionHash = ComputeSelectionHash();
+                        var selectionChanged = selectionHash != _lastSelectionHash;
+                        _lastSelectionHash = selectionHash;
+
+                        _timelineCurveEditArea.Draw(compositionOp, _selectedAnimationParameters,
+                                                    fitVerticalOnly: modeChanged || selectionChanged || heightChanged);
                         break;
+                    }
                 }
 
                 var compositionTimeClip = Structure.GetCompositionTimeClip(compositionOp);
@@ -314,6 +324,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         if (Mode == _lastMode)
             return false;
 
+        // Tear down previous mode (skip on first call when _lastMode is null)
         switch (_lastMode)
         {
             case Modes.DopeView:
@@ -341,8 +352,9 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
                 SnapHandlerForU.AddSnapAttractor(_timelineCurveEditArea);
                 break;
 
-            default:
-                throw new ArgumentOutOfRangeException();
+            case Modes.Undefined:
+                Mode = Modes.DopeView;
+                goto case Modes.DopeView;
         }
 
         _lastMode = Mode;
@@ -351,12 +363,25 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
 
     public enum Modes
     {
+        Undefined,
         DopeView,
         CurveEditor,
     }
 
     public Modes Mode = Modes.DopeView;
-    private Modes _lastMode = Modes.CurveEditor; // Make different to force initial update
+    private Modes _lastMode = Modes.Undefined;
+    private float _lastCurveEditorHeight;
+    private int _lastSelectionHash;
+
+    private int ComputeSelectionHash()
+    {
+        var hash = _selectedAnimationParameters.Count;
+        for (var i = 0; i < _selectedAnimationParameters.Count; i++)
+        {
+            hash = hash * 397 ^ _selectedAnimationParameters[i].Hash;
+        }
+        return hash;
+    }
 
     private void SyncStateWithComposition(Instance compositionOp)
     {
@@ -399,6 +424,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         state.ScaleX = Scale.X;
         state.ScrollX = Scroll.X;
         state.Mode = Mode;
+        state.TimelineHeight = FoldingHeight._customTimeLineHeight;
     }
 
     internal void LoadStateFrom(TimelineState state)
@@ -408,7 +434,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         ScrollTarget = new Vector2(state.ScrollX, ScrollTarget.Y);
         Scroll = new Vector2(state.ScrollX, Scroll.Y);
         Mode = state.Mode;
-        _lastMode = Mode; // Prevent mode-change reset
+        FoldingHeight._customTimeLineHeight = state.TimelineHeight;
     }
 
     #endregion
@@ -572,7 +598,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
     
     public sealed class AnimationParameter
     {
-        public required IEnumerable<Curve> Curves;
+        public required Curve[] Curves;
         public required IInputSlot Input;
         public required Instance Instance;
         public required SymbolUi.Child ChildUi;
@@ -602,7 +628,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         }
 
         private const int UseComputedHeight = -1;
-        private int _customTimeLineHeight = UseComputedHeight;
+        internal int _customTimeLineHeight = UseComputedHeight;
         private readonly TimeLineCanvas _timeline;
         public bool UsingCustomTimelineHeight => _customTimeLineHeight > UseComputedHeight;
 

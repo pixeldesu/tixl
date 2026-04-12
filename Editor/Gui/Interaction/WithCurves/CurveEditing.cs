@@ -76,46 +76,85 @@ internal abstract class CurveEditing
         {
             var selectedInterpolations = GetSelectedKeyframeInterpolationTypes();
 
-            var editModes = selectedInterpolations as VDefinition.EditMode[] ?? selectedInterpolations.ToArray();
+            var modes = selectedInterpolations as VDefinition.KeyInterpolation[] ?? selectedInterpolations.ToArray();
 
             bool changed = false;
             if (SelectedKeyframes.Count > 0)
             {
                 CustomComponents.HintLabel("Interpolation...");
 
-                if (ImGui.MenuItem("Smooth", null, editModes.Contains(VDefinition.EditMode.Smooth)))
+                if (ImGui.MenuItem("Linear", null, modes.Contains(VDefinition.KeyInterpolation.Linear)))
+                {
+                    OnLinear();
+                    UpdateAllTangents();
+                    changed = true;
+                }
+
+                
+                if (ImGui.MenuItem("Safe Smooth", null, modes.Contains(VDefinition.KeyInterpolation.Smooth)))
                 {
                     OnSmooth();
                     UpdateAllTangents();
                     changed = true;
                 }
 
-                if (ImGui.MenuItem("Cubic", null, editModes.Contains(VDefinition.EditMode.Cubic)))
+                if (ImGui.MenuItem("Smooth", null, modes.Contains(VDefinition.KeyInterpolation.Cubic)))
                 {
                     OnCubic();
                     UpdateAllTangents();
                     changed = true;
                 }
 
-                if (ImGui.MenuItem("Horizontal", null, editModes.Contains(VDefinition.EditMode.Horizontal)))
+                if (ImGui.MenuItem("Horizontal", null, modes.Contains(VDefinition.KeyInterpolation.Horizontal)))
                 {
                     OnHorizontal();
                     UpdateAllTangents();
                     changed = true;
                 }
 
-                if (ImGui.MenuItem("Constant", null, editModes.Contains(VDefinition.EditMode.Constant)))
+                if (ImGui.MenuItem("Constant", null, modes.Contains(VDefinition.KeyInterpolation.Constant)))
                 {
                     OnConstant();
                     UpdateAllTangents();
                     changed = true;
                 }
 
-                if (ImGui.MenuItem("Linear", null, editModes.Contains(VDefinition.EditMode.Linear)))
+
+                ImGui.Separator();
+
                 {
-                    OnLinear();
-                    UpdateAllTangents();
-                    changed = true;
+                    var allMirrored = GetSelectedOrAllPoints().All(v => !v.BrokenTangents);
+                    if (ImGui.MenuItem("Mirror Tangents", null, allMirrored))
+                    {
+                        ForSelectedOrAllPointsDo((vDef) =>
+                                                 {
+                                                     vDef.BrokenTangents = allMirrored; // Toggle
+                                                     if (!vDef.BrokenTangents)
+                                                     {
+                                                         // Sync out angle to mirror in
+                                                         vDef.OutTangentAngle = vDef.InTangentAngle + Math.PI;
+                                                     }
+                                                 });
+                        UpdateAllTangents();
+                        changed = true;
+                    }
+                }
+
+                {
+                    var anyWeighted = GetSelectedOrAllPoints().Any(v => v.Weighted);
+                    if (ImGui.MenuItem("Weighted Tensions", null, anyWeighted))
+                    {
+                        ForSelectedOrAllPointsDo((vDef) =>
+                                                 {
+                                                     vDef.Weighted = !anyWeighted; // Toggle
+                                                     if (!vDef.Weighted)
+                                                     {
+                                                         vDef.TensionIn = 1.0f;
+                                                         vDef.TensionOut = 1.0f;
+                                                     }
+                                                 });
+                        changed = true;
+                    }
                 }
 
                 ImGui.Separator();
@@ -332,11 +371,13 @@ internal abstract class CurveEditing
         ForSelectedOrAllPointsDo((vDef) =>
                                  {
                                      vDef.BrokenTangents = false;
-                                     vDef.InEditMode = VDefinition.EditMode.Smooth;
-                                     vDef.InType = VDefinition.Interpolation.Spline;
-                                     vDef.OutEditMode = VDefinition.EditMode.Smooth;
-                                     vDef.OutType = VDefinition.Interpolation.Spline;
+                                     vDef.InInterpolation = VDefinition.KeyInterpolation.Smooth;
+                                     vDef.OutInterpolation = VDefinition.KeyInterpolation.Smooth;
+                                     vDef.TensionIn = 1.0f;
+                                     vDef.TensionOut = 1.0f;
+                                     vDef.Weighted = false;
                                  });
+        
     }
 
     private void OnCubic()
@@ -344,10 +385,11 @@ internal abstract class CurveEditing
         ForSelectedOrAllPointsDo((vDef) =>
                                  {
                                      vDef.BrokenTangents = false;
-                                     vDef.InEditMode = VDefinition.EditMode.Cubic;
-                                     vDef.InType = VDefinition.Interpolation.Spline;
-                                     vDef.OutEditMode = VDefinition.EditMode.Cubic;
-                                     vDef.OutType = VDefinition.Interpolation.Spline;
+                                     vDef.InInterpolation = VDefinition.KeyInterpolation.Cubic;
+                                     vDef.OutInterpolation = VDefinition.KeyInterpolation.Cubic;
+                                     vDef.TensionIn = 1.0f;
+                                     vDef.TensionOut = 1.0f;
+                                     vDef.Weighted = false;
                                  });
     }
 
@@ -356,14 +398,13 @@ internal abstract class CurveEditing
         ForSelectedOrAllPointsDo((vDef) =>
                                  {
                                      vDef.BrokenTangents = false;
-
-                                     vDef.InEditMode = VDefinition.EditMode.Horizontal;
-                                     vDef.InType = VDefinition.Interpolation.Spline;
+                                     vDef.InInterpolation = VDefinition.KeyInterpolation.Horizontal;
                                      vDef.InTangentAngle = 0;
-
-                                     vDef.OutEditMode = VDefinition.EditMode.Horizontal;
-                                     vDef.OutType = VDefinition.Interpolation.Spline;
+                                     vDef.OutInterpolation = VDefinition.KeyInterpolation.Horizontal;
                                      vDef.OutTangentAngle = Math.PI;
+                                     vDef.TensionIn = 1.0f;
+                                     vDef.TensionOut = 1.0f;
+                                     vDef.Weighted = false;
                                  });
     }
 
@@ -372,8 +413,10 @@ internal abstract class CurveEditing
         ForSelectedOrAllPointsDo((vDef) =>
                                  {
                                      vDef.BrokenTangents = true;
-                                     vDef.OutType = VDefinition.Interpolation.Constant;
-                                     vDef.OutEditMode = VDefinition.EditMode.Constant;
+                                     vDef.OutInterpolation = VDefinition.KeyInterpolation.Constant;
+                                     vDef.TensionIn = 1.0f;
+                                     vDef.TensionOut = 1.0f;
+                                     vDef.Weighted = false;
                                  });
     }
 
@@ -381,11 +424,12 @@ internal abstract class CurveEditing
     {
         ForSelectedOrAllPointsDo((vDef) =>
                                  {
-                                     vDef.BrokenTangents = false;
-                                     vDef.InEditMode = VDefinition.EditMode.Linear;
-                                     vDef.InType = VDefinition.Interpolation.Linear;
-                                     vDef.OutEditMode = VDefinition.EditMode.Linear;
-                                     vDef.OutType = VDefinition.Interpolation.Linear;
+                                     vDef.BrokenTangents = true;
+                                     vDef.InInterpolation = VDefinition.KeyInterpolation.Linear;
+                                     vDef.OutInterpolation = VDefinition.KeyInterpolation.Linear;
+                                     vDef.TensionIn = 1.0f;
+                                     vDef.TensionOut = 1.0f;
+                                     vDef.Weighted = false;
                                  });
     }
 
@@ -405,13 +449,13 @@ internal abstract class CurveEditing
         }
     }
 
-    private IEnumerable<VDefinition.EditMode> GetSelectedKeyframeInterpolationTypes()
+    private IEnumerable<VDefinition.KeyInterpolation> GetSelectedKeyframeInterpolationTypes()
     {
-        var checkedInterpolationTypes = new HashSet<VDefinition.EditMode>();
+        var checkedInterpolationTypes = new HashSet<VDefinition.KeyInterpolation>();
         foreach (var point in GetSelectedOrAllPoints())
         {
-            checkedInterpolationTypes.Add(point.OutEditMode);
-            checkedInterpolationTypes.Add(point.InEditMode);
+            checkedInterpolationTypes.Add(point.OutInterpolation);
+            checkedInterpolationTypes.Add(point.InInterpolation);
         }
 
         return checkedInterpolationTypes;
@@ -437,13 +481,15 @@ internal abstract class CurveEditing
     {
         foreach (var curve in GetAllCurves())
         {
-            foreach( var (u,vDef) in curve.Table.ToList()) // Copy before modifications
+            curve.BeginBatchEdit();
+            foreach (var (u, vDef) in curve.Table.ToList()) // Copy before modifications
             {
                 if (Math.Abs(u - vDef.U) > 0.001f)
                 {
                     curve.MoveKey(u, vDef.U);
                 }
             }
+            curve.EndBatchEdit();
         }
     }
 

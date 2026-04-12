@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(SolutionDir)/Tixl.props" />
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -8,13 +9,14 @@
     <Platforms>AnyCPU</Platforms>
     <VersionPrefix>1.0.5</VersionPrefix>
     <HomeGuid>00000000-0000-0000-0000-000000000000</HomeGuid>
-    <EditorVersion>4.0.3</EditorVersion>
+    <EditorVersion>$(TixlVersion)</EditorVersion>
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>0108;9084;NU1900</NoWarn>
     <PackageId>fe98a538-31e2-47dc-82a4-62c2e1c29649</PackageId>
     <RootNamespace>Mediapipe</RootNamespace>
+    <AssemblyName>$(RootNamespace)</AssemblyName>
     <IsArchived>false</IsArchived>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -58,9 +60,11 @@
     <Using Alias="Format" Include="SharpDX.DXGI.Format" />
     <Using Alias="Texture2DDescription" Include="SharpDX.Direct3D11.Texture2DDescription" />
     <Using Alias="Texture3DDescription" Include="SharpDX.Direct3D11.Texture3DDescription" />
-    <Using Alias="RenderTargetBlendDescription" Include="SharpDX.Direct3D11.RenderTargetBlendDescription" />
+    <Using Alias="RenderTargetBlendDescription"
+      Include="SharpDX.Direct3D11.RenderTargetBlendDescription" />
     <Using Alias="SamplerState" Include="SharpDX.Direct3D11.SamplerState" />
-    <Using Alias="UnorderedAccessViewBufferFlags" Include="SharpDX.Direct3D11.UnorderedAccessViewBufferFlags" />
+    <Using Alias="UnorderedAccessViewBufferFlags"
+      Include="SharpDX.Direct3D11.UnorderedAccessViewBufferFlags" />
     <Using Alias="RawRectangle" Include="SharpDX.Mathematics.Interop.RawRectangle" />
     <Using Alias="RawViewportF" Include="SharpDX.Mathematics.Interop.RawViewportF" />
     <Using Alias="ResourceUsage" Include="SharpDX.Direct3D11.ResourceUsage" />
@@ -117,7 +121,8 @@
     </None>
     <None Remove="Examples\**" />
   </ItemGroup>
-  <!-- Copy package content into this project's own output only (not transitively to other projects).
+  <!-- Copy package content into this project's own output only (not transitively to other
+  projects).
        Uses a custom Target instead of <Content CopyToOutputDirectory> to prevent MSBuild from
        propagating these files into every project that builds as part of the same solution. -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
@@ -126,11 +131,20 @@
     <PackageSymbolUis Include="**/*.t3ui" Exclude="bin/**" />
     <PackageSourceCode Include="**/*.cs" Exclude="bin/**;obj/**" />
   </ItemGroup>
-  <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
-    <Copy SourceFiles="@(PackageAssets)" DestinationFiles="@(PackageAssets->'$(OutputPath)/Assets/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(PackageSymbols)" DestinationFiles="@(PackageSymbols->'$(OutputPath)/Symbols/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(PackageSymbolUis)" DestinationFiles="@(PackageSymbolUis->'$(OutputPath)/SymbolUis/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(PackageSourceCode)" DestinationFiles="@(PackageSourceCode->'$(OutputPath)/SourceCode/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  <Target Name="CopyPackageContent" AfterTargets="AfterBuild"
+    Condition="'$(Configuration)' == 'Release'">
+    <Copy SourceFiles="@(PackageAssets)"
+      DestinationFiles="@(PackageAssets->'$(OutputPath)/Assets/%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSymbols)"
+      DestinationFiles="@(PackageSymbols->'$(OutputPath)/Symbols/%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSymbolUis)"
+      DestinationFiles="@(PackageSymbolUis->'$(OutputPath)/SymbolUis/%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSourceCode)"
+      DestinationFiles="@(PackageSourceCode->'$(OutputPath)/SourceCode/%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
   </Target>
   <ItemGroup>
     <Compile Remove="Examples\**" />
@@ -149,26 +163,27 @@
     <ItemGroup Label="Define json structure of referenced operator packages">
       <OpPacks Include="@(Operators)">
         <OpPackageInfoJson>{
-    "Identity": "%(Identity)",
-    "Version": "%(Version)", 
-    "ResourcesOnly": "%(ResourcesOnly)"
-}</OpPackageInfoJson>
+          "Identity": "%(Identity)",
+          "Version": "%(Version)",
+          "ResourcesOnly": "%(ResourcesOnly)"
+          }</OpPackageInfoJson>
       </OpPacks>
     </ItemGroup>
     <PropertyGroup>
       <OperatorReferenceArray>@(OpPacks -> '%(OpPackageInfoJson)', ',')</OperatorReferenceArray>
       <OperatorPackageInfoJson>{
-    "HomeGuid": "$(HomeGuid)", 
-    "PackageId": "$(PackageId)",
-    "RootNamespace": "$(RootNamespace)",
-    "AssemblyFileName": "$(RootNamespace)",
-    "Version": "$(VersionPrefix)",
-    "EditorVersion": "$(EditorVersion)",
-    "IsEditorOnly": "$(IsEditorOnly)",
-    "OperatorPackages": [$(OperatorReferenceArray)
-    ]
-}</OperatorPackageInfoJson>
+        "HomeGuid": "$(HomeGuid)",
+        "PackageId": "$(PackageId)",
+        "RootNamespace": "$(RootNamespace)",
+        "AssemblyFileName": "$(RootNamespace)",
+        "Version": "$(VersionPrefix)",
+        "EditorVersion": "$(EditorVersion)",
+        "IsEditorOnly": "$(IsEditorOnly)",
+        "OperatorPackages": [$(OperatorReferenceArray)
+        ]
+        }</OperatorPackageInfoJson>
     </PropertyGroup>
-    <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
+    <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)"
+      Overwrite="True" Encoding="UTF-8" />
   </Target>
 </Project>

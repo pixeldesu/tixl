@@ -36,7 +36,7 @@ internal sealed class EaseKeys : Instance<EaseKeys>
 
         if (
             TryFindClosestKeys(currentTime, out var nearestKeys)
-            && nearestKeys.Item1.OutType != VDefinition.Interpolation.Constant
+            && nearestKeys.Item1.OutInterpolation != VDefinition.KeyInterpolation.Constant
         )
         {
             var (previousKey, nextKey) = nearestKeys;

@@ -91,15 +91,19 @@ public partial class ScalableCanvas
         }
     }
 
-    internal void SetVerticalScopeToCanvasArea(ImRect area, bool flipY = false, ScalableCanvas? parent = null)
+    internal void SetVerticalScopeToCanvasArea(ImRect area, bool flipY = false, ScalableCanvas? parent = null, float paddingFraction = 0f)
     {
         WindowSize = ImGui.GetWindowSize();
         var sizeY = area.GetSize().Y;
-        if (MathF.Abs(area.GetSize().Y) < 0.0001f)
+        if (MathF.Abs(sizeY) < 0.0001f)
         {
             sizeY = 1;
         }
-        
+
+        // Expand the area by padding on both sides
+        var padding = sizeY * paddingFraction;
+        sizeY += padding * 2;
+
         ScaleTarget.Y = WindowSize.Y / sizeY;
 
         if (flipY)
@@ -112,7 +116,7 @@ public partial class ScalableCanvas
             ScaleTarget.Y /= parent.Scale.Y;
         }
 
-        ScrollTarget.Y = area.Max.Y;
+        ScrollTarget.Y = area.Max.Y + padding;
     }
 
     internal ImRect GetVisibleCanvasArea()

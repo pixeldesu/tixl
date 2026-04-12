@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Animation;
@@ -32,9 +31,25 @@ public sealed class Curve : IEditableInputType
         return new Curve { _state = _state.Clone() };
     }
 
-    public Animation.CurveUtils.OutsideCurveBehavior PreCurveMapping { get => _state.PreCurveMapping; set => _state.PreCurveMapping = value; }
+    public Animation.CurveUtils.OutsideCurveBehavior PreCurveMapping
+    {
+        get => _state.PreCurveMapping;
+        set
+        {
+            _state.PreCurveMapping = value;
+            ChangeCount++;
+        }
+    }
 
-    public Animation.CurveUtils.OutsideCurveBehavior PostCurveMapping { get => _state.PostCurveMapping; set => _state.PostCurveMapping = value; }
+    public Animation.CurveUtils.OutsideCurveBehavior PostCurveMapping
+    {
+        get => _state.PostCurveMapping;
+        set
+        {
+            _state.PostCurveMapping = value;
+            ChangeCount++;
+        }
+    }
 
     public bool HasVAt(double u)
     {
@@ -96,6 +111,13 @@ public sealed class Curve : IEditableInputType
                                            out KeyValuePair<double, VDefinition> a,
                                            out KeyValuePair<double, VDefinition> b)
     {
+        if (_state.Table.Count == 0)
+        {
+            a = default;
+            b = default;
+            return false;
+        }
+
         // Return first keys
         var smallestTime = _state.Table.Keys[0];
         if (u < smallestTime || _state.Table.Count == 1)
@@ -117,18 +139,19 @@ public sealed class Curve : IEditableInputType
             return false;
         }
 
-        // This should never happen...
-            var index = FindIndexBefore(u);
-        if (index >= _state.Table.Count - 1)
+        var index = FindIndexBefore(u);
+        if (index < 0 || index >= _state.Table.Count - 1)
         {
-            var ka = _state.Table.Values[index];
-            a = new KeyValuePair<double, VDefinition>(ka.U,ka);
+            // Clamp to valid range
+            var clampedIndex = Math.Clamp(index, 0, _state.Table.Count - 1);
+            var ka = _state.Table.Values[clampedIndex];
+            a = new KeyValuePair<double, VDefinition>(ka.U, ka);
             b = a;
             return false;
         }
 
         var kA = _state.Table.Values[index];
-        var kB = _state.Table.Values[index+1];
+        var kB = _state.Table.Values[index + 1];
         a =new KeyValuePair<double, VDefinition>(kA.U,kA);
         b =new KeyValuePair<double, VDefinition>(kB.U,kB);
         return true;
@@ -162,12 +185,46 @@ public sealed class Curve : IEditableInputType
         return candidate;
     }
 
+    /// <summary>
+    /// Suppresses automatic tangent recomputation during bulk operations.
+    /// Use with <see cref="EndBatchEdit"/> to defer UpdateTangents until all mutations are done.
+    /// </summary>
+    public void BeginBatchEdit()
+    {
+        _batchEditDepth++;
+    }
+
+    /// <summary>
+    /// Ends a batch edit. When the outermost batch ends, tangents are recomputed once.
+    /// </summary>
+    public void EndBatchEdit()
+    {
+        if (_batchEditDepth <= 0)
+            return;
+
+        _batchEditDepth--;
+        if (_batchEditDepth == 0)
+        {
+            SplineInterpolator.UpdateTangents(_state.Table);
+            ChangeCount++;
+        }
+    }
+
     public void AddOrUpdateV(double u, VDefinition key)
     {
         u = Math.Round(u, TimePrecision);
         key.U = u;
+
+        // Clear parent on old key if replacing
+        if (_state.Table.TryGetValue(u, out var oldKey))
+            oldKey.ParentCurve = null;
+
+        key.ParentCurve = this;
         _state.Table[u] = key;
-        SplineInterpolator.UpdateTangents(_state.Table.ToList());
+
+        if (_batchEditDepth == 0)
+            SplineInterpolator.UpdateTangents(_state.Table);
+
         ChangeCount++;
     }
 
@@ -175,14 +232,21 @@ public sealed class Curve : IEditableInputType
     {
         u = Math.Round(u, TimePrecision);
         var state = _state;
+
+        if (state.Table.TryGetValue(u, out var removedKey))
+            removedKey.ParentCurve = null;
+
         state.Table.Remove(u);
-        SplineInterpolator.UpdateTangents(state.Table.ToList());
+
+        if (_batchEditDepth == 0)
+            SplineInterpolator.UpdateTangents(state.Table);
+
         ChangeCount++;
     }
 
     public void UpdateTangents()
     {
-        SplineInterpolator.UpdateTangents(_state.Table.ToList());
+        SplineInterpolator.UpdateTangents(_state.Table);
     }
 
     /// <summary>
@@ -209,9 +273,14 @@ public sealed class Curve : IEditableInputType
         state.Table.Remove(u);
         state.Table[newU] = key;
         key.U = newU;
-        SplineInterpolator.UpdateTangents(state.Table.ToList());
+
+        if (_batchEditDepth == 0)
+            SplineInterpolator.UpdateTangents(state.Table);
+
         ChangeCount++;
     }
+
+    private int _batchEditDepth;
 
 
     public bool TryGetKey(double u, [NotNullWhen(true)] out VDefinition? vDefinition)
@@ -268,14 +337,19 @@ public sealed class Curve : IEditableInputType
         else
         {
             TryGetKeysForInterpolation(mappedU, out var a, out var b);
-            
-            if (a.Value.OutType == VDefinition.Interpolation.Constant)
+
+            if (a.Value.OutInterpolation == VDefinition.KeyInterpolation.Constant)
             {
                 resultValue = offset + ConstInterpolator.Interpolate(a, b, mappedU);
             }
-            else if (a.Value.OutType == VDefinition.Interpolation.Linear && b.Value.OutType == VDefinition.Interpolation.Linear)
+            else if (a.Value.OutInterpolation == VDefinition.KeyInterpolation.Linear
+                     && b.Value.InInterpolation == VDefinition.KeyInterpolation.Linear)
             {
                 resultValue = offset + LinearInterpolator.Interpolate(a, b, mappedU);
+            }
+            else if (BezierInterpolator.SegmentNeedsBezier(a.Value, b.Value))
+            {
+                resultValue = offset + BezierInterpolator.Interpolate(a, b, mappedU);
             }
             else
             {
@@ -294,7 +368,21 @@ public sealed class Curve : IEditableInputType
     internal void Read(JToken inputToken)
     {
         _state.Read(inputToken);
+        SetParentOnAllKeys();
     }
+
+    private void SetParentOnAllKeys()
+    {
+        for (var i = 0; i < _state.Table.Count; i++)
+        {
+            _state.Table.Values[i].ParentCurve = this;
+        }
+    }
+
+    /// <summary>
+    /// Per-curve sample cache for efficient polyline rendering.
+    /// </summary>
+    public CurveSampleCache SampleCache { get; } = new();
 
     private CurveState _state = new();
 
@@ -303,10 +391,8 @@ public sealed class Curve : IEditableInputType
         var key = curves.GetV(time) ?? new VDefinition
                                            {
                                                U = time,
-                                               InType = VDefinition.Interpolation.Constant,
-                                               OutType = VDefinition.Interpolation.Constant,
-                                               InEditMode = VDefinition.EditMode.Constant,
-                                               OutEditMode = VDefinition.EditMode.Constant,
+                                               InInterpolation = VDefinition.KeyInterpolation.Constant,
+                                               OutInterpolation = VDefinition.KeyInterpolation.Constant,
                                            };
         key.Value = value ? 1 : 0;
         curves.AddOrUpdateV(time, key);
@@ -319,9 +405,7 @@ public sealed class Curve : IEditableInputType
             var key = curves[index].GetV(time) ?? new VDefinition { U = time };
             key.Value = values[index];
             curves[index].AddOrUpdateV(time, key);
-            curves[index].ChangeCount++;
         }
-        
     }
 
     public static void UpdateCurveValues(Curve[] curves, double time, int[] values)
@@ -331,16 +415,20 @@ public sealed class Curve : IEditableInputType
             var key = curves[index].GetV(time) ?? new VDefinition
                                                       {
                                                           U = time,
-                                                          InType = VDefinition.Interpolation.Constant,
-                                                          OutType = VDefinition.Interpolation.Constant,
-                                                          InEditMode = VDefinition.EditMode.Constant,
-                                                          OutEditMode = VDefinition.EditMode.Constant,
+                                                          InInterpolation = VDefinition.KeyInterpolation.Constant,
+                                                          OutInterpolation = VDefinition.KeyInterpolation.Constant,
                                                       };
             key.Value = values[index];
             curves[index].AddOrUpdateV(time, key);
-            curves[index].ChangeCount++;
         }
     }
     
+    /// <summary>
+    /// Increments the revision counter to invalidate caches.
+    /// Call this after directly modifying VDefinition properties (e.g. tangent angles)
+    /// without going through AddOrUpdateV/MoveKey/RemoveKeyframeAt.
+    /// </summary>
+    public void NotifyChanged() => ChangeCount++;
+
     public int ChangeCount { get; private set; }
 }

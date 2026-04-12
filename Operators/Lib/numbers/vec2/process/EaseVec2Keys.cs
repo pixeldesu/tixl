@@ -37,7 +37,7 @@ internal sealed class EaseVec2Keys : Instance<EaseVec2Keys>
 
             if (
                 TryFindClosestKeys(currentTime, curve, out var nearestKeys)
-                && nearestKeys.Item1.OutType != VDefinition.Interpolation.Constant
+                && nearestKeys.Item1.OutInterpolation != VDefinition.KeyInterpolation.Constant
             )
             {
                 var (previousKey, nextKey) = nearestKeys;

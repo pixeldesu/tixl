@@ -34,16 +34,20 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
     private readonly StringBuilder _stringBuilder = new(100);
     private readonly List<VDefinition> _visibleKeyframes = new(1000);
 
-    public void Draw(Instance compositionOp, List<TimeLineCanvas.AnimationParameter> animationParameters, bool fitCurvesVertically = false)
+    public void Draw(Instance compositionOp, List<TimeLineCanvas.AnimationParameter> animationParameters,
+                     bool fitCurvesVertically = false, bool fitVerticalOnly = false)
     {
         _visibleKeyframes.Clear();
         AnimationParameters = animationParameters;
 
-        if (fitCurvesVertically)
+        if (fitVerticalOnly)
+        {
+            if (TryGetBoundsOnCanvas(GetSelectedOrAllPoints(), out var bounds))
+                TimeLineCanvas.Current?.SetVerticalScopeToCanvasArea(bounds, flipY: true, paddingFraction: 0.15f);
+        }
+        else if (fitCurvesVertically)
         {
             ViewAllOrSelectedKeys(alsoChangeTimeRange: false);
-            //TryGetBoundsOnCanvas(GetSelectedOrAllPoints(), out var bounds);
-            //TimeLineCanvas.Current.SetVerticalScopeToCanvasArea(bounds, flipY: true);
         }
 
         ImGui.BeginGroup();
@@ -153,9 +157,18 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
                         DrawCurveLine(curve, TimeLineCanvas, color, isParamHovered || isParamComponentHovered);
                         drawList.ChannelsSetCurrent(1);
                         visibleCurveCount++;
-                        foreach (var keyframe in curve.GetVDefinitions().ToList())
+                        var keyframes = curve.GetVDefinitions();
+                        var keyframeCount = keyframes.Count;
+                        for (var ki = 0; ki < keyframeCount; ki++)
                         {
-                            CurvePoint.Draw(compositionSymbolId, keyframe, TimeLineCanvas, SelectedKeyframes.Contains(keyframe), this);
+                            var keyframe = keyframes[ki];
+                            var isSelected = SelectedKeyframes.Contains(keyframe);
+                            var isNeighborOfSelected = !isSelected
+                                                       && ((ki > 0 && SelectedKeyframes.Contains(keyframes[ki - 1]))
+                                                           || (ki < keyframeCount - 1 && SelectedKeyframes.Contains(keyframes[ki + 1])));
+                            var prevKey = ki > 0 ? keyframes[ki - 1] : null;
+                            var nextKey = ki < keyframeCount - 1 ? keyframes[ki + 1] : null;
+                            CurvePoint.Draw(compositionSymbolId, keyframe, TimeLineCanvas, isSelected, this, isNeighborOfSelected, prevKey, nextKey);
                             _visibleKeyframes.Add(keyframe);
                         }
 
@@ -464,32 +477,55 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
 
     public static void DrawCurveLine(Curve curve, ScalableCanvas canvas, Color color, bool isParamHovered = false)
     {
-        const float step = 3f;
-        var width = ImGui.GetWindowWidth();
+        var visibleStartU = canvas.InverseTransformPositionFloat(canvas.WindowPos).X;
+        var visibleEndU = canvas.InverseTransformPositionFloat(canvas.WindowPos + new Vector2(ImGui.GetWindowWidth(), 0)).X;
+        var screenScaleX = (double)canvas.Scale.X;
 
-        double dU = canvas.InverseTransformDirection(new Vector2(step, 0)).X;
-        double u = canvas.InverseTransformPositionFloat(canvas.WindowPos).X;
-        var x = canvas.WindowPos.X;
+        curve.SampleCache.Update(curve, visibleStartU, visibleEndU, screenScaleX);
 
-        var steps = (int)(width / step);
-        if (_curveLinePoints.Length != steps)
+        var cache = curve.SampleCache;
+        var firstKeyU = cache.FirstKeyU;
+        var lastKeyU = cache.LastKeyU;
+        if (double.IsNaN(firstKeyU))
+            return;
+
+        var drawList = ImGui.GetWindowDrawList();
+        var thickness = isParamHovered ? 3f : 1f;
+        var outsideColor = color.Fade(0.3f);
+
+        // Always draw 3 segments: dimmed pre, full body, dimmed post
+        // Use -/+Infinity for outer bounds to include all cached pre/post points beyond visible edges
+        DrawPolylineSegment(cache.GetPointsInRange(double.NegativeInfinity, firstKeyU), canvas, drawList, outsideColor, thickness);
+        DrawPolylineSegment(cache.GetPointsInRange(firstKeyU, lastKeyU), canvas, drawList, color, thickness);
+        DrawPolylineSegment(cache.GetPointsInRange(lastKeyU, double.PositiveInfinity), canvas, drawList, outsideColor, thickness);
+    }
+
+    private static void DrawPolylineSegment(ReadOnlySpan<Vector2> points, ScalableCanvas canvas,
+                                            ImDrawListPtr drawList, Color color, float thickness)
+    {
+        var pointCount = Math.Min(points.Length, MaxPolylinePoints);
+        if (pointCount < 2)
+            return;
+
+        for (var i = 0; i < pointCount; i++)
         {
-            _curveLinePoints = new Vector2[steps];
+            var screenPos = canvas.TransformPosition(points[i]);
+            _polylineBuffer[i] = new Vector2(screenPos.X, (int)screenPos.Y + 0.5f);
         }
 
-        for (var i = 0; i < steps; i++)
-        {
-            _curveLinePoints[i] = new Vector2(x, (int)canvas.TransformPosition(new Vector2(0, (float)curve.GetSampledValue(u))).Y + 0.5f);
-            u += dU;
-            x += step;
-        }
-
-        ImGui.GetWindowDrawList().AddPolyline(ref _curveLinePoints[0], steps, color, ImDrawFlags.None, isParamHovered ? 3 : 1);
+        drawList.AddPolyline(ref _polylineBuffer[0], pointCount, color, ImDrawFlags.None, thickness);
     }
 
     private static ChangeKeyframesCommand _changeKeyframesCommand;
-    private static Vector2[] _curveLinePoints = new Vector2[0];
     private readonly ValueSnapHandler _snapHandlerU;
     private readonly ValueSnapHandler _snapHandlerV;
     private readonly Dictionary<int, int> _pinnedParameterComponents = new();
+
+    /// <summary>
+    /// Shared pre-allocated buffer for building polyline screen points.
+    /// Used by both curve editor and dope sheet to avoid per-frame allocations.
+    /// Clamped to MaxPolylinePoints — dense clusters beyond this are visually indistinguishable.
+    /// </summary>
+    internal const int MaxPolylinePoints = 2000;
+    internal static readonly Vector2[] _polylineBuffer = new Vector2[MaxPolylinePoints];
 }

@@ -222,7 +222,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                             }
                         }
 
-                        SelectedKeyframes.UnionWith(curve.GetVDefinitions().Select(v => v));
+                        SelectedKeyframes.UnionWith(curve.GetVDefinitions());
                     }
 
                     if (someKeysNotVisible)
@@ -237,7 +237,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                     foreach (var curve in parameter.Curves)
                     {
                         // remove keys from selection
-                        SelectedKeyframes.ExceptWith(curve.GetVDefinitions().Select(v => v));
+                        SelectedKeyframes.ExceptWith(curve.GetVDefinitions());
                     }
 
                     MouseClickChangedSelection = true;
@@ -251,7 +251,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         }
 
         // Draw curves and gradients...
-        if (parameter.Curves.Count() == 4)
+        if (parameter.Curves.Length == 4)
         {
             DrawCurveGradient(parameter, layerArea, drawList);
         }
@@ -356,127 +356,107 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             "R", "G", "B", "A"
         ];
 
-    private static readonly List<Vector2> _positions = new(100); // Reuse list to avoid allocations
 
     private static void DrawCurveLines(TimeLineCanvas.AnimationParameter parameter, ImRect layerArea, ImDrawListPtr drawList)
     {
         Debug.Assert(TimeLineCanvas.Current != null);
 
         const float padding = 2;
-        // Lines
         var curveIndex = 0;
-        var screenMinX = TimeLineCanvas.Current.WindowPos.X - TimeLineCanvas.Current.WindowSize.X / 4;
-        var screenMaxX = TimeLineCanvas.Current.WindowPos.X + TimeLineCanvas.Current.WindowSize.X * 1.25f;
+        var canvas = TimeLineCanvas.Current;
+        var visibleStartU = canvas.InverseTransformPositionFloat(canvas.WindowPos).X;
+        var visibleEndU = canvas.InverseTransformPositionFloat(canvas.WindowPos + new Vector2(canvas.WindowSize.X, 0)).X;
+        var screenScaleX = (double)canvas.Scale.X;
+
         var minValue = float.PositiveInfinity;
         var maxValue = float.NegativeInfinity;
+
         foreach (var curve in parameter.Curves)
         {
-            var points = curve.GetVDefinitions();
-            if (points.Count == 0)
+            if (curve.Table.Count == 0)
                 continue;
 
-            _positions.Clear();
+            curve.SampleCache.Update(curve, visibleStartU, visibleEndU, screenScaleX);
+            var cache = curve.SampleCache;
+            var firstKeyU = cache.FirstKeyU;
+            var lastKeyU = cache.LastKeyU;
 
-
-            VDefinition? lastVDef = null;
-            float lastValue = 0;
-            float lastUOnScreen = 0;
-
-            var pointCount = points.Count;
-
-            for (var pointIndex = 0; pointIndex < pointCount; pointIndex++)
+            if (double.IsNaN(firstKeyU))
             {
-                var vDef = points[pointIndex];
-                var u = vDef.U;
-
-                // Sample new value range
-                var uOnScreen = TimeLineCanvas.Current.TransformX((float)u) - 1;
-                if (uOnScreen > screenMinX && uOnScreen < screenMaxX)
-                {
-                    if (minValue > vDef.Value)
-                        minValue = (float)vDef.Value;
-                    if (maxValue < vDef.Value)
-                        maxValue = (float)vDef.Value;
-                }
-
-                if (lastVDef != null && lastVDef.OutEditMode == VDefinition.EditMode.Constant)
-                {
-                    _positions.Add(new Vector2(
-                                               uOnScreen,
-                                               lastValue));
-                }
-                else if ((uOnScreen - lastUOnScreen) > 15 && lastVDef != null
-                                                          && (lastVDef.OutEditMode != VDefinition.EditMode.Linear ||
-                                                              vDef.OutEditMode != VDefinition.EditMode.Linear))
-                {
-                    int curveSteps = 6;
-                    for (var stepIndex = 0; stepIndex < curveSteps; stepIndex++)
-                    {
-                        var blendU = MathUtils.Remap(stepIndex, 0, curveSteps - 1, lastVDef.U, u);
-
-                        var value = (float)curve.GetSampledValue(blendU);
-                        _positions.Add(new Vector2(TimeLineCanvas.Current.TransformX((float)blendU),
-                                                   value));
-                    }
-                }
-
-                lastValue = (float)vDef.Value; 
-                _positions.Add(new Vector2(
-                                           TimeLineCanvas.Current.TransformX((float)u),
-                                           lastValue));
-
-                lastVDef = vDef;
-                lastUOnScreen = uOnScreen;
+                curveIndex++;
+                continue;
             }
 
-
-
-            for (var index = 0; index < _positions.Count; index++)
+            // Track min/max from ALL visible cached samples (including pre/post regions)
+            var allVisiblePoints = cache.GetPointsInRange(visibleStartU, visibleEndU);
+            for (var i = 0; i < allVisiblePoints.Length; i++)
             {
-                var p = _positions[index];
-                p.Y = p.Y.RemapAndClamp(parameter.DampedMaxValue, 
-                                parameter.DampedMinValue, 
-                                layerArea.Min.Y + padding, 
-                                layerArea.Max.Y - padding);
-                _positions[index] = p;
+                var value = allVisiblePoints[i].Y;
+                if (value < minValue)
+                    minValue = value;
+                if (value > maxValue)
+                    maxValue = value;
             }
 
-            if (_positions.Count > 0)
-            {
-                drawList.AddPolyline(
-                                     ref _positions.ToArray()[0],
-                                     _positions.Count,
-                                     parameter.Curves.Count() > 1 ? CurveColors[curveIndex % 4] : _grayCurveColor,
-                                     ImDrawFlags.None,
-                                     0.5f);
-            }
+            var bodyColor = parameter.Curves.Length > 1 ? CurveColors[curveIndex % 4] : _grayCurveColor;
+            var outsideColor = bodyColor.Fade(0.3f);
 
-            // Debug visualization...
-            // foreach (var p in _positions)
-            // {
-            //     _drawList.AddCircle(p + new Vector2(0,+20), 2, Color.Green.Fade(0.5f));
-            // }
+            // Always draw 3 segments: dimmed pre, full body, dimmed post
+            // Use -/+Infinity for outer bounds to include all cached pre/post points beyond visible edges
+            DrawDopeSheetPolyline(cache.GetPointsInRange(double.NegativeInfinity, firstKeyU), canvas, drawList, parameter, layerArea, padding, outsideColor);
+            DrawDopeSheetPolyline(cache.GetPointsInRange(firstKeyU, lastKeyU), canvas, drawList, parameter, layerArea, padding, bodyColor);
+            DrawDopeSheetPolyline(cache.GetPointsInRange(lastKeyU, double.PositiveInfinity), canvas, drawList, parameter, layerArea, padding, outsideColor);
+
             curveIndex++;
         }
         minValue = parameter.DampedMinValue.DampTowards(minValue);
         maxValue = parameter.DampedMaxValue.DampTowards(maxValue);
     }
 
+    private static void DrawDopeSheetPolyline(ReadOnlySpan<Vector2> points, TimeLineCanvas canvas,
+                                                ImDrawListPtr drawList, TimeLineCanvas.AnimationParameter parameter,
+                                                ImRect layerArea, float padding, Color color)
+    {
+        var pointCount = Math.Min(points.Length, TimelineCurveEditArea.MaxPolylinePoints);
+        if (pointCount < 2)
+            return;
+
+        var buf = TimelineCurveEditArea._polylineBuffer;
+        var valueRange = parameter.DampedMaxValue - parameter.DampedMinValue;
+        var centerY = (layerArea.Min.Y + layerArea.Max.Y) * 0.5f;
+        var isFlatRange = Math.Abs(valueRange) < 1e-6f;
+
+        for (var i = 0; i < pointCount; i++)
+        {
+            var p = points[i];
+            var screenX = canvas.TransformX(p.X);
+            var screenY = isFlatRange
+                              ? centerY
+                              : ((float)p.Y).RemapAndClamp(parameter.DampedMaxValue,
+                                                           parameter.DampedMinValue,
+                                                           layerArea.Min.Y + padding,
+                                                           layerArea.Max.Y - padding);
+            buf[i] = new Vector2(screenX, screenY);
+        }
+
+        drawList.AddPolyline(ref buf[0], pointCount, color, ImDrawFlags.None, 0.5f);
+    }
+
     private static void DrawCurveGradient(TimeLineCanvas.AnimationParameter parameter, ImRect layerArea, ImDrawListPtr drawList)
     {
         Debug.Assert(TimeLineCanvas.Current != null);
 
-        if (parameter.Curves.Count() != 4)
+        if (parameter.Curves.Length != 4)
             return;
 
-        var curve = parameter.Curves.First();
+        var curve = parameter.Curves[0];
         const float padding = 2;
 
         var points = curve.GetVDefinitions();
         var times = new float[points.Count];
         var colors = new Color[points.Count];
 
-        var curves = parameter.Curves.ToList();
+        var curves = parameter.Curves;
 
         var index = 0;
         foreach (var vDef in points)
@@ -523,7 +503,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                                       TimeLineCanvas.Current.TransformX(vDefU) - KeyframeIconWidth * T3Ui.UiScaleFactor / 2 + 1,
                                       layerArea.Min.Y);
 
-        if (vDef.OutEditMode == VDefinition.EditMode.Constant)
+        if (vDef.OutInterpolation == VDefinition.KeyInterpolation.Constant)
         {
             var availableSpace = nextVDef != null
                                      ? TimeLineCanvas.Current.TransformX((float)nextVDef.U) - posOnScreen.X
@@ -546,19 +526,19 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         {
             ImGui.PushStyleColor(ImGuiCol.Text, Color.White.Rgba);
             var isSelected = SelectedKeyframes.Contains(vDef);
-            if (vDef.OutEditMode == VDefinition.EditMode.Constant)
+            if (vDef.OutInterpolation == VDefinition.KeyInterpolation.Constant)
             {
                 Icons.DrawIconAtScreenPosition(isSelected ? Icon.ConstantKeyframeSelected : Icon.ConstantKeyframe, posOnScreen);
             }
-            else if (vDef.OutEditMode == VDefinition.EditMode.Horizontal)
+            else if (vDef.OutInterpolation == VDefinition.KeyInterpolation.Horizontal)
             {
                 Icons.DrawIconAtScreenPosition(isSelected ? Icon.DopeSheetKeyframeHorizontalSelected : Icon.DopeSheetKeyframeHorizontal, posOnScreen);
             }
-            else if (vDef.OutEditMode == VDefinition.EditMode.Cubic)
+            else if (vDef.OutInterpolation == VDefinition.KeyInterpolation.Cubic)
             {
                 Icons.DrawIconAtScreenPosition(isSelected ? Icon.DopeSheetKeyframeCubicSelected : Icon.DopeSheetKeyframeCubic, posOnScreen);
             }
-            else if (vDef.OutEditMode == VDefinition.EditMode.Smooth)
+            else if (vDef.OutInterpolation == VDefinition.KeyInterpolation.Smooth)
             {
                 Icons.DrawIconAtScreenPosition(isSelected ? Icon.DopeSheetKeyframeSmoothSelected : Icon.DopeSheetKeyframeSmooth, posOnScreen);
             }
