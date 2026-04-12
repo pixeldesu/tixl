@@ -162,7 +162,9 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
                             var isNeighborOfSelected = !isSelected
                                                        && ((ki > 0 && SelectedKeyframes.Contains(keyframes[ki - 1]))
                                                            || (ki < keyframeCount - 1 && SelectedKeyframes.Contains(keyframes[ki + 1])));
-                            CurvePoint.Draw(compositionSymbolId, keyframe, TimeLineCanvas, isSelected, this, isNeighborOfSelected);
+                            var prevKey = ki > 0 ? keyframes[ki - 1] : null;
+                            var nextKey = ki < keyframeCount - 1 ? keyframes[ki + 1] : null;
+                            CurvePoint.Draw(compositionSymbolId, keyframe, TimeLineCanvas, isSelected, this, isNeighborOfSelected, prevKey, nextKey);
                             _visibleKeyframes.Add(keyframe);
                         }
 
