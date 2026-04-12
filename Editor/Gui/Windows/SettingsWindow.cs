@@ -327,8 +327,16 @@ internal sealed partial class SettingsWindow : Window
                                                        They are saved as zip-archives to {AutoBackup.AutoBackup.BackupDirectory}.
                                                        """,
                                                       UserSettings.Defaults.EnableAutoBackup);
-
-                    changed |= FormInputs.AddCheckBox("Save Layout with Projects",
+                        if (UserSettings.Config.EnableAutoBackup)
+                            changed |= FormInputs.AddCheckBox("Enable Minimal Backup",
+                                                        ref UserSettings.Config.MinimalBackup,
+                                                        $""" 
+                                                        Only save the files with these extensions: .csproj, .cs, .t3, .t3ui, .hlsl, .json, .txt 
+                                                        This will considerably reduce the size of backup archives. 
+                                                        """,
+                                                        UserSettings.Defaults.MinimalBackup);
+                        FormInputs.AddVerticalSpace();
+                        changed |= FormInputs.AddCheckBox("Save Layout with Projects",
                         ref UserSettings.Config.SaveWindowLayoutsWithProjects,
                         """
                         When enabled, TiXL will save the window layout for each project.
@@ -341,7 +349,7 @@ internal sealed partial class SettingsWindow : Window
                                                                      ref UserSettings.Config.LoadMultiThreaded,
                                                                      """
                                                                      Using multi-threading for loading projects can significantly increase startup time.
-                                                                     During development or if loading freezes during startup it might be useful for disable this settings.
+                                                                     During development or if loading freezes during startup it might be useful to disable this setting.
                                                                      """,
                                                                      UserSettings.Config.LoadMultiThreaded);
 
