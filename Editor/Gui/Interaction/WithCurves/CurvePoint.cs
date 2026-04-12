@@ -89,6 +89,23 @@ internal static class CurvePoint
         }
         else if (ImGui.IsItemDeactivated())
         {
+            // Commit pending snap conversions on release
+            if ((_pendingSnaps & TangentSnaps.Linear) != 0)
+            {
+                if (_pendingSnapSide == TangentSide.In)
+                    _vDef.InInterpolation = VDefinition.KeyInterpolation.Linear;
+                else
+                    _vDef.OutInterpolation = VDefinition.KeyInterpolation.Linear;
+
+                _vDef.Weighted = false;
+            }
+
+            if ((_pendingSnaps & TangentSnaps.DefaultLength) != 0)
+            {
+                _vDef.Weighted = false;
+            }
+
+            _pendingSnaps = TangentSnaps.None;
             _isDraggingTangent = false;
         }
 
@@ -100,14 +117,17 @@ internal static class CurvePoint
     private static void HandleTangentDrag(Vector2 pCenter, TangentSide side)
     {
         var isIn = side == TangentSide.In;
+        var wasWeighted = _vDef.Weighted;
 
-        // Set this side to Tangent mode
+        // Convert this side to Tangent interpolation mode
         if (isIn)
             _vDef.InInterpolation = VDefinition.KeyInterpolation.Tangent;
         else
             _vDef.OutInterpolation = VDefinition.KeyInterpolation.Tangent;
 
-        _vDef.Weighted = true;
+        // Alt unlocks weight permanently; otherwise keep current weighted state
+        if (ImGui.GetIO().KeyAlt && !wasWeighted)
+            _vDef.Weighted = true;
 
         // Compute angle from mouse position
         var vectorInCanvas = _curveEditCanvas.InverseTransformDirection(ImGui.GetMousePos() - pCenter);
@@ -120,7 +140,9 @@ internal static class CurvePoint
         var segmentPixels = (float)segmentWidth * Math.Abs(_curveEditCanvas.Scale.X);
         var refLength = segmentPixels / 3.0f * T3Ui.UiScaleFactor;
         var screenDistance = (ImGui.GetMousePos() - pCenter).Length();
-        var rawTension = Math.Clamp(screenDistance / Math.Max(refLength, 1f), 0.05f, 3.0f);
+        var rawTension = _vDef.Weighted
+                             ? Math.Clamp(screenDistance / Math.Max(refLength, 1f), 0.05f, 3.0f)
+                             : 1.0f; // Unweighted: tension locked at 1.0
 
         // Apply snapping (unless Shift held)
         double finalAngle;
@@ -138,8 +160,13 @@ internal static class CurvePoint
                                           rawAngle, rawTension, neighborAngle, segmentWidth,
                                           out finalAngle, out finalTension);
 
-            if ((snaps & TangentSnaps.DefaultLength) != 0)
-                _vDef.Weighted = false;
+            // Track pending snap conversions (committed on release, not during drag)
+            _pendingSnaps = snaps & (TangentSnaps.DefaultLength | TangentSnaps.Linear);
+            _pendingSnapSide = side;
+
+            // Snap to linear: apply the angle and tension visually during drag
+            if ((snaps & TangentSnaps.Linear) != 0)
+                finalTension = 1.0f;
 
             if ((snaps & (TangentSnaps.Horizontal | TangentSnaps.Linear)) != 0)
             {
@@ -370,6 +397,8 @@ internal static class CurvePoint
     private static double _activeDragAngle;
     private static double _activeDragSegmentWidth;
     private static int _draggedKeyId;
+    private static TangentSnaps _pendingSnaps;
+    private static TangentSide _pendingSnapSide;
 
     // Angle snap fade state
     private static TangentSnaps _lastAngleSnaps = TangentSnaps.None;

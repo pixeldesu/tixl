@@ -109,8 +109,8 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
                         _lastSelectionHash = selectionHash;
 
                         _timelineCurveEditArea.Draw(compositionOp, _selectedAnimationParameters,
-                                                    fitCurvesVertically: modeChanged || heightChanged,
-                                                    fitVerticalOnly: selectionChanged);
+                                                    fitCurvesVertically: modeChanged,
+                                                    fitVerticalOnly: selectionChanged || heightChanged);
                         break;
                     }
                 }

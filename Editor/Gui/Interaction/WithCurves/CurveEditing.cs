@@ -83,14 +83,22 @@ internal abstract class CurveEditing
             {
                 CustomComponents.HintLabel("Interpolation...");
 
-                if (ImGui.MenuItem("Smooth", null, modes.Contains(VDefinition.KeyInterpolation.Smooth)))
+                if (ImGui.MenuItem("Linear", null, modes.Contains(VDefinition.KeyInterpolation.Linear)))
+                {
+                    OnLinear();
+                    UpdateAllTangents();
+                    changed = true;
+                }
+
+                
+                if (ImGui.MenuItem("Safe Smooth", null, modes.Contains(VDefinition.KeyInterpolation.Smooth)))
                 {
                     OnSmooth();
                     UpdateAllTangents();
                     changed = true;
                 }
 
-                if (ImGui.MenuItem("Cubic", null, modes.Contains(VDefinition.KeyInterpolation.Cubic)))
+                if (ImGui.MenuItem("Smooth", null, modes.Contains(VDefinition.KeyInterpolation.Cubic)))
                 {
                     OnCubic();
                     UpdateAllTangents();
@@ -111,11 +119,42 @@ internal abstract class CurveEditing
                     changed = true;
                 }
 
-                if (ImGui.MenuItem("Linear", null, modes.Contains(VDefinition.KeyInterpolation.Linear)))
+
+                ImGui.Separator();
+
                 {
-                    OnLinear();
-                    UpdateAllTangents();
-                    changed = true;
+                    var allMirrored = GetSelectedOrAllPoints().All(v => !v.BrokenTangents);
+                    if (ImGui.MenuItem("Mirror Tangents", null, allMirrored))
+                    {
+                        ForSelectedOrAllPointsDo((vDef) =>
+                                                 {
+                                                     vDef.BrokenTangents = allMirrored; // Toggle
+                                                     if (!vDef.BrokenTangents)
+                                                     {
+                                                         // Sync out angle to mirror in
+                                                         vDef.OutTangentAngle = vDef.InTangentAngle + Math.PI;
+                                                     }
+                                                 });
+                        UpdateAllTangents();
+                        changed = true;
+                    }
+                }
+
+                {
+                    var anyWeighted = GetSelectedOrAllPoints().Any(v => v.Weighted);
+                    if (ImGui.MenuItem("Weighted Tensions", null, anyWeighted))
+                    {
+                        ForSelectedOrAllPointsDo((vDef) =>
+                                                 {
+                                                     vDef.Weighted = !anyWeighted; // Toggle
+                                                     if (!vDef.Weighted)
+                                                     {
+                                                         vDef.TensionIn = 1.0f;
+                                                         vDef.TensionOut = 1.0f;
+                                                     }
+                                                 });
+                        changed = true;
+                    }
                 }
 
                 ImGui.Separator();
@@ -338,6 +377,16 @@ internal abstract class CurveEditing
                                      vDef.TensionOut = 1.0f;
                                      vDef.Weighted = false;
                                  });
+
+        // Set first key's In and last key's Out to Horizontal for artist-friendly endpoints
+        var allKeys = GetSelectedOrAllPoints().OrderBy(v => v.U).ToList();
+        if (allKeys.Count >= 2)
+        {
+            allKeys[0].InInterpolation = VDefinition.KeyInterpolation.Horizontal;
+            allKeys[0].InTangentAngle = 0;
+            allKeys[^1].OutInterpolation = VDefinition.KeyInterpolation.Horizontal;
+            allKeys[^1].OutTangentAngle = Math.PI;
+        }
     }
 
     private void OnCubic()
