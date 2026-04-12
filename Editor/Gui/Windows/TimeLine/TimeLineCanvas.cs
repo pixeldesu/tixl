@@ -99,9 +99,14 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
                         DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
                         break;
                     case Modes.CurveEditor:
+                    {
                         _horizontalRaster.Draw(this);
-                        _timelineCurveEditArea.Draw(compositionOp, _selectedAnimationParameters, fitCurvesVertically: modeChanged);
+                        var heightChanged = Math.Abs(ImGui.GetWindowHeight() - _lastCurveEditorHeight) > 1f;
+                        _lastCurveEditorHeight = ImGui.GetWindowHeight();
+                        _timelineCurveEditArea.Draw(compositionOp, _selectedAnimationParameters,
+                                                    fitCurvesVertically: modeChanged || heightChanged);
                         break;
+                    }
                 }
 
                 var compositionTimeClip = Structure.GetCompositionTimeClip(compositionOp);
@@ -360,6 +365,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
 
     public Modes Mode = Modes.DopeView;
     private Modes _lastMode = Modes.Undefined;
+    private float _lastCurveEditorHeight;
 
     private void SyncStateWithComposition(Instance compositionOp)
     {
@@ -402,6 +408,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         state.ScaleX = Scale.X;
         state.ScrollX = Scroll.X;
         state.Mode = Mode;
+        state.TimelineHeight = FoldingHeight._customTimeLineHeight;
     }
 
     internal void LoadStateFrom(TimelineState state)
@@ -411,6 +418,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         ScrollTarget = new Vector2(state.ScrollX, ScrollTarget.Y);
         Scroll = new Vector2(state.ScrollX, Scroll.Y);
         Mode = state.Mode;
+        FoldingHeight._customTimeLineHeight = state.TimelineHeight;
     }
 
     #endregion
@@ -604,7 +612,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         }
 
         private const int UseComputedHeight = -1;
-        private int _customTimeLineHeight = UseComputedHeight;
+        internal int _customTimeLineHeight = UseComputedHeight;
         private readonly TimeLineCanvas _timeline;
         public bool UsingCustomTimelineHeight => _customTimeLineHeight > UseComputedHeight;
 

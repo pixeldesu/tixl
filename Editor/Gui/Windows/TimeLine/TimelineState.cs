@@ -18,6 +18,9 @@ internal sealed class TimelineState
     [JsonConverter(typeof(StringEnumConverter))]
     public TimeLineCanvas.Modes Mode = TimeLineCanvas.Modes.DopeView;
 
+    // Layout
+    public int TimelineHeight = -1; // -1 = auto-computed
+
     #region Serialization
 
     internal void WriteToJson(JsonTextWriter writer)
