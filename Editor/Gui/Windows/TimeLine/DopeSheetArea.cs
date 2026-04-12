@@ -422,14 +422,20 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             return;
 
         var buf = TimelineCurveEditArea._polylineBuffer;
+        var valueRange = parameter.DampedMaxValue - parameter.DampedMinValue;
+        var centerY = (layerArea.Min.Y + layerArea.Max.Y) * 0.5f;
+        var isFlatRange = Math.Abs(valueRange) < 1e-6f;
+
         for (var i = 0; i < pointCount; i++)
         {
             var p = points[i];
             var screenX = canvas.TransformX(p.X);
-            var screenY = ((float)p.Y).RemapAndClamp(parameter.DampedMaxValue,
-                                                     parameter.DampedMinValue,
-                                                     layerArea.Min.Y + padding,
-                                                     layerArea.Max.Y - padding);
+            var screenY = isFlatRange
+                              ? centerY
+                              : ((float)p.Y).RemapAndClamp(parameter.DampedMaxValue,
+                                                           parameter.DampedMinValue,
+                                                           layerArea.Min.Y + padding,
+                                                           layerArea.Max.Y - padding);
             buf[i] = new Vector2(screenX, screenY);
         }
 

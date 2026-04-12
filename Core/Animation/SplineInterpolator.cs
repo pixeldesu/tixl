@@ -52,8 +52,8 @@ internal static class SplineInterpolator
 
     private static bool NeedsTangentComputation(VDefinition def)
     {
-        return def.InInterpolation is not (VDefinition.KeyInterpolation.Constant or VDefinition.KeyInterpolation.Linear)
-               || def.OutInterpolation is not (VDefinition.KeyInterpolation.Constant or VDefinition.KeyInterpolation.Linear);
+        return def.InInterpolation != VDefinition.KeyInterpolation.Constant
+               || def.OutInterpolation != VDefinition.KeyInterpolation.Constant;
     }
 
     /// <summary>

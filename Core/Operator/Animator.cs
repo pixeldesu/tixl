@@ -115,8 +115,9 @@ public sealed class Animator : SymbolExtension
                                    new VDefinition
                                        {
                                            Value = values[i],
-                                           InInterpolation = VDefinition.KeyInterpolation.Smooth,
-                                           OutInterpolation = VDefinition.KeyInterpolation.Smooth,
+                                           InInterpolation = VDefinition.KeyInterpolation.Linear,
+                                           OutInterpolation = VDefinition.KeyInterpolation.Linear,
+                                           BrokenTangents = true,
                                        });
         }
 

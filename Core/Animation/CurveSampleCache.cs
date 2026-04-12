@@ -187,12 +187,13 @@ public sealed class CurveSampleCache
 
     private void SampleSegment(Curve curve, double aU, VDefinition aDef, double bU, VDefinition bDef, double screenScaleX)
     {
-        // Constant: hold value with step at boundary
+        // Constant: hold value with vertical step at boundary
         if (aDef.OutInterpolation == VDefinition.KeyInterpolation.Constant)
         {
             AddPointIfNew(aU, aDef.Value);
-            // Add point just before bU at the held value for the step
+            // Two points at bU: held value then new value, forming the vertical step
             AddPoint(bU, aDef.Value);
+            AddPoint(bU, bDef.Value);
             return;
         }
 

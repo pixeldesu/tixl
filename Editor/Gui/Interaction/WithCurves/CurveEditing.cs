@@ -372,7 +372,7 @@ internal abstract class CurveEditing
     {
         ForSelectedOrAllPointsDo((vDef) =>
                                  {
-                                     vDef.BrokenTangents = false;
+                                     vDef.BrokenTangents = true;
                                      vDef.InInterpolation = VDefinition.KeyInterpolation.Linear;
                                      vDef.OutInterpolation = VDefinition.KeyInterpolation.Linear;
                                  });
