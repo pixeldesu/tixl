@@ -68,8 +68,8 @@ public sealed class VDefinition
     internal void Read(JToken jsonV)
     {
         Value = jsonV.Value<double>(nameof(Value));
-        InTangentAngle = jsonV.Value<double>(nameof(InTangentAngle));
-        OutTangentAngle = jsonV.Value<double>(nameof(OutTangentAngle));
+        InTangentAngle = jsonV.ReadValueSafe(nameof(InTangentAngle), 0.0);
+        OutTangentAngle = jsonV.ReadValueSafe(nameof(OutTangentAngle), 0.0);
         Weighted = jsonV.ReadValueSafe(nameof(Weighted), false);
         BrokenTangents = jsonV.ReadValueSafe(nameof(BrokenTangents), false);
 
@@ -121,10 +121,18 @@ public sealed class VDefinition
         writer.WriteValue(nameof(Value), Value);
         writer.WriteObject(nameof(InInterpolation), InInterpolation);
         writer.WriteObject(nameof(OutInterpolation), OutInterpolation);
-        writer.WriteValue(nameof(InTangentAngle), InTangentAngle);
-        writer.WriteValue(nameof(OutTangentAngle), OutTangentAngle);
-        writer.WriteValue(nameof(Weighted), Weighted);
-        writer.WriteValue(nameof(BrokenTangents), BrokenTangents);
+
+        if (InTangentAngle != 0.0)
+            writer.WriteValue(nameof(InTangentAngle), InTangentAngle);
+
+        if (OutTangentAngle != 0.0)
+            writer.WriteValue(nameof(OutTangentAngle), OutTangentAngle);
+
+        if (Weighted)
+            writer.WriteValue(nameof(Weighted), true);
+
+        if (BrokenTangents)
+            writer.WriteValue(nameof(BrokenTangents), true);
     }
 
     private static int _nextId;
