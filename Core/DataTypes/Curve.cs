@@ -177,6 +177,31 @@ public sealed class Curve : IEditableInputType
         return candidate;
     }
 
+    /// <summary>
+    /// Suppresses automatic tangent recomputation during bulk operations.
+    /// Use with <see cref="EndBatchEdit"/> to defer UpdateTangents until all mutations are done.
+    /// </summary>
+    public void BeginBatchEdit()
+    {
+        _batchEditDepth++;
+    }
+
+    /// <summary>
+    /// Ends a batch edit. When the outermost batch ends, tangents are recomputed once.
+    /// </summary>
+    public void EndBatchEdit()
+    {
+        if (_batchEditDepth <= 0)
+            return;
+
+        _batchEditDepth--;
+        if (_batchEditDepth == 0)
+        {
+            SplineInterpolator.UpdateTangents(_state.Table);
+            ChangeCount++;
+        }
+    }
+
     public void AddOrUpdateV(double u, VDefinition key)
     {
         u = Math.Round(u, TimePrecision);
@@ -188,7 +213,10 @@ public sealed class Curve : IEditableInputType
 
         key.ParentCurve = this;
         _state.Table[u] = key;
-        SplineInterpolator.UpdateTangents(_state.Table);
+
+        if (_batchEditDepth == 0)
+            SplineInterpolator.UpdateTangents(_state.Table);
+
         ChangeCount++;
     }
 
@@ -201,7 +229,10 @@ public sealed class Curve : IEditableInputType
             removedKey.ParentCurve = null;
 
         state.Table.Remove(u);
-        SplineInterpolator.UpdateTangents(state.Table);
+
+        if (_batchEditDepth == 0)
+            SplineInterpolator.UpdateTangents(state.Table);
+
         ChangeCount++;
     }
 
@@ -234,9 +265,14 @@ public sealed class Curve : IEditableInputType
         state.Table.Remove(u);
         state.Table[newU] = key;
         key.U = newU;
-        SplineInterpolator.UpdateTangents(state.Table);
+
+        if (_batchEditDepth == 0)
+            SplineInterpolator.UpdateTangents(state.Table);
+
         ChangeCount++;
     }
+
+    private int _batchEditDepth;
 
 
     public bool TryGetKey(double u, [NotNullWhen(true)] out VDefinition? vDefinition)

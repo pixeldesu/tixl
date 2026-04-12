@@ -426,13 +426,15 @@ internal abstract class CurveEditing
     {
         foreach (var curve in GetAllCurves())
         {
-            foreach( var (u,vDef) in curve.Table.ToList()) // Copy before modifications
+            curve.BeginBatchEdit();
+            foreach (var (u, vDef) in curve.Table.ToList()) // Copy before modifications
             {
                 if (Math.Abs(u - vDef.U) > 0.001f)
                 {
                     curve.MoveKey(u, vDef.U);
                 }
             }
+            curve.EndBatchEdit();
         }
     }
 
