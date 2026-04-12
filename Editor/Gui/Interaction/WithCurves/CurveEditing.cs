@@ -334,6 +334,9 @@ internal abstract class CurveEditing
                                      vDef.BrokenTangents = false;
                                      vDef.InInterpolation = VDefinition.KeyInterpolation.Smooth;
                                      vDef.OutInterpolation = VDefinition.KeyInterpolation.Smooth;
+                                     vDef.TensionIn = 1.0f;
+                                     vDef.TensionOut = 1.0f;
+                                     vDef.Weighted = false;
                                  });
     }
 
@@ -344,6 +347,9 @@ internal abstract class CurveEditing
                                      vDef.BrokenTangents = false;
                                      vDef.InInterpolation = VDefinition.KeyInterpolation.Cubic;
                                      vDef.OutInterpolation = VDefinition.KeyInterpolation.Cubic;
+                                     vDef.TensionIn = 1.0f;
+                                     vDef.TensionOut = 1.0f;
+                                     vDef.Weighted = false;
                                  });
     }
 
@@ -356,6 +362,9 @@ internal abstract class CurveEditing
                                      vDef.InTangentAngle = 0;
                                      vDef.OutInterpolation = VDefinition.KeyInterpolation.Horizontal;
                                      vDef.OutTangentAngle = Math.PI;
+                                     vDef.TensionIn = 1.0f;
+                                     vDef.TensionOut = 1.0f;
+                                     vDef.Weighted = false;
                                  });
     }
 
@@ -365,6 +374,9 @@ internal abstract class CurveEditing
                                  {
                                      vDef.BrokenTangents = true;
                                      vDef.OutInterpolation = VDefinition.KeyInterpolation.Constant;
+                                     vDef.TensionIn = 1.0f;
+                                     vDef.TensionOut = 1.0f;
+                                     vDef.Weighted = false;
                                  });
     }
 
@@ -375,6 +387,9 @@ internal abstract class CurveEditing
                                      vDef.BrokenTangents = true;
                                      vDef.InInterpolation = VDefinition.KeyInterpolation.Linear;
                                      vDef.OutInterpolation = VDefinition.KeyInterpolation.Linear;
+                                     vDef.TensionIn = 1.0f;
+                                     vDef.TensionOut = 1.0f;
+                                     vDef.Weighted = false;
                                  });
     }
 

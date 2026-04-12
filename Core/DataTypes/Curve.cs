@@ -111,6 +111,13 @@ public sealed class Curve : IEditableInputType
                                            out KeyValuePair<double, VDefinition> a,
                                            out KeyValuePair<double, VDefinition> b)
     {
+        if (_state.Table.Count == 0)
+        {
+            a = default;
+            b = default;
+            return false;
+        }
+
         // Return first keys
         var smallestTime = _state.Table.Keys[0];
         if (u < smallestTime || _state.Table.Count == 1)
@@ -338,6 +345,10 @@ public sealed class Curve : IEditableInputType
                      && b.Value.InInterpolation == VDefinition.KeyInterpolation.Linear)
             {
                 resultValue = offset + LinearInterpolator.Interpolate(a, b, mappedU);
+            }
+            else if (BezierInterpolator.SegmentNeedsBezier(a.Value, b.Value))
+            {
+                resultValue = offset + BezierInterpolator.Interpolate(a, b, mappedU);
             }
             else
             {

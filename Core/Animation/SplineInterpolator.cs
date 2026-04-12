@@ -66,9 +66,9 @@ internal static class SplineInterpolator
 
         double tangentLength = b.Key - a.Key;
         var p0 = a.Value.Value;
-        var m0 = SlopFromAngle(a.Value.OutTangentAngle) * tangentLength;
+        var m0 = SlopFromAngle(a.Value.OutTangentAngle) * tangentLength * a.Value.TensionOut;
         var p1 = b.Value.Value;
-        var m1 = SlopFromAngle(b.Value.InTangentAngle) * tangentLength;
+        var m1 = SlopFromAngle(b.Value.InTangentAngle) * tangentLength * b.Value.TensionIn;
 
         var t2 = t * t;
         var t3 = t2 * t;

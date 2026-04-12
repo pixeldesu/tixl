@@ -77,6 +77,20 @@ public sealed class VDefinition
         set { _brokenTangents = value; ParentCurve?.NotifyChanged(); }
     }
 
+    /// <summary>Influence multiplier for the incoming tangent. Default 1.0 = full segment width.</summary>
+    public float TensionIn
+    {
+        get => _tensionIn;
+        set { _tensionIn = value; ParentCurve?.NotifyChanged(); }
+    }
+
+    /// <summary>Influence multiplier for the outgoing tangent. Default 1.0 = full segment width.</summary>
+    public float TensionOut
+    {
+        get => _tensionOut;
+        set { _tensionOut = value; ParentCurve?.NotifyChanged(); }
+    }
+
     public VDefinition Clone()
     {
         return new VDefinition()
@@ -89,6 +103,8 @@ public sealed class VDefinition
                        _outTangentAngle = _outTangentAngle,
                        _weighted = _weighted,
                        _brokenTangents = _brokenTangents,
+                       _tensionIn = _tensionIn,
+                       _tensionOut = _tensionOut,
                        // ParentCurve intentionally NOT copied — clone is independent
                    };
     }
@@ -103,6 +119,8 @@ public sealed class VDefinition
         _outTangentAngle = def._outTangentAngle;
         _weighted = def._weighted;
         _brokenTangents = def._brokenTangents;
+        _tensionIn = def._tensionIn;
+        _tensionOut = def._tensionOut;
         ParentCurve?.NotifyChanged();
     }
 
@@ -113,6 +131,8 @@ public sealed class VDefinition
         _outTangentAngle = jsonV.ReadValueSafe(nameof(OutTangentAngle), 0.0);
         _weighted = jsonV.ReadValueSafe(nameof(Weighted), false);
         _brokenTangents = jsonV.ReadValueSafe(nameof(BrokenTangents), false);
+        _tensionIn = (float)jsonV.ReadValueSafe(nameof(TensionIn), 1.0);
+        _tensionOut = (float)jsonV.ReadValueSafe(nameof(TensionOut), 1.0);
 
         // New format: unified InInterpolation / OutInterpolation
         if (jsonV[nameof(InInterpolation)] != null)
@@ -174,6 +194,14 @@ public sealed class VDefinition
 
         if (_brokenTangents)
             writer.WriteValue(nameof(BrokenTangents), true);
+
+        // ReSharper disable CompareOfFloatsByEqualityOperator
+        if (_tensionIn != 1.0f)
+            writer.WriteValue(nameof(TensionIn), _tensionIn);
+
+        if (_tensionOut != 1.0f)
+            writer.WriteValue(nameof(TensionOut), _tensionOut);
+        // ReSharper restore CompareOfFloatsByEqualityOperator
     }
 
     private double _value;
@@ -183,5 +211,7 @@ public sealed class VDefinition
     private double _outTangentAngle;
     private bool _weighted;
     private bool _brokenTangents;
+    private float _tensionIn = 1.0f;
+    private float _tensionOut = 1.0f;
     private static int _nextId;
 }
