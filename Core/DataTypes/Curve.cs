@@ -139,18 +139,19 @@ public sealed class Curve : IEditableInputType
             return false;
         }
 
-        // This should never happen...
-            var index = FindIndexBefore(u);
-        if (index >= _state.Table.Count - 1)
+        var index = FindIndexBefore(u);
+        if (index < 0 || index >= _state.Table.Count - 1)
         {
-            var ka = _state.Table.Values[index];
-            a = new KeyValuePair<double, VDefinition>(ka.U,ka);
+            // Clamp to valid range
+            var clampedIndex = Math.Clamp(index, 0, _state.Table.Count - 1);
+            var ka = _state.Table.Values[clampedIndex];
+            a = new KeyValuePair<double, VDefinition>(ka.U, ka);
             b = a;
             return false;
         }
 
         var kA = _state.Table.Values[index];
-        var kB = _state.Table.Values[index+1];
+        var kB = _state.Table.Values[index + 1];
         a =new KeyValuePair<double, VDefinition>(kA.U,kA);
         b =new KeyValuePair<double, VDefinition>(kB.U,kB);
         return true;
