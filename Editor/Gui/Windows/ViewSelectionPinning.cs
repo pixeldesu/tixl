@@ -277,6 +277,7 @@ internal sealed class ViewSelectionPinning
         }
 
         _pinnedInstancePath = instance != null ? instance.InstancePath : [];
+        _pinnedEvaluationInstancePath = _pinnedInstancePath;
         _pinnedProjectView = projectView;
         _isPinned = true;
     }
@@ -286,6 +287,7 @@ internal sealed class ViewSelectionPinning
         _isPinned = false;
         _pinnedProjectView = null;
         _pinnedInstancePath = [];
+        _pinnedEvaluationInstancePath = [];
     }
 
     public bool TryGetPinnedEvaluationInstance(Structure structure, [NotNullWhen(true)] out Instance? instance)
