@@ -178,4 +178,93 @@ public class CurveInterpolationTests
         Assert.Equal(7.0, curve.GetSampledValue(2.0), 4);
         Assert.Equal(7.0, curve.GetSampledValue(100.0), 4);
     }
+
+    [Fact]
+    public void SingleKey_ReturnsThatValueEverywhere()
+    {
+        var curve = new Curve();
+        curve.AddOrUpdateV(5.0, new VDefinition
+                                    {
+                                        Value = 42.0,
+                                        InInterpolation = VDefinition.KeyInterpolation.Smooth,
+                                        OutInterpolation = VDefinition.KeyInterpolation.Smooth,
+                                    });
+
+        Assert.Equal(42.0, curve.GetSampledValue(0.0), 4);
+        Assert.Equal(42.0, curve.GetSampledValue(5.0), 4);
+        Assert.Equal(42.0, curve.GetSampledValue(10.0), 4);
+    }
+
+    [Fact]
+    public void EmptyCurve_ReturnsZero()
+    {
+        var curve = new Curve();
+
+        Assert.Equal(0.0, curve.GetSampledValue(0.0));
+        Assert.Equal(0.0, curve.GetSampledValue(1.0));
+    }
+
+    [Fact]
+    public void EqualEndpoints_WithUpwardTangents_ProducesOvershoot()
+    {
+        // Two keys at same value with tangents both pointing upward —
+        // spline interpolation should overshoot above 5.0 (intentional behavior).
+        var curve = new Curve();
+        curve.AddOrUpdateV(0.0, new VDefinition
+                                    {
+                                        Value = 5.0,
+                                        InInterpolation = VDefinition.KeyInterpolation.Tangent,
+                                        OutInterpolation = VDefinition.KeyInterpolation.Tangent,
+                                        InTangentAngle = 0.0,
+                                        OutTangentAngle = 0.7854, // ~45 degrees up
+                                    });
+        curve.AddOrUpdateV(1.0, new VDefinition
+                                    {
+                                        Value = 5.0,
+                                        InInterpolation = VDefinition.KeyInterpolation.Tangent,
+                                        OutInterpolation = VDefinition.KeyInterpolation.Tangent,
+                                        InTangentAngle = Math.PI - 0.7854, // ~135 degrees = coming from above
+                                        OutTangentAngle = 0.0,
+                                    });
+
+        // Endpoints must be exactly 5.0
+        Assert.Equal(5.0, curve.GetSampledValue(0.0), 4);
+        Assert.Equal(5.0, curve.GetSampledValue(1.0), 4);
+
+        // Midpoint should be above 5.0 due to both tangents pushing upward
+        var mid = curve.GetSampledValue(0.5);
+        Assert.True(mid > 5.1, $"Expected overshoot above 5.0, got {mid}");
+    }
+
+    [Fact]
+    public void MixedInterpolation_ConstantThenLinear()
+    {
+        var curve = new Curve();
+        curve.AddOrUpdateV(0.0, new VDefinition
+                                    {
+                                        Value = 1.0,
+                                        InInterpolation = VDefinition.KeyInterpolation.Constant,
+                                        OutInterpolation = VDefinition.KeyInterpolation.Constant,
+                                    });
+        curve.AddOrUpdateV(1.0, new VDefinition
+                                    {
+                                        Value = 3.0,
+                                        InInterpolation = VDefinition.KeyInterpolation.Linear,
+                                        OutInterpolation = VDefinition.KeyInterpolation.Linear,
+                                    });
+        curve.AddOrUpdateV(2.0, new VDefinition
+                                    {
+                                        Value = 5.0,
+                                        InInterpolation = VDefinition.KeyInterpolation.Linear,
+                                        OutInterpolation = VDefinition.KeyInterpolation.Linear,
+                                    });
+
+        // First segment: constant hold
+        Assert.Equal(1.0, curve.GetSampledValue(0.5), 4);
+        // At key 1: snap to 3.0
+        Assert.Equal(3.0, curve.GetSampledValue(1.0), 4);
+        // Second segment: linear 3→5
+        Assert.Equal(4.0, curve.GetSampledValue(1.5), 4);
+        Assert.Equal(5.0, curve.GetSampledValue(2.0), 4);
+    }
 }

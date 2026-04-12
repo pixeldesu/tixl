@@ -573,7 +573,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
     
     public sealed class AnimationParameter
     {
-        public required IEnumerable<Curve> Curves;
+        public required Curve[] Curves;
         public required IInputSlot Input;
         public required Instance Instance;
         public required SymbolUi.Child ChildUi;

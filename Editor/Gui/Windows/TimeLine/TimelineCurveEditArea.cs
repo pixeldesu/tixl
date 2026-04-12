@@ -153,7 +153,7 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
                         DrawCurveLine(curve, TimeLineCanvas, color, isParamHovered || isParamComponentHovered);
                         drawList.ChannelsSetCurrent(1);
                         visibleCurveCount++;
-                        foreach (var keyframe in curve.GetVDefinitions().ToList())
+                        foreach (var keyframe in curve.GetVDefinitions())
                         {
                             CurvePoint.Draw(compositionSymbolId, keyframe, TimeLineCanvas, SelectedKeyframes.Contains(keyframe), this);
                             _visibleKeyframes.Add(keyframe);
@@ -472,7 +472,7 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
         var x = canvas.WindowPos.X;
 
         var steps = (int)(width / step);
-        if (_curveLinePoints.Length != steps)
+        if (_curveLinePoints.Length < steps)
         {
             _curveLinePoints = new Vector2[steps];
         }

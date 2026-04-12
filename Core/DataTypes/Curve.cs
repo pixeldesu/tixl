@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Animation;
@@ -183,7 +182,7 @@ public sealed class Curve : IEditableInputType
         u = Math.Round(u, TimePrecision);
         key.U = u;
         _state.Table[u] = key;
-        SplineInterpolator.UpdateTangents(_state.Table.ToList());
+        SplineInterpolator.UpdateTangents(_state.Table);
         ChangeCount++;
     }
 
@@ -192,13 +191,13 @@ public sealed class Curve : IEditableInputType
         u = Math.Round(u, TimePrecision);
         var state = _state;
         state.Table.Remove(u);
-        SplineInterpolator.UpdateTangents(state.Table.ToList());
+        SplineInterpolator.UpdateTangents(state.Table);
         ChangeCount++;
     }
 
     public void UpdateTangents()
     {
-        SplineInterpolator.UpdateTangents(_state.Table.ToList());
+        SplineInterpolator.UpdateTangents(_state.Table);
     }
 
     /// <summary>
@@ -225,7 +224,7 @@ public sealed class Curve : IEditableInputType
         state.Table.Remove(u);
         state.Table[newU] = key;
         key.U = newU;
-        SplineInterpolator.UpdateTangents(state.Table.ToList());
+        SplineInterpolator.UpdateTangents(state.Table);
         ChangeCount++;
     }
 

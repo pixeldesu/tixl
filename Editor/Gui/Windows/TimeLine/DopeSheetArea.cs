@@ -1,5 +1,6 @@
 #nullable enable
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.DataTypes.Vector;
@@ -222,7 +223,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                             }
                         }
 
-                        SelectedKeyframes.UnionWith(curve.GetVDefinitions().Select(v => v));
+                        SelectedKeyframes.UnionWith(curve.GetVDefinitions());
                     }
 
                     if (someKeysNotVisible)
@@ -237,7 +238,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                     foreach (var curve in parameter.Curves)
                     {
                         // remove keys from selection
-                        SelectedKeyframes.ExceptWith(curve.GetVDefinitions().Select(v => v));
+                        SelectedKeyframes.ExceptWith(curve.GetVDefinitions());
                     }
 
                     MouseClickChangedSelection = true;
@@ -251,7 +252,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         }
 
         // Draw curves and gradients...
-        if (parameter.Curves.Count() == 4)
+        if (parameter.Curves.Length == 4)
         {
             DrawCurveGradient(parameter, layerArea, drawList);
         }
@@ -444,9 +445,9 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             if (_positions.Count > 0)
             {
                 drawList.AddPolyline(
-                                     ref _positions.ToArray()[0],
+                                     ref CollectionsMarshal.AsSpan(_positions)[0],
                                      _positions.Count,
-                                     parameter.Curves.Count() > 1 ? CurveColors[curveIndex % 4] : _grayCurveColor,
+                                     parameter.Curves.Length > 1 ? CurveColors[curveIndex % 4] : _grayCurveColor,
                                      ImDrawFlags.None,
                                      0.5f);
             }
@@ -466,17 +467,17 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
     {
         Debug.Assert(TimeLineCanvas.Current != null);
 
-        if (parameter.Curves.Count() != 4)
+        if (parameter.Curves.Length != 4)
             return;
 
-        var curve = parameter.Curves.First();
+        var curve = parameter.Curves[0];
         const float padding = 2;
 
         var points = curve.GetVDefinitions();
         var times = new float[points.Count];
         var colors = new Color[points.Count];
 
-        var curves = parameter.Curves.ToList();
+        var curves = parameter.Curves;
 
         var index = 0;
         foreach (var vDef in points)
