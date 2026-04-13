@@ -52,7 +52,7 @@ internal static class CurvePoint
 
         // Keyframe interaction
         ImGui.SetCursorScreenPos(pTopLeft);
-        ImGui.InvisibleButton("key" + vDef.GetHashCode(), _controlSize);
+        ImGui.InvisibleButton("key" + vDef.UniqueId, _controlSize);
         DrawUtils.DebugItemRect();
 
         Icons.DrawIconOnLastItem(isSelected
@@ -69,23 +69,35 @@ internal static class CurvePoint
         var isIn = side == TangentSide.In;
         var handleOffset = isIn ? _leftTangentInScreen : _rightTangentInScreen;
         var handleCenter = pCenter + handleOffset;
+        var isWeighted = _vDef.Weighted;
 
-        var lineColor = dimmed ? _tangentHandleColor.Fade(0.25f) : _tangentHandleColor;
-        var knobColor = dimmed ? UiColors.Text.Fade(0.4f) : UiColors.Text;
+        var lineColor = dimmed ? _tangentHandleColor.Fade(0.25f) : _tangentHandleColor.Fade(0.8f);
+        var knobColor = dimmed ? UiColors.Text.Fade(0.4f) : UiColors.Text.Fade(0.8f);
 
-        var buttonId = isIn ? "keyLT" + _vDef.GetHashCode() : "keyRT" + _vDef.GetHashCode();
-        var cursorOffset = isIn ? Vector2.Zero : _fixOffset;
+        var buttonId = isIn ? "keyLT" + _vDef.UniqueId : "keyRT" + _vDef.UniqueId;
 
-        ImGui.SetCursorPos(handleCenter - _tangentHandleSizeHalf - _curveEditCanvas.WindowPos + cursorOffset);
+        // Place invisible button centered on the handle in screen coordinates
+        ImGui.SetCursorScreenPos(handleCenter - _tangentHandleSizeHalf);
         ImGui.InvisibleButton(buttonId, _tangentHandleSize);
         var isHovered = ImGui.IsItemHovered();
-        if (isHovered)
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+        if (isHovered && !ImGui.IsItemActive())
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
+
+        // Capture drag start offset for relative dragging (avoids initial jump)
+        if (ImGui.IsItemActivated())
+        {
+            _dragStartOffset = ImGui.GetMousePos() - handleCenter;
+        }
 
         // Dragging
         if (ImGui.IsItemActive() && ImGui.IsMouseDragging(0, 0f))
         {
             HandleTangentDrag(pCenter, side);
+            // Recompute screen vectors after drag modified angles/tensions
+            // so the visual drawn below matches the updated state
+            UpdateTangentVectors();
+            handleOffset = isIn ? _leftTangentInScreen : _rightTangentInScreen;
+            handleCenter = pCenter + handleOffset;
         }
         else if (ImGui.IsItemDeactivated())
         {
@@ -107,10 +119,20 @@ internal static class CurvePoint
 
             _pendingSnaps = TangentSnaps.None;
             _isDraggingTangent = false;
+            _dragStartOffset = Vector2.Zero;
         }
 
-        _drawList.AddRectFilled(handleCenter - _tangentSizeHalf, handleCenter + _tangentSize,
-                                isHovered ? UiColors.ForegroundFull : knobColor);
+        // Draw handle: square for weighted, circle for unweighted
+        var handleColor = isHovered ? UiColors.ForegroundFull : knobColor;
+        if (isWeighted)
+        {
+            _drawList.AddRectFilled(handleCenter - _tangentSizeHalf, handleCenter + _tangentSize, handleColor);
+        }
+        else
+        {
+            _drawList.AddCircleFilled(handleCenter, 2.5f * T3Ui.UiScaleFactor, handleColor);
+        }
+
         _drawList.AddLine(pCenter, handleCenter, lineColor);
     }
 
@@ -129,8 +151,9 @@ internal static class CurvePoint
         if (ImGui.GetIO().KeyAlt && !wasWeighted)
             _vDef.Weighted = true;
 
-        // Compute angle from mouse position
-        var vectorInCanvas = _curveEditCanvas.InverseTransformDirection(ImGui.GetMousePos() - pCenter);
+        // Compute angle from mouse position, adjusted for grab offset to avoid initial jump
+        var adjustedMousePos = ImGui.GetMousePos() - _dragStartOffset;
+        var vectorInCanvas = _curveEditCanvas.InverseTransformDirection(adjustedMousePos - pCenter);
         var rawAngle = isIn
                            ? Math.PI / 2 - Math.Atan2(-vectorInCanvas.X, -vectorInCanvas.Y)
                            : -Math.PI / 2 - Math.Atan2(vectorInCanvas.X, vectorInCanvas.Y);
@@ -139,7 +162,7 @@ internal static class CurvePoint
         var segmentWidth = isIn ? _segmentWidthIn : _segmentWidthOut;
         var segmentPixels = (float)segmentWidth * Math.Abs(_curveEditCanvas.Scale.X);
         var refLength = segmentPixels / 3.0f * T3Ui.UiScaleFactor;
-        var screenDistance = (ImGui.GetMousePos() - pCenter).Length();
+        var screenDistance = (adjustedMousePos - pCenter).Length();
         var rawTension = _vDef.Weighted
                              ? Math.Clamp(screenDistance / Math.Max(refLength, 1f), 0.05f, 3.0f)
                              : 1.0f; // Unweighted: tension locked at 1.0
@@ -156,7 +179,7 @@ internal static class CurvePoint
         else
         {
             var neighborAngle = isIn ? _neighborAngleIn : _neighborAngleOut;
-            var snaps = ApplyTangentSnaps(ImGui.GetMousePos(), pCenter,
+            var snaps = ApplyTangentSnaps(adjustedMousePos, pCenter,
                                           rawAngle, rawTension, neighborAngle, segmentWidth,
                                           out finalAngle, out finalTension);
 
@@ -195,24 +218,37 @@ internal static class CurvePoint
         _activeDragAngle = finalAngle;
         _activeDragSegmentWidth = segmentWidth;
 
+
         // Ctrl breaks tangents
         if (ImGui.GetIO().KeyCtrl)
             _vDef.BrokenTangents = true;
 
+        // Auto-break on first drag frame if tangents aren't actually mirrored
+        // (e.g., Smooth with different auto-angles for each side)
+        if (!_vDef.BrokenTangents && !_isDraggingTangent)
+        {
+            var angleDiff = _vDef.InTangentAngle - (_vDef.OutTangentAngle - Math.PI);
+            while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+            while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+            if (Math.Abs(angleDiff) > 0.1)
+                _vDef.BrokenTangents = true;
+        }
+
         // Mirror angle (but not tension) to opposite side if tangents are linked
+        // Recompute the mirrored side's screen vector from its own tension (don't copy screen length)
         if (!_vDef.BrokenTangents)
         {
             if (isIn)
             {
                 _vDef.OutInterpolation = VDefinition.KeyInterpolation.Tangent;
-                _rightTangentInScreen = -_leftTangentInScreen;
                 _vDef.OutTangentAngle = _vDef.InTangentAngle + (float)Math.PI;
+                _rightTangentInScreen = ComputeScreenTangent(_vDef.OutTangentAngle, _vDef.TensionOut, _segmentWidthOut);
             }
             else
             {
                 _vDef.InInterpolation = VDefinition.KeyInterpolation.Tangent;
-                _leftTangentInScreen = -_rightTangentInScreen;
                 _vDef.InTangentAngle = _vDef.OutTangentAngle + (float)Math.PI;
+                _leftTangentInScreen = ComputeScreenTangent(_vDef.InTangentAngle, _vDef.TensionIn, _segmentWidthIn);
             }
         }
         else
@@ -270,7 +306,7 @@ internal static class CurvePoint
         DefaultLength = 4,
     }
 
-    private const float SnapThresholdPx = 7f;
+    private const float SnapThresholdPx = 3f;
 
     private static TangentSnaps ApplyTangentSnaps(
         Vector2 mouseScreenPos, Vector2 keyScreenPos,
@@ -282,16 +318,20 @@ internal static class CurvePoint
         snappedTension = rawTension;
         var snaps = TangentSnaps.None;
         var mouseOffset = mouseScreenPos - keyScreenPos;
+        var handleDistance = mouseOffset.Length();
+
+        // Disable angle snaps when handle is too short — snap zones dominate at small radii
+        var enableAngleSnaps = handleDistance > 50f;
 
         // 1. Horizontal — perpendicular pixel distance to horizontal line
-        if (Math.Abs(mouseOffset.Y) < SnapThresholdPx)
+        if (enableAngleSnaps && Math.Abs(mouseOffset.Y) < SnapThresholdPx)
         {
             snappedAngle = Math.Round(snappedAngle / Math.PI) * Math.PI;
             snaps |= TangentSnaps.Horizontal;
         }
 
         // 2. Linear (toward neighbor) — perpendicular pixel distance to neighbor line
-        if (neighborAngle.HasValue && (snaps & TangentSnaps.Horizontal) == 0)
+        if (enableAngleSnaps && neighborAngle.HasValue && (snaps & TangentSnaps.Horizontal) == 0)
         {
             var lineDir = GetScreenDirForAngle(neighborAngle.Value);
             var lineLen = lineDir.Length();
@@ -399,6 +439,7 @@ internal static class CurvePoint
     private static int _draggedKeyId;
     private static TangentSnaps _pendingSnaps;
     private static TangentSide _pendingSnapSide;
+    private static Vector2 _dragStartOffset; // Offset from handle center to grab point
 
     // Angle snap fade state
     private static TangentSnaps _lastAngleSnaps = TangentSnaps.None;
@@ -423,7 +464,6 @@ internal static class CurvePoint
 
     private static readonly Vector2 _controlSize = new(21, 21);
     private static readonly Vector2 _controlSizeHalf = _controlSize * 0.5f;
-    private static readonly Vector2 _fixOffset = new(1, 7);
     private static readonly Color _tangentHandleColor = new(0.3f);
     private static readonly Vector2 _tangentHandleSize = new(15, 15);
     private static readonly Vector2 _tangentHandleSizeHalf = _tangentHandleSize * 0.5f;

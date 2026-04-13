@@ -278,9 +278,17 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
             FrameStats.Current.HasKeyframesAfterCurrentTime = true;
         }
 
-        if (ImGui.IsItemHovered())
+        if (ImGui.IsItemHovered() || ImGui.IsItemActive())
         {
-            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
+            // Force OS cursor directly — ImGui's WM_SETCURSOR-based updates
+            // don't fire reliably during active drags
+            var cursor = CurveInputEditing.MoveDirection switch
+            {
+                CurveInputEditing.MoveDirections.Horizontal => System.Windows.Forms.Cursors.SizeWE,
+                CurveInputEditing.MoveDirections.Vertical => System.Windows.Forms.Cursors.SizeNS,
+                _ => System.Windows.Forms.Cursors.SizeAll
+            };
+            System.Windows.Forms.Cursor.Current = cursor;
         }
 
         if (ImGui.IsItemDeactivated())
