@@ -152,6 +152,16 @@ internal static partial class ProjectSetup
 
                 var count = package.Symbols.Sum(x => x.Value.InstancesOfSelf.Count());
                 Log.Debug($"Updated symbol package {package.DisplayName} in {stopWatch.ElapsedMilliseconds}ms with {count} instances of its symbols");
+
+                // Check for packages that were cascadingly unloaded due to cross-context
+                // assembly dependencies (e.g. Mediapipe unloads when Lib's context unloads
+                // because Mediapipe resolved shared assemblies from Lib's context).
+                var cascaded = _activePackages.Where(x => x.NeedsAssemblyLoad).ToArray();
+                if (cascaded.Length > 0)
+                {
+                    Log.Info($"Reloading {cascaded.Length} packages that were cascadingly unloaded...");
+                    UpdateSymbolPackages(cascaded);
+                }
                 return;
             }
         }
