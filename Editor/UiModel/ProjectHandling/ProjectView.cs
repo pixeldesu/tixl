@@ -395,8 +395,11 @@ internal sealed partial class ProjectView
     
     public void SetAsFocused()
     {
+        var projectChanged = Focused != this;
         Focused = this;
-        RestoreWindowLayoutFromProject();
+
+        if (projectChanged)
+            RestoreWindowLayoutFromProject();
     }
 
     private void SaveWindowLayoutToProject()
