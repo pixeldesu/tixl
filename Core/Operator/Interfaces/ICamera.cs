@@ -17,14 +17,19 @@ public interface ICamera
 
 public struct CameraDefinition
 {
+    public CameraDefinition()
+    {
+
+    }
+
     public Vector2 NearFarClip;
     public Vector2 LensShift;
     public Vector3 PositionOffset;
-    public Vector3 Position;
+    public Vector3 Position = new(0, 0, GraphicsMath.DefaultCameraDistance);
     public Vector3 Target;
-    public Vector3 Up;
-    public float AspectRatio;
-    public float FieldOfView;
+    public Vector3 Up = Vector3.UnitY;
+    public float AspectRatio = -1; // Unclear, how this plays together with flexible aspect ratio defined by Output targets
+    public float FieldOfView = GraphicsMath.DefaultCamFovDegrees.ToRadians();
     public float Roll;
     public Vector3 RotationOffset;
     public bool OffsetAffectsTarget;
@@ -50,21 +55,21 @@ public struct CameraDefinition
         Vector3 up = Vector3.Transform(Vector3.UnitY, q);
 
         return new CameraDefinition
-                   {
-                       Position = blendedPosition,
-                       Target = blendedPosition + forward, // RH camera
-                       Up = Vector3.Normalize(up),
-                       Roll = 0,
+        {
+            Position = blendedPosition,
+            Target = blendedPosition + forward, // RH camera
+            Up = Vector3.Normalize(up),
+            Roll = 0,
 
-                       NearFarClip = MathUtils.Lerp(a.NearFarClip, b.NearFarClip, f),
-                       LensShift = MathUtils.Lerp(a.LensShift, b.LensShift, f),
-                       PositionOffset = MathUtils.Lerp(a.PositionOffset, b.PositionOffset, f),
-                       AspectRatio = MathUtils.Lerp(a.AspectRatio, b.AspectRatio, f),
-                       FieldOfView = MathUtils.Lerp(a.FieldOfView, b.FieldOfView, f),
-                       RotationOffset = MathUtils.Lerp(a.RotationOffset, b.RotationOffset, f),
+            NearFarClip = MathUtils.Lerp(a.NearFarClip, b.NearFarClip, f),
+            LensShift = MathUtils.Lerp(a.LensShift, b.LensShift, f),
+            PositionOffset = MathUtils.Lerp(a.PositionOffset, b.PositionOffset, f),
+            AspectRatio = MathUtils.Lerp(a.AspectRatio, b.AspectRatio, f),
+            FieldOfView = MathUtils.Lerp(a.FieldOfView, b.FieldOfView, f),
+            RotationOffset = MathUtils.Lerp(a.RotationOffset, b.RotationOffset, f),
 
-                       OffsetAffectsTarget = f < 0.5f ? a.OffsetAffectsTarget : b.OffsetAffectsTarget,
-                   };
+            OffsetAffectsTarget = f < 0.5f ? a.OffsetAffectsTarget : b.OffsetAffectsTarget,
+        };
     }
 
 
