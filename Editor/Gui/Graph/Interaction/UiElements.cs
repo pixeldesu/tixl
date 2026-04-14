@@ -35,7 +35,7 @@ internal sealed class UiElements
         SymbolLibrary.HandleDragAndDropForSymbolItem(symbolUi.Symbol);
         if (ImGui.IsItemHovered())
         {
-            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
         }
             
         if (!string.IsNullOrEmpty(symbolUi.Description))

@@ -541,6 +541,15 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
             return;
         }
 
+        if (result == DragAndDropHandling.DragInteractionResult.Hovering)
+        {
+            DrawDragPreview(guid);
+            return;
+        }
+
+        if (result != DragAndDropHandling.DragInteractionResult.Dropped)
+            return;
+
         if (SymbolUiRegistry.TryGetSymbolUi(guid, out var newSymbolUi))
         {
             var newSymbol = newSymbolUi.Symbol;
@@ -555,6 +564,29 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         {
             Log.Warning($"Symbol {guid} not found in registry");
         }
+    }
+
+    private static void DrawDragPreview(Guid symbolId)
+    {
+        if (!SymbolUiRegistry.TryGetSymbolUi(symbolId, out var symbolUi))
+            return;
+
+        var symbol = symbolUi.Symbol;
+        var color = symbol.OutputDefinitions.Count > 0
+                        ? TypeUiRegistry.GetPropertiesForType(symbol.OutputDefinitions[0]?.ValueType).Color
+                        : UiColors.Gray;
+
+        var mousePos = ImGui.GetMousePos();
+        var label = symbol.Name;
+        var textSize = ImGui.CalcTextSize(label);
+        var padding = new Vector2(6, 4);
+        var pos = mousePos + new Vector2(12, 12);
+        var size = textSize + padding * 2;
+
+        var drawList = ImGui.GetForegroundDrawList();
+        drawList.AddRectFilled(pos, pos + size, ColorVariations.OperatorBackground.Apply(color));
+        drawList.AddRect(pos, pos + size, ColorVariations.OperatorOutline.Apply(color));
+        drawList.AddText(pos + padding, ColorVariations.OperatorLabel.Apply(color), label);
     }
 
     public void FocusViewToSelection()
