@@ -41,7 +41,7 @@ internal static class ConnectionSplitHelper
             var buttonMin = _mousePosition - Vector2.One * radius / 2;
             ImGui.SetCursorScreenPos(buttonMin);
 
-            if (ImGui.InvisibleButton("splitMe", Vector2.One * radius))
+            if (ImGui.InvisibleButton("splitMe", Vector2.One * radius.ClampMin(1)))
             {
                 var posOnScreen = graphCanvas.InverseTransformPositionFloat(BestMatchLastFrame.PositionOnScreen)
                                   - new Vector2(SymbolUi.Child.DefaultOpSize.X * 0.25f,

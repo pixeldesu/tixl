@@ -219,7 +219,10 @@ internal sealed class GraphNode
                 }
 
                 //--------------------------------------------------------------------------
-                ImGui.InvisibleButton("node", _selectableScreenRect.GetSize());
+                var buttonSize = new Vector2(_selectableScreenRect.GetWidth().ClampMin(1),
+                                             _selectableScreenRect.GetHeight().ClampMin(1));
+                
+                ImGui.InvisibleButton("node", buttonSize);
                 //--------------------------------------------------------------------------
 
                 if(!preventInteraction)
