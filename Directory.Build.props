@@ -2,5 +2,7 @@
 <Project>
   <PropertyGroup>
     <SolutionDir>$(MSBuildThisFileDirectory)</SolutionDir>
+    <!-- NU1603: transitive package version resolved to higher version (harmless) -->
+    <NoWarn>$(NoWarn);NU1603</NoWarn>
   </PropertyGroup>
 </Project>

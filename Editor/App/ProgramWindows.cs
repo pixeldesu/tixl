@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Windows.Forms;
 using SharpDX;
 using SharpDX.Direct3D;
@@ -266,7 +265,7 @@ internal static class ProgramWindows
         Viewer.Show();
     }
 
-    private static void OnCloseMainWindow(object sender, CancelEventArgs args)
+    private static void OnCloseMainWindow(object sender, FormClosingEventArgs args)
     {
         if (EditableSymbolProject.AllProjects.Any(x => x.IsSaving))
         {

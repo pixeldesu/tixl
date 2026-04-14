@@ -1,3 +1,4 @@
+#nullable enable
 using T3.Core.Compilation;
 using T3.Core.Logging;
 

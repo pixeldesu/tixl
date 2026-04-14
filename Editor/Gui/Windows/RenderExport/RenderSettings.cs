@@ -30,7 +30,7 @@ internal sealed class RenderSettings
             // First access for this composition — initialize with defaults + legacy paths
             var settings = new RenderSettings();
 
-            #pragma warning disable CS0612 // Obsolete
+            #pragma warning disable CS0612, CS0618 // Obsolete
             var legacy = UserSettings.Config;
             if (!string.IsNullOrEmpty(legacy.RenderVideoFilePath))
                 settings.VideoFilePath = legacy.RenderVideoFilePath;
@@ -40,7 +40,7 @@ internal sealed class RenderSettings
                 settings.SequenceFileName = legacy.RenderSequenceFileName;
             if (!string.IsNullOrEmpty(legacy.RenderSequencePrefix))
                 settings.SequencePrefix = legacy.RenderSequencePrefix;
-            #pragma warning restore CS0612
+            #pragma warning restore CS0612, CS0618
 
             symbolUi.RenderSettings = settings;
             symbolUi.FlagAsModified();

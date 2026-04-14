@@ -9,7 +9,9 @@ public static class SvgLoader
     {
         try
         {
+            #pragma warning disable CS0618 // Use Open<T>(string, SvgOptions) - keeping old overload for now
             newValue = SvgDocument.Open<SvgDocument>(file.AbsolutePath, (Dictionary<string, string>?)null);
+            #pragma warning restore CS0618
             failureReason = null;
             return true;
         }

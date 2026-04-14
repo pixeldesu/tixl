@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -137,7 +136,7 @@ internal sealed class AppWindow
 
     internal void SetBorderStyleSizable() => Form.FormBorderStyle = FormBorderStyle.Sizable;
 
-    internal void InitializeWindow(FormWindowState windowState, CancelEventHandler handleClose, bool handleKeys)
+    internal void InitializeWindow(FormWindowState windowState, FormClosingEventHandler handleClose, bool handleKeys)
     {
         InitRenderTargetsAndEventHandlers();
 
@@ -145,11 +144,11 @@ internal sealed class AppWindow
         {
             MsForms.MsForms.TrackKeysOf(Form);
         }
-            
+
         MsForms.MsForms.TrackMouseOf(Form);
 
         if (handleClose != null)
-            Form.Closing += handleClose;
+            Form.FormClosing += handleClose;
 
         Form.WindowState = windowState;
     }
@@ -204,7 +203,7 @@ internal sealed class AppWindow
 
                                       RebuildBackBuffer(Form, device, ref _renderTargetView, ref _backBufferTexture, ref _swapChain);
                                       if (_isResizingRightNow)
-                                          _renderCallback?.Invoke();
+                                          _renderCallback();
                                   };
     }
 
@@ -248,7 +247,7 @@ internal sealed class AppWindow
     private Texture2D _backBufferTexture;
     public Texture2D BackBufferTexture => _backBufferTexture;
     private bool _isResizingRightNow;
-    private Action? _renderCallback;
+    private Action _renderCallback;
     private Rectangle _boundsBeforeFullscreen;
 
     public void SetTexture(Texture2D texture)
