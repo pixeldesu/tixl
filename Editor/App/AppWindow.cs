@@ -127,7 +127,11 @@ internal sealed class AppWindow
         _deviceContext.ClearRenderTargetView(RenderTargetView, sharpDxColor);
     }
 
-    internal void RunRenderLoop(Action callback) => RenderLoop.Run(Form, () => callback());
+    internal void RunRenderLoop(Action callback)
+    {
+        _renderCallback = callback;
+        RenderLoop.Run(Form, () => callback());
+    }
 
     internal void SetSize(int width, int height) => Form.ClientSize = new Size(width, height);
 
@@ -192,17 +196,15 @@ internal sealed class AppWindow
         RenderTargetView = new RenderTargetView(device, _backBufferTexture);
 
         Form.ResizeBegin += (sender, args) => _isResizingRightNow = true;
-        Form.ResizeEnd += (sender, args) =>
-                          {
-                              RebuildBackBuffer(Form, device, ref _renderTargetView, ref _backBufferTexture, ref _swapChain);
-                              _isResizingRightNow = false;
-                          };
+        Form.ResizeEnd += (sender, args) => _isResizingRightNow = false;
         Form.ClientSizeChanged += (sender, args) =>
                                   {
-                                      if (_isResizingRightNow)
+                                      if (Form.ClientSize.Width == 0 || Form.ClientSize.Height == 0)
                                           return;
 
                                       RebuildBackBuffer(Form, device, ref _renderTargetView, ref _backBufferTexture, ref _swapChain);
+                                      if (_isResizingRightNow)
+                                          _renderCallback?.Invoke();
                                   };
     }
 
@@ -246,6 +248,7 @@ internal sealed class AppWindow
     private Texture2D _backBufferTexture;
     public Texture2D BackBufferTexture => _backBufferTexture;
     private bool _isResizingRightNow;
+    private Action? _renderCallback;
     private Rectangle _boundsBeforeFullscreen;
 
     public void SetTexture(Texture2D texture)
