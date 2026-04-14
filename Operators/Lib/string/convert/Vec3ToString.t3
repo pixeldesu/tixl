@@ -1,0 +1,21 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "06ae6091-ce81-4e8f-ae96-83c189c70b10"/*Vec3ToString*/,
+  "Inputs": [
+    {
+      "Id": "0035b185-2e0b-4854-842a-4965180177f1"/*Vector*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "045e84e3-2456-46fb-af43-30549e08afbd"/*Format*/,
+      "DefaultValue": ""
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
